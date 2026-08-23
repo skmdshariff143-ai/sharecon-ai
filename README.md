@@ -80,7 +80,7 @@ To ensure transparent evaluation, metrics are separated into distinct mathematic
 | **Seed 2024** | **91.7%** | **90.5%** | **100.0%** | **100.0%** | **78.7%** | **90.6%** | **61.7%** | **₹0.00** |
 | **Seed 9999** | **91.4%** | **94.3%** | **100.0%** | **100.0%** | **80.9%** | **90.6%** | **61.7%** | **₹0.00** |
 
-*Key Takeaway: The engine achieves 100.0% Auto-Resolution Precision across all seeds with **₹0.00 False-Positive Exposure**, ensuring zero unsafe auto-reconciliation of ambiguous, duplicate, or mismatched transactions.*
+*Benchmark Note: Validated on five deterministic synthetic seeds. In this reported synthetic benchmark, no unsafe auto-match was observed (₹0.00 False-Positive Exposure). Results reflect deterministic synthetic evaluation and do not establish live production performance.*
 
 ---
 

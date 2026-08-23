@@ -2,7 +2,7 @@
 
 ## 1. Visual Language & Principles
 
-- **Quiet Confidence**: Institutional financial tools should feel robust, dependable, and calm. High density is preferred over unnecessary whitespace.
+- **Quiet Confidence**: Professional financial tools should feel robust, dependable, and calm. High density is preferred over unnecessary whitespace.
 - **Evidence Before Decoration**: Visual elements must communicate status, lineage, or risk. Avoid decorative gradients, 3D shapes, or generic AI sparkle icons.
 - **Restrained Color Coding**: Colors represent financial state, not arbitrary aesthetics:
   - **Slate / Navy (`#0f172a`, `#1e293b`, `#334155`)**: Primary text, headers, and navigation rail.

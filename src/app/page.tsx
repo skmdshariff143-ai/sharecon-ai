@@ -6,7 +6,6 @@ import {
   ReconciliationRecord,
   EngineConfig,
   GroundTruth,
-  AuditEvent,
   Payment,
   Settlement,
   BankTransaction,
@@ -14,6 +13,7 @@ import {
 import { generateSyntheticDataset } from '@/lib/dataset/generator';
 import { reconcileBatch, DEFAULT_ENGINE_CONFIG } from '@/lib/engine/matcher';
 import { evaluateReconciliation } from '@/lib/engine/evaluator';
+import { applyReviewerDecision } from '@/lib/engine/operations';
 import { exportReconciliationCsv, exportAuditEventsCsv } from '@/lib/dataset/csv';
 
 // Components
@@ -131,77 +131,27 @@ function DashboardContent() {
   ) => {
     if (!batch) return;
 
-    const now = new Date().toISOString();
-    const updatedRecords = batch.records.map((r) => {
-      if (r.recordId === recordId) {
-        const newStatus =
-          action === 'APPROVED'
-            ? ('MANUALLY_APPROVED' as const)
-            : action === 'REJECTED'
-            ? ('MANUALLY_REJECTED' as const)
-            : r.status;
-
-        return {
-          ...r,
-          status: newStatus,
-          reviewerDecision: {
-            action,
-            reviewer: 'Finance Operations Lead',
-            reviewedAt: now,
-            note: note || `Manual controller decision: ${action}`,
-          },
-        };
-      }
-      return r;
-    });
-
-    const targetRecord = batch.records.find((r) => r.recordId === recordId);
-    const newAuditEvent: AuditEvent = {
-      eventId: `aud_rev_${Date.now()}_${recordId}`,
-      timestamp: now,
-      actor: 'FINANCE_REVIEWER',
-      action:
-        action === 'APPROVED'
-          ? 'MANUAL_APPROVE'
-          : action === 'REJECTED'
-          ? 'MANUAL_REJECT'
-          : 'INVESTIGATION_FLAG',
-      entityIds: {
-        paymentId: recordId,
-        settlementId: targetRecord?.matchedSettlement?.settlementId,
-        bankTransactionId: targetRecord?.matchedBankTransaction?.bankTransactionId,
-      },
-      previousState: targetRecord?.status || 'PENDING_REVIEW',
-      newState:
-        action === 'APPROVED'
-          ? 'MANUALLY_APPROVED'
-          : action === 'REJECTED'
-          ? 'MANUALLY_REJECTED'
-          : targetRecord?.status || 'PENDING_REVIEW',
-      evidence: {
-        note: note || '',
-        originalConfidence: targetRecord?.confidence,
-        exceptionType: targetRecord?.exceptionType,
-      },
-      confidence: targetRecord?.confidence || 0,
-      reason: note || `Human controller decision: ${action}`,
-      modelUsed: 'Human-In-The-Loop',
-      fallbackUsed: false,
-    };
-
-    const updatedAuditEvents = [newAuditEvent, ...batch.auditEvents];
+    const decisionResult = applyReviewerDecision(
+      batch.records,
+      batch.auditEvents,
+      recordId,
+      action,
+      'Finance Operations Lead',
+      note
+    );
 
     // Preserves the immutable baseline engine benchmark across reviewer decisions
     setBatch({
       ...batch,
-      records: updatedRecords,
-      auditEvents: updatedAuditEvents,
+      records: decisionResult.updatedRecords,
+      auditEvents: decisionResult.updatedAuditEvents,
     });
 
     // Update selected record in drawer if open
     if (selectedRecord && selectedRecord.recordId === recordId) {
-      const updated = updatedRecords.find((r) => r.recordId === recordId);
-      if (updated) setSelectedRecord(updated);
+      if (decisionResult.modifiedRecord) {
+        setSelectedRecord(decisionResult.modifiedRecord);
+      }
     }
 
     showToast({
@@ -436,6 +386,7 @@ function DashboardContent() {
             <EvaluationLabTab
               evaluation={batch?.evaluation}
               records={batch ? batch.records : []}
+              groundTruth={groundTruth}
             />
           )}
 

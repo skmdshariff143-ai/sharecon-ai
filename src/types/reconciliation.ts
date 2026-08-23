@@ -225,3 +225,45 @@ export interface BatchReconciliationResult {
   auditEvents: AuditEvent[];
   evaluation?: EvaluationMetrics;
 }
+
+export interface SeedBenchmarkResult {
+  seed: number;
+  label: string;
+  totalRecords: number;
+  proposedPairPrecision: number;
+  proposedPairRecall: number;
+  autoResolutionPrecision: number;
+  autoResolutionRecall: number;
+  reviewRoutingAccuracy: number;
+  exceptionAccuracy: number;
+  autoReconciliationRate: number;
+  falsePositiveExposurePaise: number;
+  processingDurationMs: number;
+}
+
+export interface PolicySimulationResult {
+  highThreshold: number;
+  mediumThreshold: number;
+  autoReconciledCount: number;
+  autoReconciliationRate: number;
+  reviewCount: number;
+  reviewRate: number;
+  exceptionCount: number;
+  exceptionRate: number;
+  autoResolutionPrecision: number;
+  autoResolutionRecall: number;
+  reviewRoutingAccuracy: number;
+  falsePositiveCount: number;
+  falsePositiveExposurePaise: number;
+  evaluation: EvaluationMetrics;
+  isValid: boolean;
+  validationError?: string;
+}
+
+export interface OperationalDecisionResult {
+  updatedRecords: ReconciliationRecord[];
+  updatedAuditEvents: AuditEvent[];
+  modifiedRecord: ReconciliationRecord | undefined;
+  newEvent: AuditEvent;
+}
+

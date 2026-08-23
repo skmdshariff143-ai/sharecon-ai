@@ -24,6 +24,15 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   const [circuitBreaker, setCircuitBreaker] = useState(config.circuitBreakerThresholdPercent);
   const [dryRun, setDryRun] = useState(config.dryRun);
 
+  React.useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const handleSave = () => {
@@ -39,7 +48,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs animate-in fade-in">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="settings-modal-title"
+      className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs animate-in fade-in"
+    >
       <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200">
         <div className="flex items-center justify-between pb-4 border-b border-slate-200">
           <div className="flex items-center gap-2.5">
@@ -47,7 +61,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               <Sliders className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-slate-900">Reconciliation Engine Settings</h3>
+              <h3 id="settings-modal-title" className="text-base font-bold text-slate-900">
+                Reconciliation Engine Settings
+              </h3>
               <p className="text-xs text-slate-500">
                 Calibrate thresholds and automated matching safety gates.
               </p>

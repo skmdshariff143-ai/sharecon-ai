@@ -2,8 +2,10 @@ import { describe, it, expect } from 'vitest';
 import { generateSyntheticDataset } from '@/lib/dataset/generator';
 import { reconcileBatch, DEFAULT_ENGINE_CONFIG } from '@/lib/engine/matcher';
 import { evaluateReconciliation } from '@/lib/engine/evaluator';
+import { applyReviewerDecision } from '@/lib/engine/operations';
 import { normalizeReference, normalizeUtr, computeTokenSimilarity } from '@/lib/engine/normalizer';
 import { detectDatasetCollisions } from '@/lib/engine/collision';
+import { ReconciliationRecord } from '@/types/reconciliation';
 
 describe('Normalizer & String Matching Utilities', () => {
   it('normalizes references with punctuation and whitespace', () => {
@@ -129,7 +131,8 @@ describe('Reconciliation Engine & Ground Truth Evaluation', () => {
     expect(evaluation.falsePositiveExposurePaise).toBe(0); // Zero unsafe auto-matches
   });
 
-  it('guarantees that human reviewer approve/reject operations cannot mutate the baseline benchmark', () => {
+  it('guarantees that human reviewer approve/reject/flag operations cannot mutate the baseline benchmark (deep equality)', () => {
+    // 1. Create a batch and baseline evaluation snapshot
     const dataset = generateSyntheticDataset(42);
     const result = reconcileBatch(
       dataset.payments,
@@ -137,32 +140,69 @@ describe('Reconciliation Engine & Ground Truth Evaluation', () => {
       dataset.bankTransactions,
       DEFAULT_ENGINE_CONFIG
     );
-    const baselineEval = evaluateReconciliation(result.records, dataset.groundTruth, 10);
+    const baselineEval = evaluateReconciliation(result.records, dataset.groundTruth, 12.5);
+    const originalSnapshot = JSON.parse(JSON.stringify(baselineEval));
 
-    // Human controller approves pending review items
-    const modifiedRecords = result.records.map((r) => {
-      if (r.status === 'PENDING_REVIEW') {
-        return {
-          ...r,
-          status: 'MANUALLY_APPROVED' as const,
-        };
-      }
-      return r;
-    });
+    const pendingRecord1 = result.records.find((r: ReconciliationRecord) => r.status === 'PENDING_REVIEW')!;
+    const pendingRecord2 = result.records.filter((r: ReconciliationRecord) => r.status === 'PENDING_REVIEW')[1]!;
+    const pendingRecord3 = result.records.filter((r: ReconciliationRecord) => r.status === 'PENDING_REVIEW')[2]!;
 
-    // In the application, the baseline evaluation object remains immutable
-    expect(baselineEval.autoResolutionPrecision).toBeGreaterThan(0.9);
-    expect(baselineEval.totalAutoReconciled).toBe(
-      result.records.filter((r) => r.status === 'AUTO_RECONCILED').length
+    expect(pendingRecord1).toBeDefined();
+    expect(pendingRecord2).toBeDefined();
+    expect(pendingRecord3).toBeDefined();
+
+    // 2. Approve record 1
+    const approveResult = applyReviewerDecision(
+      result.records,
+      result.auditEvents,
+      pendingRecord1.recordId,
+      'APPROVED',
+      'Senior Controller',
+      'Verified with bank relationship manager'
     );
 
-    // Modified records count has changed operationally
-    const manualApprovedCount = modifiedRecords.filter(
-      (r) => r.status === 'MANUALLY_APPROVED'
-    ).length;
-    expect(manualApprovedCount).toBeGreaterThan(0);
-    // Baseline evaluation object remains unchanged
-    expect(baselineEval.correctAutoReconciled).toBe(
+    // 3. Reject record 2
+    const rejectResult = applyReviewerDecision(
+      approveResult.updatedRecords,
+      approveResult.updatedAuditEvents,
+      pendingRecord2.recordId,
+      'REJECTED',
+      'Senior Controller',
+      'Amount difference is unapproved'
+    );
+
+    // 4. Flag record 3
+    const flagResult = applyReviewerDecision(
+      rejectResult.updatedRecords,
+      rejectResult.updatedAuditEvents,
+      pendingRecord3.recordId,
+      'FLAGGED',
+      'Senior Controller',
+      'Flagged for compliance review'
+    );
+
+    // 5. Confirm operational statuses changed
+    const modified1 = flagResult.updatedRecords.find((r: ReconciliationRecord) => r.recordId === pendingRecord1.recordId)!;
+    const modified2 = flagResult.updatedRecords.find((r: ReconciliationRecord) => r.recordId === pendingRecord2.recordId)!;
+    const modified3 = flagResult.updatedRecords.find((r: ReconciliationRecord) => r.recordId === pendingRecord3.recordId)!;
+
+    expect(modified1.status).toBe('MANUALLY_APPROVED');
+    expect(modified2.status).toBe('MANUALLY_REJECTED');
+    expect(modified3.status).toBe('PENDING_REVIEW'); // Flagging preserves status
+    expect(modified3.reviewerDecision?.action).toBe('FLAGGED');
+
+    // 6. Confirm appropriate audit events were created
+    expect(flagResult.updatedAuditEvents.length).toBe(result.auditEvents.length + 3);
+    expect(flagResult.updatedAuditEvents[0].action).toBe('INVESTIGATION_FLAG');
+    expect(flagResult.updatedAuditEvents[1].action).toBe('MANUAL_REJECT');
+    expect(flagResult.updatedAuditEvents[2].action).toBe('MANUAL_APPROVE');
+
+    // 7. Confirm the stored baseline evaluation remains deeply equal to its original snapshot
+    expect(baselineEval).toEqual(originalSnapshot);
+
+    // 8. Confirm no ground-truth evaluation was modified or recomputed by the human reviewer decisions
+    expect(baselineEval.totalRecordsProcessed).toBe(180);
+    expect(baselineEval.autoReconciledCount).toBe(
       result.records.filter((r) => r.status === 'AUTO_RECONCILED').length
     );
   });

@@ -1,45 +1,96 @@
 import { describe, it, expect } from 'vitest';
 import { generateSyntheticDataset } from '@/lib/dataset/generator';
 import { reconcileBatch, DEFAULT_ENGINE_CONFIG } from '@/lib/engine/matcher';
+import { runMultiSeedBenchmark, simulatePolicyThresholds } from '@/lib/engine/evaluator';
 import { exportReconciliationCsv, exportAuditEventsCsv } from '@/lib/dataset/csv';
 import { AuditEvent } from '@/types/reconciliation';
 
-describe('Premium Control Center & UI Logic Tests', () => {
-  it('correctly simulates threshold adjustments without mutating original batch records', () => {
+describe('Premium Control Center, Policy Simulator & Multi-Seed Benchmark Tests', () => {
+  it('dynamically computes multi-seed benchmarks across seeds without hardcoded values', () => {
+    const seeds = [42, 101, 777];
+    const results = runMultiSeedBenchmark(seeds, DEFAULT_ENGINE_CONFIG);
+
+    expect(results.length).toBe(3);
+    results.forEach((res, idx) => {
+      expect(res.seed).toBe(seeds[idx]);
+      expect(res.totalRecords).toBe(180);
+      expect(typeof res.proposedPairPrecision).toBe('number');
+      expect(typeof res.proposedPairRecall).toBe('number');
+      expect(typeof res.autoResolutionPrecision).toBe('number');
+      expect(typeof res.autoResolutionRecall).toBe('number');
+      expect(typeof res.reviewRoutingAccuracy).toBe('number');
+      expect(typeof res.falsePositiveExposurePaise).toBe('number');
+      expect(res.autoResolutionPrecision).toBeGreaterThanOrEqual(0.9);
+      expect(res.falsePositiveExposurePaise).toBe(0);
+    });
+  });
+
+  it('runs genuine policy threshold simulations and verifies trade-offs without mutating baseline', () => {
     const dataset = generateSyntheticDataset(42);
-    const result = reconcileBatch(
+
+    // 1. Run baseline
+    const baseline = simulatePolicyThresholds(
       dataset.payments,
       dataset.settlements,
       dataset.bankTransactions,
-      DEFAULT_ENGINE_CONFIG
+      dataset.groundTruth,
+      85,
+      50
     );
 
-    // Baseline record count
-    expect(result.records.length).toBe(180);
+    expect(baseline.isValid).toBe(true);
+    expect(baseline.autoReconciledCount).toBeGreaterThan(0);
 
-    // Simulate aggressive threshold (70%)
-    const simAuto70 = result.records.filter(
-      (r) =>
-        r.confidence >= 70 &&
-        (r.exceptionType === 'CLEAN_MATCH' ||
-          r.exceptionType === 'DATE_SKEW_MATCH' ||
-          r.exceptionType === 'INCONSISTENT_DESCRIPTION' ||
-          r.exceptionType === 'PARTIALLY_MISSING_REF')
-    ).length;
+    // 2. Run aggressive simulation (70% high threshold)
+    const aggressive = simulatePolicyThresholds(
+      dataset.payments,
+      dataset.settlements,
+      dataset.bankTransactions,
+      dataset.groundTruth,
+      70,
+      40
+    );
 
-    // Simulate conservative threshold (95%)
-    const simAuto95 = result.records.filter(
-      (r) =>
-        r.confidence >= 95 &&
-        (r.exceptionType === 'CLEAN_MATCH' ||
-          r.exceptionType === 'DATE_SKEW_MATCH' ||
-          r.exceptionType === 'INCONSISTENT_DESCRIPTION' ||
-          r.exceptionType === 'PARTIALLY_MISSING_REF')
-    ).length;
+    expect(aggressive.isValid).toBe(true);
+    // Aggressive threshold yields equal or higher automation count
+    expect(aggressive.autoReconciledCount).toBeGreaterThanOrEqual(baseline.autoReconciledCount);
+    expect(aggressive.autoReconciliationRate).toBeGreaterThanOrEqual(baseline.autoReconciliationRate);
 
-    expect(simAuto70).toBeGreaterThanOrEqual(simAuto95);
-    // Baseline records untouched
-    expect(result.records[0].confidence).toBeGreaterThan(0);
+    // 3. Run conservative simulation (95% high threshold)
+    const conservative = simulatePolicyThresholds(
+      dataset.payments,
+      dataset.settlements,
+      dataset.bankTransactions,
+      dataset.groundTruth,
+      95,
+      60
+    );
+
+    expect(conservative.isValid).toBe(true);
+    // Conservative threshold yields equal or lower automation count
+    expect(conservative.autoReconciledCount).toBeLessThanOrEqual(baseline.autoReconciledCount);
+
+    // 4. Verify baseline dataset records were not mutated
+    expect(dataset.payments.length).toBe(180);
+    expect(dataset.groundTruth.length).toBe(180);
+  });
+
+  it('rejects invalid threshold combinations where medium threshold exceeds high threshold', () => {
+    const dataset = generateSyntheticDataset(42);
+
+    // Medium (80) > High (70) -> Must be rejected
+    const invalidResult = simulatePolicyThresholds(
+      dataset.payments,
+      dataset.settlements,
+      dataset.bankTransactions,
+      dataset.groundTruth,
+      70,
+      80
+    );
+
+    expect(invalidResult.isValid).toBe(false);
+    expect(invalidResult.validationError).toBeDefined();
+    expect(invalidResult.validationError).toContain('cannot exceed high threshold');
   });
 
   it('exports reconciliation records to valid CSV format with header', () => {
