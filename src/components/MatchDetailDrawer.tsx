@@ -1,20 +1,19 @@
-'use client';
-
 import React, { useState } from 'react';
 import {
   X,
   ShieldCheck,
   CheckCircle2,
-  AlertCircle,
-  Clock,
   Sparkles,
   UserCheck,
   Ban,
   Flag,
   Loader2,
+  Building,
+  Bot,
 } from 'lucide-react';
-import { ReconciliationRecord, MatchStatus } from '@/types/reconciliation';
+import { ReconciliationRecord } from '@/types/reconciliation';
 import { formatINR } from '@/lib/money';
+import { ConfirmationModal } from './ConfirmationModal';
 
 interface MatchDetailDrawerProps {
   record: ReconciliationRecord | null;
@@ -24,342 +23,300 @@ interface MatchDetailDrawerProps {
     action: 'APPROVED' | 'REJECTED' | 'FLAGGED',
     note?: string
   ) => void;
-  onAnalyzeException: (record: ReconciliationRecord) => Promise<void>;
-  isAnalyzingAi: boolean;
+  onAnalyzeAi?: (record: ReconciliationRecord) => Promise<void>;
+  isAnalyzingAi?: boolean;
 }
 
 export const MatchDetailDrawer: React.FC<MatchDetailDrawerProps> = ({
   record,
   onClose,
   onReviewDecision,
-  onAnalyzeException,
-  isAnalyzingAi,
+  onAnalyzeAi,
+  isAnalyzingAi = false,
 }) => {
   const [reviewerNote, setReviewerNote] = useState('');
+  const [confirmAction, setConfirmAction] = useState<'APPROVED' | 'REJECTED' | 'FLAGGED' | null>(
+    null
+  );
 
   if (!record) return null;
 
-  const { payment, matchedSettlement, matchedBankTransaction, evidence, aiAnalysis } = record;
+  const {
+    payment,
+    matchedSettlement,
+    matchedBankTransaction,
+    confidence,
+    status,
+    exceptionType,
+    financialExposurePaise,
+    evidence,
+    explanation,
+    aiAnalysis,
+    reviewerDecision,
+  } = record;
 
-  const getStatusBadge = (status: MatchStatus) => {
-    switch (status) {
-      case 'AUTO_RECONCILED':
-      case 'MANUALLY_APPROVED':
-        return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-            <CheckCircle2 className="w-3.5 h-3.5" />
-            {status === 'AUTO_RECONCILED' ? 'Auto-Reconciled (Safe)' : 'Manually Approved'}
-          </span>
-        );
-      case 'PENDING_REVIEW':
-        return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-300">
-            <Clock className="w-3.5 h-3.5" />
-            Pending Human Review
-          </span>
-        );
-      case 'MANUALLY_REJECTED':
-      case 'UNMATCHED_EXCEPTION':
-        return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200">
-            <AlertCircle className="w-3.5 h-3.5" />
-            {status === 'MANUALLY_REJECTED' ? 'Manually Rejected' : 'Unmatched Exception'}
-          </span>
-        );
-    }
-  };
-
-  const getConfidenceColor = (conf: number) => {
-    if (conf >= 85) return 'text-emerald-700 bg-emerald-50 border-emerald-200';
-    if (conf >= 50) return 'text-amber-800 bg-amber-50 border-amber-300';
-    return 'text-rose-700 bg-rose-50 border-rose-200';
+  const handleConfirmDecision = () => {
+    if (!confirmAction) return;
+    onReviewDecision(record.recordId, confirmAction, reviewerNote);
+    setConfirmAction(null);
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden flex justify-end bg-slate-900/30 backdrop-blur-xs transition-opacity animate-in fade-in">
-      <div className="w-full max-w-2xl bg-white h-full shadow-2xl flex flex-col overflow-y-auto border-l border-slate-200">
+    <>
+      {/* Backdrop */}
+      <div
+        className="fixed inset-0 z-40 bg-slate-950/40 backdrop-blur-2xs transition-opacity"
+        onClick={onClose}
+      />
+
+      {/* Drawer Panel */}
+      <aside
+        role="dialog"
+        aria-modal="true"
+        aria-label="Reconciliation Evidence Inspector"
+        className="fixed top-0 bottom-0 right-0 z-50 w-full max-w-2xl bg-white border-l border-slate-200 shadow-2xl flex flex-col animate-in slide-in-from-right duration-200"
+      >
         {/* Drawer Header */}
-        <div className="p-5 border-b border-slate-200 flex items-center justify-between sticky top-0 bg-white/95 backdrop-blur-xs z-10">
-          <div className="flex items-center gap-3">
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <span className="font-mono text-sm font-bold text-slate-900">
-                  {record.payment.paymentId}
-                </span>
-                {getStatusBadge(record.status)}
-              </div>
-              <p className="text-xs text-slate-500">
-                Order: <span className="font-mono text-slate-700">{payment.orderId}</span> | Exception: <strong className="text-slate-700">{record.exceptionType}</strong>
-              </p>
+        <div className="px-6 py-4 border-b border-slate-200 bg-slate-50/70 flex items-center justify-between shrink-0">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] font-mono font-bold text-slate-500 uppercase tracking-wider">
+                3-Way Trace Inspector
+              </span>
+              <span
+                className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold ${
+                  status === 'AUTO_RECONCILED'
+                    ? 'bg-emerald-100 text-emerald-800'
+                    : status === 'MANUALLY_APPROVED'
+                    ? 'bg-blue-100 text-blue-800'
+                    : status === 'MANUALLY_REJECTED' || status === 'UNMATCHED_EXCEPTION'
+                    ? 'bg-rose-100 text-rose-800'
+                    : 'bg-amber-100 text-amber-800'
+                }`}
+              >
+                {status.replace(/_/g, ' ')}
+              </span>
+              <span className="text-[11px] font-semibold text-slate-500 bg-slate-200/80 px-2 py-0.5 rounded">
+                {exceptionType.replace(/_/g, ' ')}
+              </span>
             </div>
+            <h2 className="text-base font-bold text-slate-900 font-mono mt-0.5">
+              {payment.paymentId}
+            </h2>
           </div>
+
           <button
             onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition-colors cursor-pointer"
+            aria-label="Close drawer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Drawer Body */}
-        <div className="p-5 space-y-6 flex-1">
-          {/* Confidence & Explanation Card */}
-          <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <ShieldCheck className="w-5 h-5 text-blue-600" />
-                <span className="text-xs font-semibold text-slate-700 uppercase tracking-wider">
-                  Reconciliation Decision Score
-                </span>
+        {/* Scrollable Content */}
+        <div className="flex-1 p-6 overflow-y-auto space-y-6 text-xs">
+          {/* Key Metrics Bar */}
+          <div className="grid grid-cols-3 gap-3">
+            <div className="bg-slate-50 p-3 rounded-xl border border-slate-200">
+              <span className="text-[10px] uppercase font-bold text-slate-400">Gross Amount</span>
+              <div className="text-sm font-bold text-slate-900 font-mono mt-0.5">
+                {formatINR(payment.grossAmount)}
               </div>
-              <span
-                className={`px-3 py-0.5 rounded-full text-sm font-bold border ${getConfidenceColor(
-                  record.confidence
-                )}`}
-              >
-                {record.confidence}% Match Confidence
-              </span>
             </div>
-            <p className="text-xs text-slate-700 leading-relaxed font-medium bg-white p-3 rounded-lg border border-slate-200">
-              {record.explanation}
-            </p>
 
-            {/* Evidence Breakdown Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mt-3 pt-3 border-t border-slate-200">
-              <div className="bg-white p-2.5 rounded-lg border border-slate-200">
-                <div className="text-[11px] text-slate-500 font-medium">Reference</div>
-                <div className="text-sm font-bold text-slate-900">
-                  {evidence.referenceScore} <span className="text-[10px] text-slate-400">/ 40</span>
-                </div>
-                <div className="text-[10px] text-slate-500 truncate mt-0.5">
-                  {evidence.details.referenceMatch}
-                </div>
+            <div className="bg-slate-50 p-3 rounded-xl border border-slate-200">
+              <span className="text-[10px] uppercase font-bold text-slate-400">Match Confidence</span>
+              <div
+                className={`text-sm font-bold font-mono mt-0.5 ${
+                  confidence >= 85
+                    ? 'text-emerald-700'
+                    : confidence >= 50
+                    ? 'text-amber-700'
+                    : 'text-rose-700'
+                }`}
+              >
+                {confidence}%
               </div>
+            </div>
 
-              <div className="bg-white p-2.5 rounded-lg border border-slate-200">
-                <div className="text-[11px] text-slate-500 font-medium">Amount Match</div>
-                <div className="text-sm font-bold text-slate-900">
-                  {evidence.amountScore} <span className="text-[10px] text-slate-400">/ 35</span>
-                </div>
-                <div className="text-[10px] text-slate-500 truncate mt-0.5">
-                  Diff: {formatINR(evidence.details.amountDifferencePaise)}
-                </div>
-              </div>
-
-              <div className="bg-white p-2.5 rounded-lg border border-slate-200">
-                <div className="text-[11px] text-slate-500 font-medium">Date Proximity</div>
-                <div className="text-sm font-bold text-slate-900">
-                  {evidence.dateScore} <span className="text-[10px] text-slate-400">/ 15</span>
-                </div>
-                <div className="text-[10px] text-slate-500 truncate mt-0.5">
-                  Δ {evidence.details.dateDeltaDays} day(s)
-                </div>
-              </div>
-
-              <div className="bg-white p-2.5 rounded-lg border border-slate-200">
-                <div className="text-[11px] text-slate-500 font-medium">UTR / Desc</div>
-                <div className="text-sm font-bold text-slate-900">
-                  {evidence.descriptionScore} <span className="text-[10px] text-slate-400">/ 10</span>
-                </div>
-                <div className="text-[10px] text-slate-500 truncate mt-0.5">
-                  {evidence.details.utrMatch}
-                </div>
+            <div className="bg-slate-50 p-3 rounded-xl border border-slate-200">
+              <span className="text-[10px] uppercase font-bold text-slate-400">Financial Exposure</span>
+              <div className="text-sm font-bold text-rose-700 font-mono mt-0.5">
+                {formatINR(financialExposurePaise)}
               </div>
             </div>
           </div>
 
-          {/* 3-Way Reconciliation Trace */}
-          <div>
-            <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3">
-              3-Way Audit Trail Comparison
-            </h4>
-            <div className="space-y-3">
-              {/* Leg 1: Payment Gateway */}
-              <div className="border border-slate-200 rounded-xl p-3.5 bg-white">
-                <div className="flex items-center justify-between pb-2 border-b border-slate-100 mb-2">
-                  <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-blue-500"></span> 1. Payment Ledger (Captured)
-                  </span>
-                  <span className="font-mono text-xs text-slate-500">{payment.createdAt.slice(0, 10)}</span>
+          {/* 3-Way Trace Lineage Map */}
+          <div className="space-y-3">
+            <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+              <Building className="w-4 h-4 text-blue-600" />
+              Three-Source Transaction Lineage
+            </h3>
+
+            {/* Leg 1: Payment Ledger */}
+            <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2">
+              <div className="flex items-center justify-between font-bold text-slate-900">
+                <span className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
+                  Leg 1: Razorpay Payment Order
+                </span>
+                <span className="font-mono text-slate-600">{payment.paymentId}</span>
+              </div>
+              <div className="grid grid-cols-2 gap-2 text-slate-600 font-mono text-[11px] pt-1 border-t border-slate-200/60">
+                <div>Order Ref: <strong className="text-slate-800">{payment.orderId}</strong></div>
+                <div>Created: <strong className="text-slate-800">{new Date(payment.createdAt).toLocaleDateString()}</strong></div>
+                <div>Fee (2%): <strong className="text-slate-800">{formatINR(payment.fee)}</strong></div>
+                <div>GST (18%): <strong className="text-slate-800">{formatINR(payment.tax)}</strong></div>
+                <div className="col-span-2">
+                  Expected Net Settlement: <strong className="text-blue-700">{formatINR(payment.expectedNetAmount)}</strong>
                 </div>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
-                  <div>
-                    <span className="text-slate-400 text-[11px] block">Gross Amount</span>
-                    <strong className="text-slate-900">{formatINR(payment.grossAmount)}</strong>
+              </div>
+            </div>
+
+            {/* Leg 2: Nodal Settlement Advice */}
+            <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2">
+              <div className="flex items-center justify-between font-bold text-slate-900">
+                <span className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+                  Leg 2: Gateway Settlement Advice
+                </span>
+                <span className="font-mono text-slate-600">
+                  {matchedSettlement ? matchedSettlement.settlementId : 'MISSING SETTLEMENT'}
+                </span>
+              </div>
+              {matchedSettlement ? (
+                <div className="grid grid-cols-2 gap-2 text-slate-600 font-mono text-[11px] pt-1 border-t border-slate-200/60">
+                  <div>Settled Amount: <strong className="text-slate-800">{formatINR(matchedSettlement.settledAmount)}</strong></div>
+                  <div>Settled Date: <strong className="text-slate-800">{new Date(matchedSettlement.settledAt).toLocaleDateString()}</strong></div>
+                  <div className="col-span-2">Gateway UTR: <strong className="text-slate-900 font-bold">{matchedSettlement.utr}</strong></div>
+                </div>
+              ) : (
+                <div className="text-rose-600 text-[11px] font-semibold pt-1 border-t border-slate-200/60">
+                  No gateway settlement advice found matching this payment.
+                </div>
+              )}
+            </div>
+
+            {/* Leg 3: Bank Statement Credit */}
+            <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2">
+              <div className="flex items-center justify-between font-bold text-slate-900">
+                <span className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                  Leg 3: Bank Statement Credit Line
+                </span>
+                <span className="font-mono text-slate-600">
+                  {matchedBankTransaction ? matchedBankTransaction.bankTransactionId : 'MISSING BANK CREDIT'}
+                </span>
+              </div>
+              {matchedBankTransaction ? (
+                <div className="grid grid-cols-2 gap-2 text-slate-600 font-mono text-[11px] pt-1 border-t border-slate-200/60">
+                  <div>Credit Amount: <strong className="text-slate-800">{formatINR(matchedBankTransaction.creditAmount)}</strong></div>
+                  <div>Credited Date: <strong className="text-slate-800">{new Date(matchedBankTransaction.creditedAt).toLocaleDateString()}</strong></div>
+                  <div className="col-span-2 text-slate-500 font-sans truncate">
+                    Desc: <strong className="text-slate-700 font-mono">{matchedBankTransaction.description}</strong>
                   </div>
-                  <div>
-                    <span className="text-slate-400 text-[11px] block">Gateway Fee (2%)</span>
-                    <strong className="text-slate-700">{formatINR(payment.fee)}</strong>
-                  </div>
-                  <div>
-                    <span className="text-slate-400 text-[11px] block">GST on Fee (18%)</span>
-                    <strong className="text-slate-700">{formatINR(payment.tax)}</strong>
-                  </div>
-                  <div>
-                    <span className="text-slate-400 text-[11px] block">Expected Net</span>
-                    <strong className="text-blue-700 font-bold">{formatINR(payment.expectedNetAmount)}</strong>
-                  </div>
+                </div>
+              ) : (
+                <div className="text-rose-600 text-[11px] font-semibold pt-1 border-t border-slate-200/60">
+                  No merchant bank credit deposit recorded for this transaction.
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* 4-Factor Evidence Points Breakdown */}
+          <div className="space-y-3">
+            <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+              <ShieldCheck className="w-4 h-4 text-emerald-600" />
+              4-Factor Evidence Score Contribution
+            </h3>
+
+            <div className="bg-white border border-slate-200 rounded-xl p-4 space-y-3">
+              {/* Reference */}
+              <div>
+                <div className="flex justify-between font-semibold mb-1">
+                  <span className="text-slate-700">Reference Match (Exact / Partial)</span>
+                  <span className="font-mono font-bold text-slate-900">{evidence.referenceScore} / 40 pts</span>
+                </div>
+                <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                  <div
+                    className="bg-blue-600 h-1.5 rounded-full"
+                    style={{ width: `${(evidence.referenceScore / 40) * 100}%` }}
+                  />
                 </div>
               </div>
 
-              {/* Leg 2: Razorpay Settlement */}
-              <div
-                className={`border rounded-xl p-3.5 ${
-                  matchedSettlement
-                    ? 'border-slate-200 bg-white'
-                    : 'border-rose-200 bg-rose-50/50'
-                }`}
-              >
-                <div className="flex items-center justify-between pb-2 border-b border-slate-100 mb-2">
-                  <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                    <span
-                      className={`w-2 h-2 rounded-full ${
-                        matchedSettlement ? 'bg-indigo-500' : 'bg-rose-500'
-                      }`}
-                    ></span>
-                    2. Razorpay Settlement Advice
-                  </span>
-                  {matchedSettlement ? (
-                    <span className="font-mono text-xs text-slate-500">
-                      {matchedSettlement.settledAt.slice(0, 10)}
-                    </span>
-                  ) : (
-                    <span className="text-xs text-rose-700 font-semibold">MISSING FROM BATCH</span>
-                  )}
+              {/* Amount */}
+              <div>
+                <div className="flex justify-between font-semibold mb-1">
+                  <span className="text-slate-700">Amount Compatibility</span>
+                  <span className="font-mono font-bold text-slate-900">{evidence.amountScore} / 35 pts</span>
                 </div>
-                {matchedSettlement ? (
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
-                    <div>
-                      <span className="text-slate-400 text-[11px] block">Settlement ID</span>
-                      <span className="font-mono font-medium text-slate-800 truncate block">
-                        {matchedSettlement.settlementId}
-                      </span>
-                    </div>
-                    <div>
-                      <span className="text-slate-400 text-[11px] block">Settled Amount</span>
-                      <strong className="text-slate-900">
-                        {formatINR(matchedSettlement.settledAmount)}
-                      </strong>
-                    </div>
-                    <div>
-                      <span className="text-slate-400 text-[11px] block">Payment Reference</span>
-                      <span className="font-mono text-slate-700 truncate block">
-                        {matchedSettlement.paymentReference}
-                      </span>
-                    </div>
-                    <div>
-                      <span className="text-slate-400 text-[11px] block">Settlement UTR</span>
-                      <span className="font-mono text-indigo-700 font-semibold truncate block">
-                        {matchedSettlement.utr}
-                      </span>
-                    </div>
-                  </div>
-                ) : (
-                  <p className="text-xs text-rose-700">
-                    No matching settlement advice record found in the gateway settlement statement.
-                  </p>
-                )}
+                <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                  <div
+                    className="bg-blue-600 h-1.5 rounded-full"
+                    style={{ width: `${(evidence.amountScore / 35) * 100}%` }}
+                  />
+                </div>
               </div>
 
-              {/* Leg 3: Bank Account Transaction */}
-              <div
-                className={`border rounded-xl p-3.5 ${
-                  matchedBankTransaction
-                    ? 'border-slate-200 bg-white'
-                    : 'border-rose-200 bg-rose-50/50'
-                }`}
-              >
-                <div className="flex items-center justify-between pb-2 border-b border-slate-100 mb-2">
-                  <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                    <span
-                      className={`w-2 h-2 rounded-full ${
-                        matchedBankTransaction ? 'bg-emerald-500' : 'bg-rose-500'
-                      }`}
-                    ></span>
-                    3. Merchant Bank Statement Credit
-                  </span>
-                  {matchedBankTransaction ? (
-                    <span className="font-mono text-xs text-slate-500">
-                      {matchedBankTransaction.creditedAt.slice(0, 10)}
-                    </span>
-                  ) : (
-                    <span className="text-xs text-rose-700 font-semibold">MISSING BANK DEPOSIT</span>
-                  )}
+              {/* Date */}
+              <div>
+                <div className="flex justify-between font-semibold mb-1">
+                  <span className="text-slate-700">Date Window Proximity</span>
+                  <span className="font-mono font-bold text-slate-900">{evidence.dateScore} / 15 pts</span>
                 </div>
-                {matchedBankTransaction ? (
-                  <div className="space-y-2 text-xs">
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                      <div>
-                        <span className="text-slate-400 text-[11px] block">Bank Tx ID</span>
-                        <span className="font-mono text-slate-800 truncate block">
-                          {matchedBankTransaction.bankTransactionId}
-                        </span>
-                      </div>
-                      <div>
-                        <span className="text-slate-400 text-[11px] block">Bank Credit Amount</span>
-                        <strong className="text-emerald-700 font-bold">
-                          {formatINR(matchedBankTransaction.creditAmount)}
-                        </strong>
-                      </div>
-                      <div>
-                        <span className="text-slate-400 text-[11px] block">Bank UTR</span>
-                        <span className="font-mono text-slate-700 truncate block">
-                          {matchedBankTransaction.utr}
-                        </span>
-                      </div>
-                    </div>
-                    <div>
-                      <span className="text-slate-400 text-[11px] block">Description</span>
-                      <span className="font-mono text-slate-600 text-[11px] bg-slate-50 p-1.5 rounded block truncate">
-                        {matchedBankTransaction.description}
-                      </span>
-                    </div>
-                  </div>
-                ) : (
-                  <p className="text-xs text-rose-700">
-                    No corresponding credit advice detected in merchant bank statement for this settlement.
-                  </p>
-                )}
+                <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                  <div
+                    className="bg-blue-600 h-1.5 rounded-full"
+                    style={{ width: `${(evidence.dateScore / 15) * 100}%` }}
+                  />
+                </div>
+              </div>
+
+              {/* Description */}
+              <div>
+                <div className="flex justify-between font-semibold mb-1">
+                  <span className="text-slate-700">UTR &amp; Statement Description Similarity</span>
+                  <span className="font-mono font-bold text-slate-900">{evidence.descriptionScore} / 10 pts</span>
+                </div>
+                <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                  <div
+                    className="bg-blue-600 h-1.5 rounded-full"
+                    style={{ width: `${(evidence.descriptionScore / 10) * 100}%` }}
+                  />
+                </div>
+              </div>
+
+              {/* Justification Quote */}
+              <div className="p-3 bg-blue-50/60 rounded-lg border border-blue-100 text-[11px] text-blue-900 leading-relaxed mt-2">
+                <strong>Audit Explanation:</strong> {explanation}
               </div>
             </div>
           </div>
 
-          {/* Grounded AI Exception Analyst Box */}
-          <div className="border border-indigo-100 bg-indigo-50/40 rounded-xl p-4">
-            <div className="flex items-center justify-between mb-2.5">
-              <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-indigo-600" />
-                <span className="text-xs font-bold text-indigo-900 uppercase tracking-wider">
-                  Grounded AI Exception Analyst
-                </span>
-                {aiAnalysis && (
-                  <span
-                    className={`px-2 py-0.5 rounded text-[10px] font-semibold border ${
-                      aiAnalysis.isFallback
-                        ? 'bg-slate-100 text-slate-700 border-slate-200'
-                        : 'bg-indigo-100 text-indigo-800 border-indigo-200'
-                    }`}
-                  >
-                    [{aiAnalysis.modelUsed}]
-                  </span>
-                )}
-              </div>
-
-              {!aiAnalysis && (
+          {/* Grounded AI Exception Analysis */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+                <Bot className="w-4 h-4 text-violet-600" />
+                Grounded Exception Analyst (Advisory)
+              </h3>
+              {onAnalyzeAi && !aiAnalysis && (
                 <button
-                  onClick={() => onAnalyzeException(record)}
+                  onClick={() => onAnalyzeAi(record)}
                   disabled={isAnalyzingAi}
-                  className="inline-flex items-center gap-1.5 px-3 py-1 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium rounded-lg transition-colors shadow-xs disabled:opacity-50 cursor-pointer"
+                  className="px-2.5 py-1 rounded-lg text-xs font-semibold text-violet-700 bg-violet-50 hover:bg-violet-100 border border-violet-200 flex items-center gap-1 transition-colors cursor-pointer"
                 >
                   {isAnalyzingAi ? (
                     <>
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                      <span>Analyzing...</span>
+                      <Loader2 className="w-3 h-3 animate-spin" /> Analyzing...
                     </>
                   ) : (
                     <>
-                      <Sparkles className="w-3.5 h-3.5" />
-                      <span>Analyze with Gemini</span>
+                      <Sparkles className="w-3 h-3 text-violet-600" /> Analyze with Gemini
                     </>
                   )}
                 </button>
@@ -367,115 +324,126 @@ export const MatchDetailDrawer: React.FC<MatchDetailDrawerProps> = ({
             </div>
 
             {aiAnalysis ? (
-              <div className="space-y-3 text-xs">
-                <div>
-                  <span className="text-[11px] font-semibold text-slate-500 block mb-0.5">
-                    Summary & Diagnosis
+              <div className="bg-violet-50/40 border border-violet-200 rounded-xl p-4 space-y-2 text-xs">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-violet-950">Diagnosis:</span>
+                  <span className="text-[10px] font-mono px-2 py-0.5 bg-violet-100 text-violet-800 rounded font-semibold">
+                    [{aiAnalysis.modelUsed}]
                   </span>
-                  <p className="text-slate-800 font-medium leading-relaxed bg-white p-2.5 rounded-lg border border-indigo-100">
-                    {aiAnalysis.summary}
-                  </p>
                 </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                  <div className="bg-white p-2.5 rounded-lg border border-indigo-100">
-                    <span className="text-[11px] font-semibold text-slate-500 block mb-1">
-                      Recommended Action
-                    </span>
-                    <p className="text-slate-800 font-medium leading-normal">
-                      {aiAnalysis.recommendedAction}
-                    </p>
-                  </div>
-
-                  <div className="bg-white p-2.5 rounded-lg border border-indigo-100">
-                    <span className="text-[11px] font-semibold text-slate-500 block mb-1">
-                      Missing Information Checklist
-                    </span>
-                    <ul className="list-disc list-inside text-slate-700 space-y-0.5">
-                      {aiAnalysis.missingInformation.map((info, idx) => (
-                        <li key={idx} className="truncate">
-                          {info}
-                        </li>
+                <p className="text-slate-700">{aiAnalysis.summary}</p>
+                <div className="pt-2 border-t border-violet-200/60">
+                  <strong className="text-violet-900">Recommended Next Action:</strong>
+                  <p className="text-slate-700 mt-0.5">{aiAnalysis.recommendedAction}</p>
+                </div>
+                {aiAnalysis.missingInformation.length > 0 && (
+                  <div className="pt-2 border-t border-violet-200/60">
+                    <strong className="text-slate-700">Missing Information Checklist:</strong>
+                    <ul className="list-disc list-inside text-slate-600 mt-1 space-y-0.5">
+                      {aiAnalysis.missingInformation.map((item, idx) => (
+                        <li key={idx}>{item}</li>
                       ))}
                     </ul>
                   </div>
-                </div>
-
-                <div className="flex items-center justify-between text-[11px] text-slate-500 pt-1">
-                  <span>
-                    Risk Assessment: <strong className="text-slate-800">{aiAnalysis.riskAssessment}</strong>
-                  </span>
-                  <span>{aiAnalysis.reviewerNote}</span>
-                </div>
+                )}
               </div>
             ) : (
-              <p className="text-xs text-slate-600">
-                Click <strong>Analyze with Gemini</strong> to generate grounded exception classification, root-cause summary, and actionable remediation checklist.
-              </p>
+              <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-500 text-[11px]">
+                Click &quot;Analyze with Gemini&quot; to generate an advisory remediation analysis.
+              </div>
             )}
           </div>
 
-          {/* Reviewer Action Controls */}
-          {(record.status === 'PENDING_REVIEW' ||
-            record.status === 'MANUALLY_APPROVED' ||
-            record.status === 'MANUALLY_REJECTED') && (
-            <div className="bg-white border border-slate-200 rounded-xl p-4 space-y-3">
-              <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
-                <UserCheck className="w-4 h-4 text-slate-600" />
-                Human Reviewer Decision
-              </h4>
-
-              <div>
-                <label className="text-[11px] font-medium text-slate-500 block mb-1">
-                  Reviewer Note / Justification (Appended to Audit Trail)
-                </label>
-                <input
-                  type="text"
-                  value={reviewerNote}
-                  onChange={(e) => setReviewerNote(e.target.value)}
-                  placeholder="e.g., Verified fee rate anomaly against merchant custom contract tier."
-                  className="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                />
+          {/* Existing Reviewer Decision if any */}
+          {reviewerDecision && (
+            <div className="p-4 bg-blue-50/60 border border-blue-200 rounded-xl space-y-1">
+              <div className="flex items-center justify-between text-blue-900 font-bold">
+                <span>Decision: {reviewerDecision.action}</span>
+                <span className="font-mono text-[10px] text-blue-700">
+                  {new Date(reviewerDecision.reviewedAt).toLocaleString()}
+                </span>
               </div>
-
-              <div className="flex items-center gap-2 pt-1">
-                <button
-                  onClick={() => {
-                    onReviewDecision(record.recordId, 'APPROVED', reviewerNote);
-                    onClose();
-                  }}
-                  className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg transition-colors cursor-pointer"
-                >
-                  <UserCheck className="w-4 h-4" />
-                  <span>Approve Match</span>
-                </button>
-
-                <button
-                  onClick={() => {
-                    onReviewDecision(record.recordId, 'REJECTED', reviewerNote);
-                    onClose();
-                  }}
-                  className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold rounded-lg transition-colors cursor-pointer"
-                >
-                  <Ban className="w-4 h-4" />
-                  <span>Reject Match</span>
-                </button>
-
-                <button
-                  onClick={() => {
-                    onReviewDecision(record.recordId, 'FLAGGED', reviewerNote);
-                    onClose();
-                  }}
-                  className="inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg transition-colors cursor-pointer"
-                >
-                  <Flag className="w-4 h-4" />
-                  <span>Flag</span>
-                </button>
-              </div>
+              <p className="text-slate-700 text-xs">{reviewerDecision.note}</p>
+              <div className="text-[10px] text-slate-500">By: {reviewerDecision.reviewer}</div>
             </div>
           )}
+
+          {/* Reviewer Action Controls */}
+          <div className="pt-4 border-t border-slate-200 space-y-3">
+            <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+              <UserCheck className="w-4 h-4 text-slate-600" />
+              Finance Controller Decision
+            </h3>
+
+            <textarea
+              placeholder="Enter auditor note explaining review approval or rejection rationale..."
+              value={reviewerNote}
+              onChange={(e) => setReviewerNote(e.target.value)}
+              className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder:text-slate-400 focus:outline-hidden focus:ring-1 focus:ring-blue-500"
+              rows={2}
+            />
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setConfirmAction('APPROVED')}
+                className="flex-1 py-2.5 rounded-xl text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 transition-colors flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
+              >
+                <CheckCircle2 className="w-4 h-4" /> Approve Match
+              </button>
+
+              <button
+                onClick={() => setConfirmAction('REJECTED')}
+                className="flex-1 py-2.5 rounded-xl text-xs font-semibold text-white bg-rose-600 hover:bg-rose-700 transition-colors flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
+              >
+                <Ban className="w-4 h-4" /> Reject Match
+              </button>
+
+              <button
+                onClick={() => setConfirmAction('FLAGGED')}
+                className="py-2.5 px-3 rounded-xl text-xs font-semibold text-amber-800 bg-amber-100 hover:bg-amber-200 border border-amber-200 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                title="Flag for treasury inquiry"
+              >
+                <Flag className="w-4 h-4" /> Flag
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
+      </aside>
+
+      {/* Consequential Action Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={Boolean(confirmAction)}
+        title={
+          confirmAction === 'APPROVED'
+            ? 'Confirm Manual Match Approval'
+            : confirmAction === 'REJECTED'
+            ? 'Confirm Transaction Rejection'
+            : 'Flag for Treasury Investigation'
+        }
+        description={
+          confirmAction === 'APPROVED'
+            ? `Are you sure you want to approve reconciliation for ${payment.paymentId} (${formatINR(payment.grossAmount)})? This records an immutable controller approval in the audit trail.`
+            : confirmAction === 'REJECTED'
+            ? `Are you sure you want to reject matching for ${payment.paymentId}? The record will be isolated in the exception ledger.`
+            : `Flag ${payment.paymentId} for senior treasury investigation.`
+        }
+        confirmLabel={
+          confirmAction === 'APPROVED'
+            ? 'Approve Match'
+            : confirmAction === 'REJECTED'
+            ? 'Reject Match'
+            : 'Flag Record'
+        }
+        actionType={
+          confirmAction === 'APPROVED'
+            ? 'APPROVE'
+            : confirmAction === 'REJECTED'
+            ? 'REJECT'
+            : 'FLAG'
+        }
+        onConfirm={handleConfirmDecision}
+        onClose={() => setConfirmAction(null)}
+      />
+    </>
   );
 };

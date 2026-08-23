@@ -1,5 +1,3 @@
-'use client';
-
 import React, { useState, useMemo } from 'react';
 import {
   Search,
@@ -8,11 +6,15 @@ import {
   AlertCircle,
   ArrowUpDown,
   ExternalLink,
-  UserCheck,
   Ban,
+  Download,
+  X,
+  LayoutList,
+  TableProperties,
 } from 'lucide-react';
 import { ReconciliationRecord, MatchStatus } from '@/types/reconciliation';
 import { formatINR } from '@/lib/money';
+import { exportReconciliationCsv } from '@/lib/dataset/csv';
 
 interface ReconciliationTabProps {
   records: ReconciliationRecord[];
@@ -29,22 +31,34 @@ export const ReconciliationTab: React.FC<ReconciliationTabProps> = ({
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'ALL' | MatchStatus>('ALL');
+  const [exceptionFilter, setExceptionFilter] = useState<string>('ALL');
+  const [minConfidence, setMinConfidence] = useState<number>(0);
   const [sortBy, setSortBy] = useState<'DATE' | 'AMOUNT' | 'CONFIDENCE'>('DATE');
   const [sortOrder, setSortOrder] = useState<'ASC' | 'DESC'>('DESC');
+  const [viewMode, setViewMode] = useState<'TABLE' | 'CARDS'>('TABLE');
+
+  // Extract unique exception categories
+  const exceptionCategories = useMemo(() => {
+    const set = new Set<string>();
+    records.forEach((r) => set.add(r.exceptionType));
+    return Array.from(set);
+  }, [records]);
 
   const filteredRecords = useMemo(() => {
     return records
       .filter((r) => {
         if (statusFilter !== 'ALL' && r.status !== statusFilter) return false;
+        if (exceptionFilter !== 'ALL' && r.exceptionType !== exceptionFilter) return false;
+        if (r.confidence < minConfidence) return false;
         if (!searchQuery) return true;
 
         const q = searchQuery.toLowerCase();
         return (
           r.payment.paymentId.toLowerCase().includes(q) ||
           r.payment.orderId.toLowerCase().includes(q) ||
-          r.matchedSettlement?.utr.toLowerCase().includes(q) ||
-          r.matchedSettlement?.settlementId.toLowerCase().includes(q) ||
-          r.matchedBankTransaction?.bankTransactionId.toLowerCase().includes(q) ||
+          (r.matchedSettlement?.utr && r.matchedSettlement.utr.toLowerCase().includes(q)) ||
+          (r.matchedSettlement?.settlementId && r.matchedSettlement.settlementId.toLowerCase().includes(q)) ||
+          (r.matchedBankTransaction?.bankTransactionId && r.matchedBankTransaction.bankTransactionId.toLowerCase().includes(q)) ||
           r.exceptionType.toLowerCase().includes(q)
         );
       })
@@ -61,7 +75,28 @@ export const ReconciliationTab: React.FC<ReconciliationTabProps> = ({
         }
         return sortOrder === 'DESC' ? -comp : comp;
       });
-  }, [records, searchQuery, statusFilter, sortBy, sortOrder]);
+  }, [records, searchQuery, statusFilter, exceptionFilter, minConfidence, sortBy, sortOrder]);
+
+  const handleExportFiltered = () => {
+    const csv = exportReconciliationCsv(filteredRecords);
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `reconciliation_filtered_${Date.now()}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const clearFilters = () => {
+    setSearchQuery('');
+    setStatusFilter('ALL');
+    setExceptionFilter('ALL');
+    setMinConfidence(0);
+  };
+
+  const hasActiveFilters =
+    searchQuery || statusFilter !== 'ALL' || exceptionFilter !== 'ALL' || minConfidence > 0;
 
   const getStatusBadge = (status: MatchStatus) => {
     switch (status) {
@@ -80,251 +115,303 @@ export const ReconciliationTab: React.FC<ReconciliationTabProps> = ({
             Review Needed
           </span>
         );
-      case 'MANUALLY_REJECTED':
       case 'UNMATCHED_EXCEPTION':
+      case 'MANUALLY_REJECTED':
         return (
           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-rose-50 text-rose-700 border border-rose-200">
             <AlertCircle className="w-3 h-3" />
-            {status === 'MANUALLY_REJECTED' ? 'Rejected' : 'Exception'}
+            {status === 'UNMATCHED_EXCEPTION' ? 'Exception' : 'Rejected'}
           </span>
         );
     }
   };
 
-  const getConfidenceBadge = (conf: number) => {
-    let color = 'bg-rose-50 text-rose-700 border-rose-200';
-    if (conf >= 85) color = 'bg-emerald-50 text-emerald-700 border-emerald-200';
-    else if (conf >= 50) color = 'bg-amber-50 text-amber-800 border-amber-300';
-
-    return (
-      <span className={`px-2 py-0.5 rounded text-[11px] font-bold border ${color}`}>
-        {conf}%
-      </span>
-    );
-  };
-
   return (
-    <div className="bg-white border border-slate-200 rounded-xl shadow-xs overflow-hidden flex flex-col">
-      {/* Table Controls */}
-      <div className="p-4 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3 bg-slate-50/50">
-        {/* Search */}
-        <div className="relative min-w-[240px] flex-1 max-w-md">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search Payment ID, Order, UTR, Exception..."
-            className="w-full text-xs pl-9 pr-3 py-2 bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-          />
-        </div>
-
-        {/* Filters & Sorting */}
-        <div className="flex items-center flex-wrap gap-2">
-          {/* Status Filter Buttons */}
-          <div className="inline-flex rounded-lg p-0.5 bg-slate-200/70 text-xs">
-            <button
-              onClick={() => setStatusFilter('ALL')}
-              className={`px-2.5 py-1 rounded-md font-medium transition-colors cursor-pointer ${
-                statusFilter === 'ALL'
-                  ? 'bg-white text-slate-900 shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              All ({records.length})
-            </button>
-            <button
-              onClick={() => setStatusFilter('AUTO_RECONCILED')}
-              className={`px-2.5 py-1 rounded-md font-medium transition-colors cursor-pointer ${
-                statusFilter === 'AUTO_RECONCILED'
-                  ? 'bg-white text-emerald-700 shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              Safe ({records.filter((r) => r.status === 'AUTO_RECONCILED').length})
-            </button>
-            <button
-              onClick={() => setStatusFilter('PENDING_REVIEW')}
-              className={`px-2.5 py-1 rounded-md font-medium transition-colors cursor-pointer ${
-                statusFilter === 'PENDING_REVIEW'
-                  ? 'bg-white text-amber-800 shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              Review ({records.filter((r) => r.status === 'PENDING_REVIEW').length})
-            </button>
-            <button
-              onClick={() => setStatusFilter('UNMATCHED_EXCEPTION')}
-              className={`px-2.5 py-1 rounded-md font-medium transition-colors cursor-pointer ${
-                statusFilter === 'UNMATCHED_EXCEPTION'
-                  ? 'bg-white text-rose-700 shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              Exceptions ({records.filter((r) => r.status === 'UNMATCHED_EXCEPTION').length})
-            </button>
+    <div className="space-y-4">
+      {/* Multi-Facet Filter Toolbar */}
+      <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          {/* Search Box */}
+          <div className="relative flex-1 min-w-[240px]">
+            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              placeholder="Search Payment ID, Order Ref, Gateway UTR..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder:text-slate-400 focus:outline-hidden focus:ring-1 focus:ring-blue-500 focus:bg-white"
+            />
           </div>
 
-          {/* Sort Dropdown */}
-          <div className="flex items-center gap-1 text-xs text-slate-500 bg-white border border-slate-300 rounded-lg px-2.5 py-1">
-            <span>Sort:</span>
+          {/* Quick Filter Selects */}
+          <div className="flex items-center flex-wrap gap-2">
+            {/* Status Select */}
             <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as 'DATE' | 'AMOUNT' | 'CONFIDENCE')}
-              className="bg-transparent font-semibold text-slate-700 focus:outline-none cursor-pointer"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value as 'ALL' | MatchStatus)}
+              className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 font-medium cursor-pointer"
             >
-              <option value="DATE">Date</option>
-              <option value="AMOUNT">Amount</option>
-              <option value="CONFIDENCE">Confidence</option>
+              <option value="ALL">All Statuses</option>
+              <option value="AUTO_RECONCILED">Auto-Reconciled</option>
+              <option value="PENDING_REVIEW">Pending Review</option>
+              <option value="MANUALLY_APPROVED">Manually Approved</option>
+              <option value="UNMATCHED_EXCEPTION">Unmatched Exceptions</option>
+              <option value="MANUALLY_REJECTED">Rejected</option>
             </select>
-            <button
-              onClick={() => setSortOrder(sortOrder === 'ASC' ? 'DESC' : 'ASC')}
-              className="text-slate-500 hover:text-slate-800 p-0.5 cursor-pointer"
-              title="Toggle sort direction"
+
+            {/* Exception Category Select */}
+            <select
+              value={exceptionFilter}
+              onChange={(e) => setExceptionFilter(e.target.value)}
+              className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 font-medium cursor-pointer max-w-[180px] truncate"
             >
-              <ArrowUpDown className="w-3 h-3" />
+              <option value="ALL">All Anomaly Types</option>
+              {exceptionCategories.map((cat) => (
+                <option key={cat} value={cat}>
+                  {cat.replace(/_/g, ' ')}
+                </option>
+              ))}
+            </select>
+
+            {/* View Mode Switcher */}
+            <div className="hidden sm:flex items-center border border-slate-200 rounded-xl p-0.5 bg-slate-50">
+              <button
+                onClick={() => setViewMode('TABLE')}
+                className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+                  viewMode === 'TABLE'
+                    ? 'bg-white text-blue-600 shadow-2xs'
+                    : 'text-slate-500 hover:text-slate-700'
+                }`}
+                title="Table Grid View"
+              >
+                <TableProperties className="w-3.5 h-3.5" />
+              </button>
+              <button
+                onClick={() => setViewMode('CARDS')}
+                className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+                  viewMode === 'CARDS'
+                    ? 'bg-white text-blue-600 shadow-2xs'
+                    : 'text-slate-500 hover:text-slate-700'
+                }`}
+                title="Card List View"
+              >
+                <LayoutList className="w-3.5 h-3.5" />
+              </button>
+            </div>
+
+            {/* Export Current View */}
+            <button
+              onClick={handleExportFiltered}
+              className="inline-flex items-center gap-1.5 px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition-colors cursor-pointer"
+            >
+              <Download className="w-3.5 h-3.5 text-slate-500" />
+              <span>Export ({filteredRecords.length})</span>
             </button>
           </div>
         </div>
+
+        {/* Active Filter Chips */}
+        {hasActiveFilters && (
+          <div className="flex items-center flex-wrap gap-2 pt-2 border-t border-slate-100 text-xs">
+            <span className="text-[11px] text-slate-500 font-semibold">Active Filters:</span>
+            {searchQuery && (
+              <span className="inline-flex items-center gap-1 bg-blue-50 text-blue-700 px-2 py-0.5 rounded-md text-[11px] font-medium border border-blue-200">
+                Search: &quot;{searchQuery}&quot;
+                <X className="w-3 h-3 cursor-pointer" onClick={() => setSearchQuery('')} />
+              </span>
+            )}
+            {statusFilter !== 'ALL' && (
+              <span className="inline-flex items-center gap-1 bg-blue-50 text-blue-700 px-2 py-0.5 rounded-md text-[11px] font-medium border border-blue-200">
+                Status: {statusFilter.replace(/_/g, ' ')}
+                <X className="w-3 h-3 cursor-pointer" onClick={() => setStatusFilter('ALL')} />
+              </span>
+            )}
+            {exceptionFilter !== 'ALL' && (
+              <span className="inline-flex items-center gap-1 bg-blue-50 text-blue-700 px-2 py-0.5 rounded-md text-[11px] font-medium border border-blue-200">
+                Category: {exceptionFilter.replace(/_/g, ' ')}
+                <X className="w-3 h-3 cursor-pointer" onClick={() => setExceptionFilter('ALL')} />
+              </span>
+            )}
+            <button
+              onClick={clearFilters}
+              className="text-[11px] text-slate-500 hover:text-slate-800 font-semibold underline cursor-pointer ml-auto"
+            >
+              Reset All Filters
+            </button>
+          </div>
+        )}
       </div>
 
-      {/* Table Content */}
-      <div className="overflow-x-auto">
-        <table className="w-full text-left text-xs border-collapse">
-          <thead>
-            <tr className="bg-slate-100/70 border-b border-slate-200 text-slate-600 font-semibold uppercase text-[10px] tracking-wider">
-              <th className="py-3 px-4">Payment ID & Order</th>
-              <th className="py-3 px-4">Gross / Expected Net</th>
-              <th className="py-3 px-4">Settlement Ref & UTR</th>
-              <th className="py-3 px-4">Settled / Credited</th>
-              <th className="py-3 px-4 text-center">Score</th>
-              <th className="py-3 px-4">Status & Exception</th>
-              <th className="py-3 px-4 text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100 text-slate-700">
-            {filteredRecords.map((record) => {
-              const { payment, matchedSettlement, matchedBankTransaction } = record;
-
-              return (
-                <tr
-                  key={record.recordId}
-                  onClick={() => onSelectRecord(record)}
-                  className="hover:bg-blue-50/40 transition-colors cursor-pointer group"
-                >
-                  {/* Payment ID & Order */}
-                  <td className="py-3 px-4">
-                    <div className="font-mono font-bold text-slate-900 group-hover:text-blue-600 transition-colors">
-                      {payment.paymentId}
+      {/* Main Table View */}
+      {viewMode === 'TABLE' ? (
+        <div className="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="min-w-full text-xs text-left divide-y divide-slate-200">
+              <thead className="bg-slate-50 text-slate-600 font-semibold uppercase text-[10px] sticky top-0 z-10">
+                <tr>
+                  <th className="py-3 px-3.5">Payment ID</th>
+                  <th className="py-3 px-3.5">Order Ref</th>
+                  <th
+                    className="py-3 px-3.5 cursor-pointer hover:text-slate-900"
+                    onClick={() => {
+                      setSortBy('AMOUNT');
+                      setSortOrder(sortOrder === 'ASC' ? 'DESC' : 'ASC');
+                    }}
+                  >
+                    <div className="flex items-center gap-1">
+                      <span>Gross Amt</span>
+                      <ArrowUpDown className="w-3 h-3 text-slate-400" />
                     </div>
-                    <div className="font-mono text-[11px] text-slate-400">
-                      {payment.orderId} | {payment.createdAt.slice(0, 10)}
+                  </th>
+                  <th className="py-3 px-3.5">Settlement ID</th>
+                  <th className="py-3 px-3.5">Bank UTR</th>
+                  <th className="py-3 px-3.5">Status</th>
+                  <th
+                    className="py-3 px-3.5 cursor-pointer hover:text-slate-900"
+                    onClick={() => {
+                      setSortBy('CONFIDENCE');
+                      setSortOrder(sortOrder === 'ASC' ? 'DESC' : 'ASC');
+                    }}
+                  >
+                    <div className="flex items-center gap-1">
+                      <span>Score</span>
+                      <ArrowUpDown className="w-3 h-3 text-slate-400" />
                     </div>
-                  </td>
-
-                  {/* Gross / Expected Net */}
-                  <td className="py-3 px-4">
-                    <div className="font-semibold text-slate-900">
-                      {formatINR(payment.grossAmount)}
-                    </div>
-                    <div className="text-[11px] text-blue-700 font-medium">
-                      Net: {formatINR(payment.expectedNetAmount)}
-                    </div>
-                  </td>
-
-                  {/* Settlement Ref & UTR */}
-                  <td className="py-3 px-4">
-                    {matchedSettlement ? (
-                      <div>
-                        <div className="font-mono text-[11px] font-semibold text-slate-800 truncate max-w-[150px]">
-                          {matchedSettlement.paymentReference}
-                        </div>
-                        <div className="font-mono text-[10px] text-indigo-700">
-                          {matchedSettlement.utr}
-                        </div>
-                      </div>
-                    ) : (
-                      <span className="text-slate-400 text-[11px] italic">No Settlement Record</span>
-                    )}
-                  </td>
-
-                  {/* Settled / Credited */}
-                  <td className="py-3 px-4">
-                    {matchedSettlement ? (
-                      <div>
-                        <div className="font-semibold text-slate-900">
-                          {formatINR(matchedSettlement.settledAmount)}
-                        </div>
-                        {matchedBankTransaction ? (
-                          <div className="text-[10px] text-emerald-700 font-medium">
-                            Bank: {formatINR(matchedBankTransaction.creditAmount)}
+                  </th>
+                  <th className="py-3 px-3.5">Anomaly Category</th>
+                  <th className="py-3 px-3.5 text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 font-mono">
+                {filteredRecords.length === 0 ? (
+                  <tr>
+                    <td colSpan={9} className="py-12 text-center text-slate-500 font-sans">
+                      No reconciliation records match the active search and filter criteria.
+                    </td>
+                  </tr>
+                ) : (
+                  filteredRecords.map((record) => (
+                    <tr
+                      key={record.recordId}
+                      className="hover:bg-slate-50/80 transition-colors cursor-pointer"
+                      onClick={() => onSelectRecord(record)}
+                    >
+                      <td className="py-3 px-3.5 font-bold text-slate-900">{record.payment.paymentId}</td>
+                      <td className="py-3 px-3.5 text-slate-600">{record.payment.orderId}</td>
+                      <td className="py-3 px-3.5 font-bold text-slate-900">
+                        {formatINR(record.payment.grossAmount)}
+                      </td>
+                      <td className="py-3 px-3.5 text-slate-600">
+                        {record.matchedSettlement ? (
+                          record.matchedSettlement.settlementId
+                        ) : (
+                          <span className="text-rose-500 font-sans text-[11px]">Missing</span>
+                        )}
+                      </td>
+                      <td className="py-3 px-3.5 text-slate-600">
+                        {record.matchedSettlement?.utr ||
+                          record.matchedBankTransaction?.utr || (
+                            <span className="text-slate-400 font-sans text-[11px]">—</span>
+                          )}
+                      </td>
+                      <td className="py-3 px-3.5 font-sans">{getStatusBadge(record.status)}</td>
+                      <td className="py-3 px-3.5">
+                        <span
+                          className={`font-bold ${
+                            record.confidence >= 85
+                              ? 'text-emerald-700'
+                              : record.confidence >= 50
+                              ? 'text-amber-700'
+                              : 'text-rose-700'
+                          }`}
+                        >
+                          {record.confidence}%
+                        </span>
+                      </td>
+                      <td className="py-3 px-3.5 font-sans">
+                        <span className="text-[11px] text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded">
+                          {record.exceptionType.replace(/_/g, ' ')}
+                        </span>
+                      </td>
+                      <td
+                        className="py-3 px-3.5 text-right font-sans"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        {record.status === 'PENDING_REVIEW' ? (
+                          <div className="flex items-center justify-end gap-1">
+                            <button
+                              onClick={() => onQuickApprove(record.recordId)}
+                              className="p-1 rounded-md text-emerald-600 hover:bg-emerald-50 border border-emerald-200 cursor-pointer"
+                              title="Quick Approve"
+                            >
+                              <CheckCircle2 className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              onClick={() => onQuickReject(record.recordId)}
+                              className="p-1 rounded-md text-rose-600 hover:bg-rose-50 border border-rose-200 cursor-pointer"
+                              title="Quick Reject"
+                            >
+                              <Ban className="w-3.5 h-3.5" />
+                            </button>
                           </div>
                         ) : (
-                          <div className="text-[10px] text-rose-600 font-medium">
-                            No Bank Deposit
-                          </div>
+                          <button
+                            onClick={() => onSelectRecord(record)}
+                            className="text-xs font-semibold text-blue-600 hover:underline inline-flex items-center gap-1 cursor-pointer"
+                          >
+                            Trace <ExternalLink className="w-3 h-3" />
+                          </button>
                         )}
-                      </div>
-                    ) : (
-                      <span className="text-slate-400 text-[11px] italic">—</span>
-                    )}
-                  </td>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      ) : (
+        /* Mobile / Card List View */
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+          {filteredRecords.map((record) => (
+            <div
+              key={record.recordId}
+              onClick={() => onSelectRecord(record)}
+              className="bg-white border border-slate-200 hover:border-blue-300 rounded-2xl p-4 shadow-xs space-y-2.5 transition-colors cursor-pointer"
+            >
+              <div className="flex items-center justify-between">
+                <span className="font-mono font-bold text-slate-900">{record.payment.paymentId}</span>
+                {getStatusBadge(record.status)}
+              </div>
 
-                  {/* Score */}
-                  <td className="py-3 px-4 text-center">
-                    {getConfidenceBadge(record.confidence)}
-                  </td>
+              <div className="grid grid-cols-2 gap-2 text-xs font-mono pt-2 border-t border-slate-100">
+                <div>
+                  <span className="text-[10px] uppercase font-bold text-slate-400 font-sans block">Gross</span>
+                  <strong>{formatINR(record.payment.grossAmount)}</strong>
+                </div>
+                <div>
+                  <span className="text-[10px] uppercase font-bold text-slate-400 font-sans block">Confidence</span>
+                  <strong className="text-blue-700">{record.confidence}%</strong>
+                </div>
+              </div>
 
-                  {/* Status & Exception */}
-                  <td className="py-3 px-4">
-                    <div className="mb-0.5">{getStatusBadge(record.status)}</div>
-                    <div className="text-[10px] text-slate-500 font-medium">
-                      {record.exceptionType}
-                    </div>
-                  </td>
+              <div className="text-[11px] text-slate-600 bg-slate-50 p-2 rounded-lg border border-slate-100 font-mono">
+                <div>Order: {record.payment.orderId}</div>
+                <div>UTR: {record.matchedSettlement?.utr || '—'}</div>
+              </div>
 
-                  {/* Actions */}
-                  <td className="py-3 px-4 text-right" onClick={(e) => e.stopPropagation()}>
-                    {record.status === 'PENDING_REVIEW' ? (
-                      <div className="flex items-center justify-end gap-1.5">
-                        <button
-                          onClick={() => onQuickApprove(record.recordId)}
-                          className="p-1 rounded bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors cursor-pointer"
-                          title="Quick Approve"
-                        >
-                          <UserCheck className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          onClick={() => onQuickReject(record.recordId)}
-                          className="p-1 rounded bg-rose-50 text-rose-700 hover:bg-rose-100 transition-colors cursor-pointer"
-                          title="Quick Reject"
-                        >
-                          <Ban className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    ) : (
-                      <button
-                        onClick={() => onSelectRecord(record)}
-                        className="text-xs text-blue-600 hover:underline inline-flex items-center gap-0.5 cursor-pointer"
-                      >
-                        Inspect <ExternalLink className="w-3 h-3" />
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Table Footer */}
-      <div className="p-3 bg-slate-50 border-t border-slate-200 text-xs text-slate-500 flex items-center justify-between">
-        <span>
-          Showing <strong>{filteredRecords.length}</strong> of <strong>{records.length}</strong> records
-        </span>
-        <span className="text-[11px]">Click any row to open full 3-way trace & AI diagnosis drawer</span>
-      </div>
+              <div className="flex items-center justify-between text-xs pt-1">
+                <span className="text-[11px] text-slate-500 font-semibold">
+                  {record.exceptionType.replace(/_/g, ' ')}
+                </span>
+                <span className="text-xs font-semibold text-blue-600 hover:underline flex items-center gap-1">
+                  Inspect 3-Way <ExternalLink className="w-3 h-3" />
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

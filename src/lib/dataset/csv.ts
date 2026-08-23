@@ -207,3 +207,51 @@ export function exportBankTransactionsCsv(bankTransactions: BankTransaction[]): 
   }));
   return Papa.unparse(unparsed);
 }
+
+export function exportReconciliationCsv(records: import('@/types/reconciliation').ReconciliationRecord[]): string {
+  const unparsed = records.map((r) => ({
+    'Record ID': r.recordId,
+    'Payment ID': r.payment.paymentId,
+    'Order ID': r.payment.orderId,
+    'Gross Amount (INR)': paiseToRupees(r.payment.grossAmount).toFixed(2),
+    'Fee (INR)': paiseToRupees(r.payment.fee).toFixed(2),
+    'Tax (INR)': paiseToRupees(r.payment.tax).toFixed(2),
+    'Expected Net (INR)': paiseToRupees(r.payment.expectedNetAmount).toFixed(2),
+    'Settlement ID': r.matchedSettlement?.settlementId || '',
+    'Settled Amount (INR)': r.matchedSettlement ? paiseToRupees(r.matchedSettlement.settledAmount).toFixed(2) : '',
+    'Bank Transaction ID': r.matchedBankTransaction?.bankTransactionId || '',
+    'Bank Credit Amount (INR)': r.matchedBankTransaction ? paiseToRupees(r.matchedBankTransaction.creditAmount).toFixed(2) : '',
+    'Gateway UTR': r.matchedSettlement?.utr || r.matchedBankTransaction?.utr || '',
+    'Reconciliation Status': r.status,
+    'Confidence Score (%)': r.confidence,
+    'Exception Type': r.exceptionType,
+    'Financial Exposure (INR)': paiseToRupees(r.financialExposurePaise).toFixed(2),
+    'Audit Explanation': r.explanation,
+  }));
+  return Papa.unparse(unparsed);
+}
+
+export function exportExceptionsCsv(records: import('@/types/reconciliation').ReconciliationRecord[]): string {
+  const exceptions = records.filter((r) => r.status !== 'AUTO_RECONCILED' && r.status !== 'MANUALLY_APPROVED');
+  return exportReconciliationCsv(exceptions);
+}
+
+export function exportAuditEventsCsv(events: import('@/types/reconciliation').AuditEvent[]): string {
+  const unparsed = events.map((e) => ({
+    'Event ID': e.eventId,
+    'Timestamp': e.timestamp,
+    'Actor': e.actor,
+    'Action': e.action,
+    'Payment ID': e.entityIds.paymentId || '',
+    'Settlement ID': e.entityIds.settlementId || '',
+    'Bank Transaction ID': e.entityIds.bankTransactionId || '',
+    'Previous State': e.previousState,
+    'New State': e.newState,
+    'Confidence Score (%)': e.confidence,
+    'Reason / Auditor Note': e.reason,
+    'Model Used': e.modelUsed || '',
+    'Fallback Used': e.fallbackUsed ? 'YES' : 'NO',
+  }));
+  return Papa.unparse(unparsed);
+}
+

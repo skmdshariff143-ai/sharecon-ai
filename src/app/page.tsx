@@ -2,37 +2,39 @@
 
 import React, { useState } from 'react';
 import {
-  Layers,
-  FileCheck2,
-  AlertTriangle,
-  History,
-  BarChart3,
-} from 'lucide-react';
-import {
   BatchReconciliationResult,
-  EngineConfig,
   ReconciliationRecord,
+  EngineConfig,
   GroundTruth,
+  AuditEvent,
   Payment,
   Settlement,
   BankTransaction,
-  AuditEvent,
 } from '@/types/reconciliation';
 import { generateSyntheticDataset } from '@/lib/dataset/generator';
 import { reconcileBatch, DEFAULT_ENGINE_CONFIG } from '@/lib/engine/matcher';
 import { evaluateReconciliation } from '@/lib/engine/evaluator';
-import { Header } from '@/components/Header';
-import { KpiSummary } from '@/components/KpiSummary';
-import { OverviewTab } from '@/components/OverviewTab';
+import { exportReconciliationCsv, exportAuditEventsCsv } from '@/lib/dataset/csv';
+
+// Components
+import { NavigationRail, WorkspaceTab } from '@/components/NavigationRail';
+import { TopCommandBar } from '@/components/TopCommandBar';
+import { ControlCenterTab } from '@/components/ControlCenterTab';
 import { ReconciliationTab } from '@/components/ReconciliationTab';
 import { ExceptionsTab } from '@/components/ExceptionsTab';
 import { AuditTab } from '@/components/AuditTab';
-import { EvaluationTab } from '@/components/EvaluationTab';
+import { EvaluationLabTab } from '@/components/EvaluationLabTab';
+import { MethodologyTab } from '@/components/MethodologyTab';
 import { MatchDetailDrawer } from '@/components/MatchDetailDrawer';
 import { SettingsModal } from '@/components/SettingsModal';
 import { CsvUploadModal } from '@/components/CsvUploadModal';
+import { CommandPaletteModal } from '@/components/CommandPaletteModal';
+import { GuidedDemoTour } from '@/components/GuidedDemoTour';
+import { ToastProvider, useToast } from '@/components/Toast';
 
-export default function Home() {
+function DashboardContent() {
+  const { showToast } = useToast();
+
   const [config, setConfig] = useState<EngineConfig>(DEFAULT_ENGINE_CONFIG);
   const [groundTruth, setGroundTruth] = useState<GroundTruth[]>(() => {
     const dataset = generateSyntheticDataset(42);
@@ -53,16 +55,19 @@ export default function Home() {
     return result;
   });
 
-  const [activeTab, setActiveTab] = useState<
-    'overview' | 'reconciliation' | 'exceptions' | 'audit' | 'evaluation'
-  >('overview');
+  const [activeTab, setActiveTab] = useState<WorkspaceTab>('control_center');
+  const [isNavCollapsed, setIsNavCollapsed] = useState(false);
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
 
   const [selectedRecord, setSelectedRecord] = useState<ReconciliationRecord | null>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isUploadOpen, setIsUploadOpen] = useState(false);
+  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
+  const [isTourOpen, setIsTourOpen] = useState(false);
   const [isAnalyzingAi, setIsAnalyzingAi] = useState(false);
   const [isReconciling, setIsReconciling] = useState(false);
 
+  // Load / Reload Demo Benchmark Dataset (Seed 42)
   const handleLoadDemo = () => {
     setIsReconciling(true);
     const start = performance.now();
@@ -82,13 +87,18 @@ export default function Home() {
 
     setBatch(result);
     setIsReconciling(false);
+    showToast({
+      type: 'success',
+      title: 'Demo Dataset Processed',
+      description: 'Loaded 180 synthetic multi-leg transactions across 14 financial edge cases.',
+    });
   };
 
+  // Threshold update
   const handleUpdateConfig = (newConfig: EngineConfig) => {
     setConfig(newConfig);
     if (!batch) return;
 
-    // Re-score existing batch with updated thresholds
     const payments = batch.records.map((r) => r.payment);
     const settlements = batch.records
       .map((r) => r.matchedSettlement)
@@ -106,8 +116,14 @@ export default function Home() {
     }
 
     setBatch(result);
+    showToast({
+      type: 'info',
+      title: 'Configuration Updated',
+      description: `Confidence threshold set to ${newConfig.highConfidenceThreshold}%. Dry-run: ${newConfig.dryRun ? 'Active' : 'Off'}.`,
+    });
   };
 
+  // Reviewer decisions (Approve, Reject, Flag)
   const handleReviewDecision = (
     recordId: string,
     action: 'APPROVED' | 'REJECTED' | 'FLAGGED',
@@ -120,9 +136,9 @@ export default function Home() {
       if (r.recordId === recordId) {
         const newStatus =
           action === 'APPROVED'
-            ? 'MANUALLY_APPROVED'
+            ? ('MANUALLY_APPROVED' as const)
             : action === 'REJECTED'
-            ? 'MANUALLY_REJECTED'
+            ? ('MANUALLY_REJECTED' as const)
             : r.status;
 
         return {
@@ -132,7 +148,7 @@ export default function Home() {
             action,
             reviewer: 'Finance Operations Lead',
             reviewedAt: now,
-            note: note || 'Approved following review of supporting financial evidence.',
+            note: note || `Manual controller decision: ${action}`,
           },
         };
       }
@@ -144,14 +160,24 @@ export default function Home() {
       eventId: `aud_rev_${Date.now()}_${recordId}`,
       timestamp: now,
       actor: 'FINANCE_REVIEWER',
-      action: action === 'APPROVED' ? 'MANUAL_APPROVE' : 'MANUAL_REJECT',
+      action:
+        action === 'APPROVED'
+          ? 'MANUAL_APPROVE'
+          : action === 'REJECTED'
+          ? 'MANUAL_REJECT'
+          : 'INVESTIGATION_FLAG',
       entityIds: {
         paymentId: recordId,
         settlementId: targetRecord?.matchedSettlement?.settlementId,
         bankTransactionId: targetRecord?.matchedBankTransaction?.bankTransactionId,
       },
       previousState: targetRecord?.status || 'PENDING_REVIEW',
-      newState: action === 'APPROVED' ? 'MANUALLY_APPROVED' : 'MANUALLY_REJECTED',
+      newState:
+        action === 'APPROVED'
+          ? 'MANUALLY_APPROVED'
+          : action === 'REJECTED'
+          ? 'MANUALLY_REJECTED'
+          : targetRecord?.status || 'PENDING_REVIEW',
       evidence: {
         note: note || '',
         originalConfidence: targetRecord?.confidence,
@@ -170,7 +196,6 @@ export default function Home() {
       ...batch,
       records: updatedRecords,
       auditEvents: updatedAuditEvents,
-      // evaluation remains the original baseline engine benchmark
     });
 
     // Update selected record in drawer if open
@@ -178,47 +203,68 @@ export default function Home() {
       const updated = updatedRecords.find((r) => r.recordId === recordId);
       if (updated) setSelectedRecord(updated);
     }
+
+    showToast({
+      type: action === 'APPROVED' ? 'success' : action === 'REJECTED' ? 'error' : 'warning',
+      title: `Record ${action.toLowerCase()}`,
+      description: `${recordId} state updated. Recorded in immutable audit log.`,
+    });
   };
 
+  // Quick action helpers
   const handleQuickApprove = (recordId: string) => {
     handleReviewDecision(recordId, 'APPROVED', 'Quick approved from workspace queue.');
   };
 
   const handleQuickReject = (recordId: string) => {
-    handleReviewDecision(recordId, 'REJECTED', 'Quick rejected: variance exceeds acceptable policy.');
+    handleReviewDecision(recordId, 'REJECTED', 'Quick rejected from workspace queue.');
   };
 
+  // AI Exception Analysis
   const handleAnalyzeException = async (record: ReconciliationRecord) => {
     setIsAnalyzingAi(true);
     try {
-      const response = await fetch('/api/analyze-exception', {
+      const res = await fetch('/api/analyze-exception', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ record }),
       });
 
-      const data = await response.json();
+      const data = await res.json();
       if (data.success && data.analysis && batch) {
         const updatedRecords = batch.records.map((r) =>
           r.recordId === record.recordId ? { ...r, aiAnalysis: data.analysis } : r
         );
 
-        setBatch({
-          ...batch,
-          records: updatedRecords,
-        });
-
+        setBatch({ ...batch, records: updatedRecords });
         if (selectedRecord && selectedRecord.recordId === record.recordId) {
           setSelectedRecord({ ...selectedRecord, aiAnalysis: data.analysis });
         }
+
+        showToast({
+          type: 'info',
+          title: 'Exception Diagnosed',
+          description: `Analysis completed using [${data.analysis.modelUsed}].`,
+        });
+      } else {
+        showToast({
+          type: 'error',
+          title: 'Analysis Failed',
+          description: data.error || 'Unable to diagnose exception.',
+        });
       }
-    } catch (err) {
-      console.error('Failed to run AI analysis:', err);
+    } catch {
+      showToast({
+        type: 'error',
+        title: 'Network Error',
+        description: 'Failed to contact exception analysis server.',
+      });
     } finally {
       setIsAnalyzingAi(false);
     }
   };
 
+  // Custom CSV Upload Handler
   const handleUploadSuccess = (
     payments: Payment[],
     settlements: Settlement[],
@@ -227,274 +273,219 @@ export default function Home() {
     setIsReconciling(true);
     const result = reconcileBatch(payments, settlements, bankTx, config);
 
-    // Ground truth may not exist for custom uploads
     setGroundTruth([]);
     setBatch(result);
     setIsReconciling(false);
+    showToast({
+      type: 'success',
+      title: 'Custom Statements Reconciled',
+      description: `Processed ${payments.length} payments, ${settlements.length} settlements, and ${bankTx.length} bank credits.`,
+    });
   };
 
+  // Export handlers
   const handleExportReports = () => {
     if (!batch) return;
+    const csv = exportReconciliationCsv(batch.records);
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `sharecon_reconciliation_${batch.batchId}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
 
-    // Export full reconciliation CSV
-    const rows = batch.records.map((r) => ({
-      paymentId: r.payment.paymentId,
-      orderId: r.payment.orderId,
-      grossAmountINR: (r.payment.grossAmount / 100).toFixed(2),
-      expectedNetINR: (r.payment.expectedNetAmount / 100).toFixed(2),
-      settlementId: r.matchedSettlement?.settlementId || 'N/A',
-      settledAmountINR: r.matchedSettlement
-        ? (r.matchedSettlement.settledAmount / 100).toFixed(2)
-        : '0.00',
-      settlementUtr: r.matchedSettlement?.utr || 'N/A',
-      bankTxId: r.matchedBankTransaction?.bankTransactionId || 'N/A',
-      bankCreditINR: r.matchedBankTransaction
-        ? (r.matchedBankTransaction.creditAmount / 100).toFixed(2)
-        : '0.00',
-      matchStatus: r.status,
-      confidenceScore: r.confidence,
-      exceptionType: r.exceptionType,
-      explanation: r.explanation,
-    }));
-
-    const csvContent =
-      'data:text/csv;charset=utf-8,' +
-      [
-        Object.keys(rows[0]).join(','),
-        ...rows.map((row) =>
-          Object.values(row)
-            .map((val) => `"${String(val).replace(/"/g, '""')}"`)
-            .join(',')
-        ),
-      ].join('\n');
-
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `sharecon_reconciliation_report_${Date.now()}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    showToast({
+      type: 'success',
+      title: 'Report Exported',
+      description: 'Downloaded reconciliation CSV report.',
+    });
   };
 
   const handleDownloadAuditJson = () => {
     if (!batch) return;
-    const jsonString = `data:text/json;charset=utf-8,${encodeURIComponent(
-      JSON.stringify(batch.auditEvents, null, 2)
-    )}`;
-    const link = document.createElement('a');
-    link.href = jsonString;
-    link.download = `sharecon_audit_trail_${Date.now()}.json`;
-    link.click();
+    const jsonStr = JSON.stringify(batch.auditEvents, null, 2);
+    const blob = new Blob([jsonStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `sharecon_audit_${batch.batchId}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+
+    showToast({
+      type: 'success',
+      title: 'Audit JSON Exported',
+      description: 'Downloaded complete audit event stream in JSON format.',
+    });
   };
 
   const handleDownloadAuditCsv = () => {
-    if (!batch || batch.auditEvents.length === 0) return;
-    const rows = batch.auditEvents.map((ev) => ({
-      eventId: ev.eventId,
-      timestamp: ev.timestamp,
-      actor: ev.actor,
-      action: ev.action,
-      paymentId: ev.entityIds.paymentId || '',
-      settlementId: ev.entityIds.settlementId || '',
-      previousState: ev.previousState,
-      newState: ev.newState,
-      confidence: ev.confidence,
-      reason: ev.reason,
-      modelUsed: ev.modelUsed,
-    }));
+    if (!batch) return;
+    const csv = exportAuditEventsCsv(batch.auditEvents);
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `sharecon_audit_${batch.batchId}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
 
-    const csvContent =
-      'data:text/csv;charset=utf-8,' +
-      [
-        Object.keys(rows[0]).join(','),
-        ...rows.map((row) =>
-          Object.values(row)
-            .map((val) => `"${String(val).replace(/"/g, '""')}"`)
-            .join(',')
-        ),
-      ].join('\n');
-
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `sharecon_audit_trail_${Date.now()}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    showToast({
+      type: 'success',
+      title: 'Audit CSV Exported',
+      description: 'Downloaded compliance audit logs in CSV format.',
+    });
   };
 
+  // Reset workspace
   const handleReset = () => {
     setBatch(null);
     setGroundTruth([]);
     setSelectedRecord(null);
+    showToast({
+      type: 'info',
+      title: 'Workspace Cleared',
+      description: 'All active records and session audit logs have been reset.',
+    });
   };
 
-  const reviewQueueCount =
-    batch?.records.filter((r) => r.status === 'PENDING_REVIEW').length || 0;
-  const exceptionCount =
-    batch?.records.filter((r) => r.status === 'UNMATCHED_EXCEPTION').length || 0;
+  // Operational counts
+  const pendingReviewCount = batch
+    ? batch.records.filter((r) => r.status === 'PENDING_REVIEW').length
+    : 0;
+  const exceptionCount = batch
+    ? batch.records.filter((r) => r.status === 'UNMATCHED_EXCEPTION').length
+    : 0;
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 font-sans antialiased">
-      {/* Top Header */}
-      <Header
-        config={config}
-        onUpdateConfig={handleUpdateConfig}
-        onLoadDemo={handleLoadDemo}
-        onOpenUpload={() => setIsUploadOpen(true)}
-        onOpenSettings={() => setIsSettingsOpen(true)}
-        onExportReports={handleExportReports}
-        onReset={handleReset}
-        totalRecords={batch?.records.length || 0}
-        circuitBreakerTriggered={batch?.circuitBreakerTriggered || false}
-        circuitBreakerReason={batch?.circuitBreakerReason}
-        isReconciling={isReconciling}
+    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans antialiased flex flex-col">
+      {/* Left Navigation Rail (Desktop & Mobile Drawer) */}
+      <NavigationRail
+        activeTab={activeTab}
+        onSelectTab={(tab) => setActiveTab(tab)}
+        isCollapsed={isNavCollapsed}
+        onToggleCollapse={() => setIsNavCollapsed((prev) => !prev)}
+        isMobileOpen={isMobileNavOpen}
+        onCloseMobile={() => setIsMobileNavOpen(false)}
+        pendingReviewCount={pendingReviewCount}
+        exceptionCount={exceptionCount}
       />
 
-      {/* Main Container */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {/* KPI Metric Summary Cards */}
-        <KpiSummary
-          metrics={batch?.evaluation}
-          totalRecords={batch?.records.length || 0}
+      {/* Main Content Area (Offset by Rail width on desktop) */}
+      <div
+        className={`flex-1 flex flex-col transition-all duration-200 ease-in-out ${
+          isNavCollapsed ? 'lg:pl-18' : 'lg:pl-64'
+        }`}
+      >
+        {/* Top Command Bar */}
+        <TopCommandBar
+          config={config}
+          totalRecords={batch ? batch.records.length : 0}
+          isReconciling={isReconciling}
+          onToggleNavigation={() => setIsMobileNavOpen((prev) => !prev)}
+          onUpdateConfig={handleUpdateConfig}
+          onLoadDemo={handleLoadDemo}
+          onOpenUpload={() => setIsUploadOpen(true)}
+          onOpenSettings={() => setIsSettingsOpen(true)}
+          onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
+          onStartTour={() => setIsTourOpen(true)}
+          onExportReports={handleExportReports}
+          onReset={handleReset}
         />
 
-        {/* Tab Navigation */}
-        {batch && batch.records.length > 0 && (
-          <div className="border-b border-slate-200 mb-6 flex items-center justify-between">
-            <nav className="flex space-x-1 sm:space-x-4 -mb-px text-xs font-semibold">
-              <button
-                onClick={() => setActiveTab('overview')}
-                className={`py-3 px-3 border-b-2 flex items-center gap-1.5 transition-colors cursor-pointer ${
-                  activeTab === 'overview'
-                    ? 'border-blue-600 text-blue-600'
-                    : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
-                }`}
-              >
-                <Layers className="w-4 h-4" />
-                <span>Overview</span>
-              </button>
+        {/* Workspace Body */}
+        <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          {activeTab === 'control_center' && (
+            <ControlCenterTab
+              batch={batch}
+              onNavigateToTab={(tab) => setActiveTab(tab)}
+              onSelectRecord={(rec) => setSelectedRecord(rec)}
+            />
+          )}
 
-              <button
-                onClick={() => setActiveTab('reconciliation')}
-                className={`py-3 px-3 border-b-2 flex items-center gap-1.5 transition-colors cursor-pointer ${
-                  activeTab === 'reconciliation'
-                    ? 'border-blue-600 text-blue-600'
-                    : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
-                }`}
-              >
-                <FileCheck2 className="w-4 h-4" />
-                <span>Reconciliation Workspace</span>
-                {reviewQueueCount > 0 && (
-                  <span className="ml-1 bg-amber-100 text-amber-800 text-[10px] font-bold px-1.5 py-0.2 rounded-full">
-                    {reviewQueueCount}
-                  </span>
-                )}
-              </button>
+          {activeTab === 'reconciliation' && (
+            <ReconciliationTab
+              records={batch ? batch.records : []}
+              onSelectRecord={(rec) => setSelectedRecord(rec)}
+              onQuickApprove={handleQuickApprove}
+              onQuickReject={handleQuickReject}
+            />
+          )}
 
-              <button
-                onClick={() => setActiveTab('exceptions')}
-                className={`py-3 px-3 border-b-2 flex items-center gap-1.5 transition-colors cursor-pointer ${
-                  activeTab === 'exceptions'
-                    ? 'border-blue-600 text-blue-600'
-                    : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
-                }`}
-              >
-                <AlertTriangle className="w-4 h-4" />
-                <span>Exception Queue</span>
-                {exceptionCount > 0 && (
-                  <span className="ml-1 bg-rose-100 text-rose-800 text-[10px] font-bold px-1.5 py-0.2 rounded-full">
-                    {exceptionCount}
-                  </span>
-                )}
-              </button>
+          {activeTab === 'exceptions' && (
+            <ExceptionsTab
+              records={batch ? batch.records : []}
+              onSelectRecord={(rec) => setSelectedRecord(rec)}
+              onQuickApprove={handleQuickApprove}
+              onQuickReject={handleQuickReject}
+              onAnalyzeException={handleAnalyzeException}
+              isAnalyzingAi={isAnalyzingAi}
+            />
+          )}
 
-              <button
-                onClick={() => setActiveTab('audit')}
-                className={`py-3 px-3 border-b-2 flex items-center gap-1.5 transition-colors cursor-pointer ${
-                  activeTab === 'audit'
-                    ? 'border-blue-600 text-blue-600'
-                    : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
-                }`}
-              >
-                <History className="w-4 h-4" />
-                <span>Audit Trail</span>
-              </button>
+          {activeTab === 'audit' && (
+            <AuditTab
+              auditEvents={batch ? batch.auditEvents : []}
+              onDownloadAuditJson={handleDownloadAuditJson}
+              onDownloadAuditCsv={handleDownloadAuditCsv}
+            />
+          )}
 
-              <button
-                onClick={() => setActiveTab('evaluation')}
-                className={`py-3 px-3 border-b-2 flex items-center gap-1.5 transition-colors cursor-pointer ${
-                  activeTab === 'evaluation'
-                    ? 'border-blue-600 text-blue-600'
-                    : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
-                }`}
-              >
-                <BarChart3 className="w-4 h-4" />
-                <span>Evaluation & Ground Truth</span>
-              </button>
-            </nav>
+          {activeTab === 'evaluation' && (
+            <EvaluationLabTab
+              evaluation={batch?.evaluation}
+              records={batch ? batch.records : []}
+            />
+          )}
+
+          {activeTab === 'methodology' && <MethodologyTab />}
+        </main>
+
+        {/* Footer */}
+        <footer className="bg-white border-t border-slate-200 py-3.5 mt-12 text-center text-xs text-slate-500">
+          <div className="max-w-7xl mx-auto px-4 flex flex-wrap items-center justify-between gap-2">
+            <span>
+              <strong>ShaRecon AI</strong> — Built for Razorpay AI Buildathon (AI Finance Controller Track)
+            </span>
+            <span className="text-[11px] text-slate-400">
+              Evaluated using synthetic simulations. Zero live money movement.
+            </span>
           </div>
-        )}
+        </footer>
+      </div>
 
-        {/* Tab Views */}
-        {batch && (
-          <div>
-            {activeTab === 'overview' && (
-              <OverviewTab
-                batch={batch}
-                onNavigateToTab={(tab) => setActiveTab(tab)}
-              />
-            )}
-
-            {activeTab === 'reconciliation' && (
-              <ReconciliationTab
-                records={batch.records}
-                onSelectRecord={(rec) => setSelectedRecord(rec)}
-                onQuickApprove={handleQuickApprove}
-                onQuickReject={handleQuickReject}
-              />
-            )}
-
-            {activeTab === 'exceptions' && (
-              <ExceptionsTab
-                records={batch.records}
-                onSelectRecord={(rec) => setSelectedRecord(rec)}
-                onQuickApprove={handleQuickApprove}
-                onQuickReject={handleQuickReject}
-                onAnalyzeException={handleAnalyzeException}
-                isAnalyzingAi={isAnalyzingAi}
-              />
-            )}
-
-            {activeTab === 'audit' && (
-              <AuditTab
-                auditEvents={batch.auditEvents}
-                onDownloadAuditJson={handleDownloadAuditJson}
-                onDownloadAuditCsv={handleDownloadAuditCsv}
-              />
-            )}
-
-            {activeTab === 'evaluation' && (
-              <EvaluationTab
-                evaluation={batch.evaluation}
-                records={batch.records}
-              />
-            )}
-          </div>
-        )}
-      </main>
-
-      {/* Slide-Out 3-Way Match Drawer */}
+      {/* Slide-Out 3-Way Evidence Drawer */}
       <MatchDetailDrawer
         record={selectedRecord}
         onClose={() => setSelectedRecord(null)}
         onReviewDecision={handleReviewDecision}
-        onAnalyzeException={handleAnalyzeException}
+        onAnalyzeAi={handleAnalyzeException}
         isAnalyzingAi={isAnalyzingAi}
       />
 
-      {/* Engine Settings Modal */}
+      {/* Command Palette Modal (Ctrl+K) */}
+      <CommandPaletteModal
+        isOpen={isCommandPaletteOpen}
+        onClose={() => setIsCommandPaletteOpen(false)}
+        onSelectTab={(tab) => setActiveTab(tab)}
+        onLoadDemo={handleLoadDemo}
+        onOpenUpload={() => setIsUploadOpen(true)}
+        onToggleDryRun={() => handleUpdateConfig({ ...config, dryRun: !config.dryRun })}
+        onExportReports={handleExportReports}
+        onStartTour={() => setIsTourOpen(true)}
+        records={batch ? batch.records : []}
+        onSelectRecord={(rec) => setSelectedRecord(rec)}
+      />
+
+      {/* Guided Judge Demo Walkthrough */}
+      <GuidedDemoTour
+        isOpen={isTourOpen}
+        onClose={() => setIsTourOpen(false)}
+        onNavigateTab={(tab) => setActiveTab(tab)}
+      />
+
+      {/* Threshold Configuration Modal */}
       <SettingsModal
         config={config}
         isOpen={isSettingsOpen}
@@ -502,24 +493,20 @@ export default function Home() {
         onSave={handleUpdateConfig}
       />
 
-      {/* CSV Upload Modal */}
+      {/* 3-Way CSV Upload Modal */}
       <CsvUploadModal
         isOpen={isUploadOpen}
         onClose={() => setIsUploadOpen(false)}
         onUploadSuccess={handleUploadSuccess}
       />
-
-      {/* Footer */}
-      <footer className="bg-white border-t border-slate-200 py-4 mt-12 text-center text-xs text-slate-500">
-        <div className="max-w-7xl mx-auto px-4 flex flex-wrap items-center justify-between gap-2">
-          <span>
-            ShaRecon AI — Built for Razorpay AI Buildathon (AI Finance Controller Track)
-          </span>
-          <span className="text-[11px] text-slate-400">
-            All transaction records and settlement amounts are synthetic simulations.
-          </span>
-        </div>
-      </footer>
     </div>
+  );
+}
+
+export default function Home() {
+  return (
+    <ToastProvider>
+      <DashboardContent />
+    </ToastProvider>
   );
 }

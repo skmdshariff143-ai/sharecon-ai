@@ -24,6 +24,7 @@ export const AuditTab: React.FC<AuditTabProps> = ({
   onDownloadAuditJson,
   onDownloadAuditCsv,
 }) => {
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const [actorFilter, setActorFilter] = useState<string>('ALL');
   const [actionFilter, setActionFilter] = useState<string>('ALL');
 
@@ -31,9 +32,17 @@ export const AuditTab: React.FC<AuditTabProps> = ({
     return auditEvents.filter((ev) => {
       if (actorFilter !== 'ALL' && ev.actor !== actorFilter) return false;
       if (actionFilter !== 'ALL' && ev.action !== actionFilter) return false;
-      return true;
+      if (!searchQuery) return true;
+      const q = searchQuery.toLowerCase();
+      return (
+        ev.eventId.toLowerCase().includes(q) ||
+        (ev.entityIds.paymentId && ev.entityIds.paymentId.toLowerCase().includes(q)) ||
+        (ev.entityIds.settlementId && ev.entityIds.settlementId.toLowerCase().includes(q)) ||
+        (ev.entityIds.bankTransactionId && ev.entityIds.bankTransactionId.toLowerCase().includes(q)) ||
+        ev.reason.toLowerCase().includes(q)
+      );
     });
-  }, [auditEvents, actorFilter, actionFilter]);
+  }, [auditEvents, actorFilter, actionFilter, searchQuery]);
 
   const getActorBadge = (actor: AuditEvent['actor']) => {
     switch (actor) {
@@ -97,7 +106,16 @@ export const AuditTab: React.FC<AuditTabProps> = ({
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center flex-wrap gap-2">
+          {/* Event Search */}
+          <input
+            type="text"
+            placeholder="Search Event ID, Payment, UTR..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="text-xs bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-slate-700 placeholder:text-slate-400 focus:outline-none w-48"
+          />
+
           {/* Actor Filter */}
           <select
             value={actorFilter}

@@ -79,5 +79,42 @@ This document records architectural decisions, engineering progress, test execut
 ### 3. Final Quality Gates
 - `npm run lint`: **0 errors, 0 warnings**
 - `npm run type-check`: **0 errors** (`tsc --noEmit`)
-- `npm run test`: **22/22 tests passed** (Vitest)
+- `npm run test`: **25/25 tests passed** (Vitest)
 - `npm run build`: **Compiled successfully** in Next.js 16 (App Router)
+
+---
+
+## 2026-08-23: Phase 7 — Premium Control Center & Institutional UI Transformation
+
+### 1. Architectural & UX Enhancements
+1. **Collapsible Left Navigation Rail**:
+   - Institutional desktop navigation with badges, active states, and mobile slide-out drawer.
+   - Workspaces: `Control Center`, `Reconciliation`, `Exceptions`, `Audit Trail`, `Evaluation Lab`, and `Methodology & Safety`.
+2. **Top Command Bar & Command Palette**:
+   - Instant keyboard navigation (`Ctrl+K` / `⌘K`) to jump to records or trigger actions.
+   - Real-time dataset status, dry-run indicator, AI availability badge, and quick tour trigger.
+3. **Executive Control Center & 3-Way Funnel**:
+   - 5 high-impact KPI summary cards with drill-down filters.
+   - 3-Way Transaction Reconciliation Funnel (Payments ➔ Settlements ➔ Bank Credits).
+   - "Needs Attention" queue prioritizing high-monetary-exposure unresolved cases.
+4. **Reconciliation Workspace**:
+   - Multi-facet filter toolbar (Search, Status, Exception Type, Min Confidence Slider, Sort controls, Active filter chips).
+   - Sticky header table with right-aligned currency formatting in integer paise.
+   - Responsive mobile card view switcher.
+5. **Record Evidence Drawer Upgrade**:
+   - Explicit 3-Way Trace lineage map with field-level diffs and integer-paise calculations.
+   - 4-Factor evidence point allocation bars with plain-English audit justifications.
+   - Confirmation dialog requirement for consequential reviewer decisions (Manual Approve, Reject, Flag).
+6. **Exception Command Center**:
+   - Severity classification (`CRITICAL`, `WARNING`, `ADVISORY`), exposure sorting, and grounded Gemini advisory cards with explicit fallback disclosures.
+7. **Evaluation Lab & Interactive Threshold Simulator**:
+   - Multi-seed benchmark table (Seeds 42, 101, 777, 2024, 9999).
+   - Real-time Confidence Threshold Simulator allowing judges to test automation rate vs review volume trade-offs without mutating the immutable baseline benchmark.
+   - Error Inspector table detailing every single classification mismatch.
+8. **Guided Judge Demo Tour**:
+   - 8-step interactive, non-intrusive walkthrough highlighting key innovations.
+9. **In-Product Methodology & Safety Workspace**:
+   - Visual architecture, 3-way matching rules, integer-paise math explanation, and safety circuit breaker specifications.
+10. **Toast & Feedback System**:
+    - Accessible non-blocking toast notifications for reviewer decisions, exports, threshold updates, and demo reloads.
+
