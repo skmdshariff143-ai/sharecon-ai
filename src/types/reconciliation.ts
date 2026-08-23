@@ -1,0 +1,204 @@
+/**
+ * Core Data Models and Types for ShaRecon AI
+ * All monetary amounts are in integer paise (1 INR = 100 paise).
+ */
+
+export type CurrencyCode = 'INR' | 'USD' | 'EUR' | 'GBP';
+
+export interface Payment {
+  paymentId: string;
+  orderId: string;
+  grossAmount: number; // in integer paise
+  fee: number; // in integer paise
+  tax: number; // in integer paise
+  expectedNetAmount: number; // in integer paise
+  currency: string;
+  status: 'captured' | 'failed' | 'refunded' | 'pending';
+  createdAt: string; // ISO 8601
+}
+
+export interface Settlement {
+  settlementId: string;
+  paymentReference: string; // paymentId or orderId reference
+  settledAmount: number; // in integer paise
+  utr: string;
+  settledAt: string; // ISO 8601
+  status: 'processed' | 'reversed' | 'failed';
+}
+
+export interface BankTransaction {
+  bankTransactionId: string;
+  utr: string;
+  creditAmount: number; // in integer paise
+  description: string;
+  creditedAt: string; // ISO 8601
+}
+
+export type ExceptionType =
+  | 'CLEAN_MATCH'
+  | 'DATE_SKEW_MATCH'
+  | 'MISSING_BANK_CREDIT'
+  | 'MISSING_SETTLEMENT'
+  | 'DUPLICATE_SETTLEMENT'
+  | 'DUPLICATE_BANK_CREDIT'
+  | 'AMOUNT_MISMATCH'
+  | 'FEE_TAX_ANOMALY'
+  | 'DELAYED_SETTLEMENT'
+  | 'INCONSISTENT_DESCRIPTION'
+  | 'PARTIALLY_MISSING_REF'
+  | 'AMBIGUOUS_AMOUNT'
+  | 'MALFORMED_ROW'
+  | 'UNSUPPORTED_CURRENCY';
+
+export type ExpectedOutcome = 'auto_reconciled' | 'manual_review' | 'unmatched_exception';
+
+export interface GroundTruth {
+  paymentId: string;
+  expectedSettlementId: string | null;
+  expectedBankTransactionId: string | null;
+  expectedExceptionType: ExceptionType;
+  expectedOutcome: ExpectedOutcome;
+  scenarioDescription: string;
+}
+
+export interface EvidenceBreakdown {
+  referenceScore: number; // Max 40
+  amountScore: number; // Max 35
+  dateScore: number; // Max 15
+  descriptionScore: number; // Max 10
+  totalConfidence: number; // 0 to 100
+  details: {
+    referenceMatch: 'EXACT_PAYMENT_ID' | 'EXACT_ORDER_ID' | 'PARTIAL_REF' | 'NONE';
+    utrMatch: 'EXACT_UTR' | 'FUZZY_UTR' | 'NONE';
+    amountDifferencePaise: number;
+    amountTolerancePassed: boolean;
+    dateDeltaDays: number;
+    descriptionSimilarityRatio: number;
+  };
+}
+
+export type MatchStatus =
+  | 'AUTO_RECONCILED'
+  | 'PENDING_REVIEW'
+  | 'MANUALLY_APPROVED'
+  | 'MANUALLY_REJECTED'
+  | 'UNMATCHED_EXCEPTION';
+
+export interface AiExceptionAnalysis {
+  exceptionCategory: ExceptionType;
+  summary: string;
+  recommendedAction: string;
+  missingInformation: string[];
+  reviewerNote: string;
+  riskAssessment: 'LOW' | 'MEDIUM' | 'HIGH';
+  modelUsed: string;
+  isFallback: boolean;
+  analyzedAt: string;
+}
+
+export interface ReconciliationRecord {
+  recordId: string; // usually paymentId
+  payment: Payment;
+  matchedSettlement: Settlement | null;
+  matchedBankTransaction: BankTransaction | null;
+  status: MatchStatus;
+  confidence: number;
+  evidence: EvidenceBreakdown;
+  explanation: string;
+  exceptionType: ExceptionType;
+  financialExposurePaise: number;
+  aiAnalysis?: AiExceptionAnalysis;
+  reviewerDecision?: {
+    action: 'APPROVED' | 'REJECTED' | 'FLAGGED';
+    reviewer: string;
+    reviewedAt: string;
+    note?: string;
+  };
+}
+
+export interface AuditEvent {
+  eventId: string;
+  timestamp: string;
+  actor: 'SYSTEM_ENGINE' | 'FINANCE_REVIEWER' | 'ADMIN';
+  action:
+    | 'AUTO_RECONCILE'
+    | 'MANUAL_APPROVE'
+    | 'MANUAL_REJECT'
+    | 'INVESTIGATION_FLAG'
+    | 'BATCH_RUN'
+    | 'THRESHOLD_UPDATE';
+  entityIds: {
+    paymentId?: string;
+    settlementId?: string;
+    bankTransactionId?: string;
+    batchId?: string;
+  };
+  previousState: string;
+  newState: string;
+  evidence: Record<string, unknown>;
+  confidence: number;
+  reason: string;
+  modelUsed: string;
+  fallbackUsed: boolean;
+}
+
+export interface EngineConfig {
+  highConfidenceThreshold: number; // e.g. 85 (>= 85 auto reconciles)
+  mediumConfidenceThreshold: number; // e.g. 50 (50-84 review)
+  maxDateDeltaDays: number; // e.g. 3 days
+  feeTolerancePaise: number; // e.g. 0 (exact match) or 100 paise
+  circuitBreakerThresholdPercent: number; // e.g. 25% anomaly triggers stop
+  dryRun: boolean; // default true
+}
+
+export interface ErrorInspectionItem {
+  paymentId: string;
+  grossAmountPaise: number;
+  predictedOutcome: MatchStatus;
+  expectedOutcome: ExpectedOutcome;
+  predictedSettlementId: string | null;
+  expectedSettlementId: string | null;
+  predictedBankTransactionId: string | null;
+  expectedBankTransactionId: string | null;
+  predictedExceptionType: ExceptionType;
+  expectedExceptionType: ExceptionType;
+  confidence: number;
+  errorClassification: 'FALSE_POSITIVE' | 'FALSE_NEGATIVE' | 'EXCEPTION_MISCLASSIFICATION';
+  explanation: string;
+  monetaryExposurePaise: number;
+}
+
+export interface EvaluationMetrics {
+  totalRecordsProcessed: number;
+  correctMatches: number;
+  incorrectMatches: number; // False Positives
+  missedMatches: number; // False Negatives
+  trueNegatives: number;
+  precision: number; // TP / (TP + FP)
+  recall: number; // TP / (TP + FN)
+  f1Score: number;
+  autoReconciledCount: number;
+  autoReconciliationRate: number;
+  manualReviewCount: number;
+  manualReviewRate: number;
+  exceptionCount: number;
+  exceptionDetectionAccuracy: number;
+  totalGrossAmountPaise: number;
+  matchedAmountPaise: number;
+  amountCoverageRate: number;
+  falsePositiveExposurePaise: number;
+  totalFinancialExposurePaise: number;
+  processingDurationMs: number;
+  errors: ErrorInspectionItem[];
+}
+
+export interface BatchReconciliationResult {
+  batchId: string;
+  executedAt: string;
+  config: EngineConfig;
+  circuitBreakerTriggered: boolean;
+  circuitBreakerReason?: string;
+  records: ReconciliationRecord[];
+  auditEvents: AuditEvent[];
+  evaluation?: EvaluationMetrics;
+}
