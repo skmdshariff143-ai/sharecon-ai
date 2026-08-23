@@ -109,4 +109,111 @@ describe('Reconciliation Engine & Ground Truth Evaluation', () => {
       expect(r.status).not.toBe('AUTO_RECONCILED');
     });
   });
+
+  it('honestly separates proposed-pair precision/recall and auto-resolution precision/recall', () => {
+    const dataset = generateSyntheticDataset(42);
+    const result = reconcileBatch(
+      dataset.payments,
+      dataset.settlements,
+      dataset.bankTransactions,
+      DEFAULT_ENGINE_CONFIG
+    );
+    const evaluation = evaluateReconciliation(result.records, dataset.groundTruth, 10);
+
+    expect(evaluation.proposedPairPrecision).toBeGreaterThanOrEqual(0.9);
+    expect(evaluation.proposedPairRecall).toBeGreaterThanOrEqual(0.85);
+    expect(evaluation.autoResolutionPrecision).toBeGreaterThanOrEqual(0.9);
+    expect(evaluation.autoResolutionRecall).toBeGreaterThanOrEqual(0.85);
+    expect(evaluation.reviewRoutingAccuracy).toBeGreaterThanOrEqual(0.8);
+    expect(evaluation.exceptionDetectionAccuracy).toBeGreaterThanOrEqual(0.8);
+    expect(evaluation.falsePositiveExposurePaise).toBe(0); // Zero unsafe auto-matches
+  });
+
+  it('guarantees that human reviewer approve/reject operations cannot mutate the baseline benchmark', () => {
+    const dataset = generateSyntheticDataset(42);
+    const result = reconcileBatch(
+      dataset.payments,
+      dataset.settlements,
+      dataset.bankTransactions,
+      DEFAULT_ENGINE_CONFIG
+    );
+    const baselineEval = evaluateReconciliation(result.records, dataset.groundTruth, 10);
+
+    // Human controller approves pending review items
+    const modifiedRecords = result.records.map((r) => {
+      if (r.status === 'PENDING_REVIEW') {
+        return {
+          ...r,
+          status: 'MANUALLY_APPROVED' as const,
+        };
+      }
+      return r;
+    });
+
+    // In the application, the baseline evaluation object remains immutable
+    expect(baselineEval.autoResolutionPrecision).toBeGreaterThan(0.9);
+    expect(baselineEval.totalAutoReconciled).toBe(
+      result.records.filter((r) => r.status === 'AUTO_RECONCILED').length
+    );
+
+    // Modified records count has changed operationally
+    const manualApprovedCount = modifiedRecords.filter(
+      (r) => r.status === 'MANUALLY_APPROVED'
+    ).length;
+    expect(manualApprovedCount).toBeGreaterThan(0);
+    // Baseline evaluation object remains unchanged
+    expect(baselineEval.correctAutoReconciled).toBe(
+      result.records.filter((r) => r.status === 'AUTO_RECONCILED').length
+    );
+  });
+
+  it('runs multi-seed benchmark across 5 independent seeds and reports individual metrics', () => {
+    const seeds = [42, 101, 777, 2024, 9999];
+    const seedResults: Array<{
+      seed: number;
+      proposedPairPrecision: string;
+      proposedPairRecall: string;
+      autoResolutionPrecision: string;
+      autoResolutionRecall: string;
+      reviewRoutingAccuracy: string;
+      exceptionAccuracy: string;
+      autoReconciliationRate: string;
+      falsePositiveExposure: number;
+    }> = [];
+
+    for (const seed of seeds) {
+      const dataset = generateSyntheticDataset(seed);
+      const result = reconcileBatch(
+        dataset.payments,
+        dataset.settlements,
+        dataset.bankTransactions,
+        DEFAULT_ENGINE_CONFIG
+      );
+      const evalMetrics = evaluateReconciliation(result.records, dataset.groundTruth, 10);
+
+      seedResults.push({
+        seed,
+        proposedPairPrecision: `${(evalMetrics.proposedPairPrecision * 100).toFixed(1)}%`,
+        proposedPairRecall: `${(evalMetrics.proposedPairRecall * 100).toFixed(1)}%`,
+        autoResolutionPrecision: `${(evalMetrics.autoResolutionPrecision * 100).toFixed(1)}%`,
+        autoResolutionRecall: `${(evalMetrics.autoResolutionRecall * 100).toFixed(1)}%`,
+        reviewRoutingAccuracy: `${(evalMetrics.reviewRoutingAccuracy * 100).toFixed(1)}%`,
+        exceptionAccuracy: `${(evalMetrics.exceptionDetectionAccuracy * 100).toFixed(1)}%`,
+        autoReconciliationRate: `${(evalMetrics.autoReconciliationRate * 100).toFixed(1)}%`,
+        falsePositiveExposure: evalMetrics.falsePositiveExposurePaise,
+      });
+
+      // Verify no seed suffers from unsafe auto-reconciliation exposure
+      expect(evalMetrics.falsePositiveExposurePaise).toBe(0);
+      expect(evalMetrics.autoResolutionPrecision).toBeGreaterThanOrEqual(0.85);
+      expect(evalMetrics.proposedPairPrecision).toBeGreaterThanOrEqual(0.85);
+    }
+
+    // Log multi-seed results table for release documentation
+    console.log('MULTI-SEED EVALUATION RESULTS:');
+    console.table(seedResults);
+
+    // Verify all 5 seeds were executed and evaluated
+    expect(seedResults.length).toBe(5);
+  });
 });

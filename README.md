@@ -9,7 +9,7 @@
 
 Merchants operating at scale face daily reconciliation friction connecting customer payments captured in Razorpay, nodal gateway settlement batches, and merchant bank account credits. References are frequently truncated, dates diverge due to banking holidays or cutoffs, amounts reflect fee tiers (2.0% to 3.5%) and 18% GST deductions, and deposits may be delayed, duplicated, or missing.
 
-**ShaRecon AI** is a production-ready financial reconciliation platform and AI Finance Controller. It processes multi-leg transaction streams with **strict integer-paise arithmetic**, a **deterministic 4-factor scoring engine**, **1-to-1 collision prevention safeguards**, and a **grounded Gemini 2.5 Flash exception analyst** backed by a 100% reliable offline fallback.
+**ShaRecon AI** is a working financial reconciliation prototype and AI Finance Controller built for the Razorpay AI Buildathon. It processes multi-leg transaction streams with **strict integer-paise arithmetic**, a **deterministic 4-factor scoring engine**, **1-to-1 collision prevention safeguards**, and a **grounded Gemini 2.5 Flash exception analyst** supported by a deterministic offline fallback.
 
 ---
 
@@ -26,9 +26,9 @@ graph TD
     E -->|Score < 50% or Incomplete Leg| H[Unmatched Exception Queue]
     G & H --> I[Server-Side Grounded Gemini Analyst / Fallback]
     G --> J[Reviewer Action: Approve / Reject / Flag]
-    F & J & H --> K[Append-Only Immutable Audit Trail]
-    D --> L[Ground Truth Benchmark Evaluator]
-    L --> M[Honest Metrics: Precision, Recall, F1, Exposure & Error Inspector]
+    F & J & H --> K[Append-Only Audit Trail]
+    D --> L[Ground Truth Benchmark Evaluator (Immutable)]
+    L --> M[Honest Metrics: Pair Precision, Auto-Precision, Routing & Exposure]
 ```
 
 ---
@@ -41,43 +41,46 @@ graph TD
 ### 2. Explainable Deterministic Matching
 - **4-Factor Evidence Breakdown**:
   - **Reference Match (40 pts)**: Exact payment ID, order ID, or partial reference.
-  - **Amount Compatibility (35 pts)**: Expected net vs settled amount vs bank credit.
+  - **Amount Compatibility (35 pts)**: Net settled amount vs expected net (`20 pts`) + Bank credit amount vs settled amount (`15 pts`).
   - **Date Window Proximity (15 pts)**: T+0 to T+3 calendar delta scoring.
   - **UTR & Description Similarity (10 pts)**: Alphanumeric UTR validation & token overlap.
 - Every result produces a plain-English, traceable audit explanation (e.g., *"Matched with 98% confidence: Exact Payment ID ref (pay_0001_razor) verified. Net settled amount matches expected ₹4,899.00. Bank credit verified with exact UTR RBIP100000073. Settled in 1 day."*).
 
 ### 3. Grounded Gemini Exception Analyst with Deterministic Fallback
-- Gemini 2.5 Flash operates as an expert grounded copilot via a server-side route.
+- Gemini 2.5 Flash operates strictly as an advisory exception copilot via a server-side route.
 - It summarizes anomalies, classifies risk, and produces actionable checklists without ever altering numerical match scores or executing financial movement.
-- When `GEMINI_API_KEY` is missing or quota is reached, a deterministic rule-based fallback activates instantly with clear UI disclosure (`[ShaRecon-Deterministic-Fallback]`).
+- Deterministic fallback preserves core exception triage when Gemini is unavailable, with explicit UI disclosure (`[ShaRecon-Deterministic-Fallback]`).
 
 ### 4. Financial Safety & Human-in-the-Loop Controls
 - **Dry-Run by Default**: Simulates matching without committing live ledger state.
 - **Safety Circuit Breaker**: Halts automated matching if the batch anomaly rate exceeds 35%.
 - **Collision Protection**: Prevents duplicate settlements or bank credits from being double-assigned.
-- **Interactive Review Queue**: Reviewers can inspect 3-way traces, approve/reject matches, and record audit notes.
-
-### 5. Honest Ground-Truth Evaluation Benchmark
-- Evaluates engine predictions against 180 labeled synthetic scenarios spanning 14 real-world edge cases.
-- Computes Precision, Recall, F1 score, Auto-Reconciliation rate, and False-Positive exposure.
-- Includes a live **Error Inspector Table** allowing judges to inspect every single classification mismatch.
+- **Immutable Baseline Benchmark**: Human reviewer approve/reject operations update live session counters but do not rewrite baseline engine benchmark metrics.
 
 ---
 
-## 📊 Verified Evaluation Benchmark (180 Records)
+## 📊 Honest Evaluation Benchmark & Multi-Seed Robustness
 
-| Metric | Measured Value | Definition / Calculation |
-| :--- | :--- | :--- |
-| **Total Processed Records** | **180** | Deterministic synthetic benchmark |
-| **Total Processed Volume** | **₹18,28,782.00** | Sum of gross payments |
-| **Auto-Reconciled Safe Matches** | **106 records (58.9%)** | Clean, date skew, & low-risk matches |
-| **Human Review Queue** | **44 cases (24.4%)** | Duplicates, fee anomalies, delays |
-| **Unmatched Exceptions** | **30 cases (16.7%)** | Missing bank credits & settlements |
-| **Match Precision** | **94.7%** | \(\frac{\text{TP}}{\text{TP} + \text{FP}}\) |
-| **Match Recall** | **97.3%** | \(\frac{\text{TP}}{\text{TP} + \text{FN}}\) |
-| **F1 Benchmark Score** | **96.0%** | \(\frac{2 \times P \times R}{P + R}\) |
-| **False-Positive Monetary Exposure** | **₹0.00** | Zero misallocated auto-matches |
-| **Engine Processing Duration** | **< 20ms** | High-throughput in-memory matching |
+To ensure transparent evaluation, metrics are separated into distinct mathematical categories rather than grouped into a single ambiguous aggregate:
+
+- **Proposed-Pair Precision**: Fraction of engine-proposed (Settlement + Bank) pairs where both IDs match ground truth.
+- **Proposed-Pair Recall**: Fraction of ground-truth pairs correctly identified by the engine.
+- **Auto-Resolution Precision**: Fraction of auto-reconciled records that are both ID-correct and safe to auto-resolve.
+- **Auto-Resolution Recall**: Fraction of ground-truth safe records successfully auto-reconciled.
+- **Review-Routing Accuracy**: Fraction of review-requiring records correctly routed to the human queue.
+- **False-Positive Monetary Exposure**: Rupee value of unsafe or wrong-entity auto-resolutions (Target: ₹0.00).
+
+### Multi-Seed Benchmark Results (180 Records per Seed)
+
+| Seed | Proposed-Pair Precision | Proposed-Pair Recall | Auto-Resolution Precision | Auto-Resolution Recall | Review-Routing Accuracy | Exception Accuracy | Auto-Reconciliation Rate | False-Positive Exposure |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **Seed 42** *(Default Demo)* | **90.6%** | **91.1%** | **100.0%** | **100.0%** | **83.0%** | **90.6%** | **61.7%** | **₹0.00** |
+| **Seed 101** | **88.9%** | **91.1%** | **100.0%** | **100.0%** | **87.2%** | **90.6%** | **61.7%** | **₹0.00** |
+| **Seed 777** | **90.1%** | **91.8%** | **100.0%** | **100.0%** | **87.2%** | **90.6%** | **61.7%** | **₹0.00** |
+| **Seed 2024** | **91.7%** | **90.5%** | **100.0%** | **100.0%** | **78.7%** | **90.6%** | **61.7%** | **₹0.00** |
+| **Seed 9999** | **91.4%** | **94.3%** | **100.0%** | **100.0%** | **80.9%** | **90.6%** | **61.7%** | **₹0.00** |
+
+*Key Takeaway: The engine achieves 100.0% Auto-Resolution Precision across all seeds with **₹0.00 False-Positive Exposure**, ensuring zero unsafe auto-reconciliation of ambiguous, duplicate, or mismatched transactions.*
 
 ---
 
@@ -115,32 +118,10 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ---
 
-## 🚢 Vercel Deployment
+## ⚠️ Disclosures & Known Limitations
 
-ShaRecon AI is architected for zero-configuration deployment on Vercel:
-
-1. Push your repository to GitHub.
-2. Import the project into your [Vercel Dashboard](https://vercel.com).
-3. Set the optional environment variable `GEMINI_API_KEY` in Project Settings -> Environment Variables.
-4. Click **Deploy**.
-
----
-
-## 🛠️ Technology Stack
-
-| Layer | Technology | Purpose |
-| :--- | :--- | :--- |
-| **Framework** | Next.js 16 (App Router) | High-performance React server components & API routes |
-| **Language** | TypeScript (Strict Mode) | Type safety across financial and audit contracts |
-| **Styling** | Tailwind CSS v4 | Refined fintech design system |
-| **Icons** | Lucide React | Clean, accessible UI iconography |
-| **Visualizations** | Recharts | Distribution charts and anomaly frequency plots |
-| **Data Parsing** | Papa Parse + Zod | Strict CSV validation with actionable error reporting |
-| **AI Copilot** | `@google/genai` (Gemini 2.5 Flash) | Grounded exception analysis & remediation recommendations |
-| **Testing** | Vitest | Comprehensive test suite covering money, engine, and AI |
-
----
-
-## ⚠️ Disclaimer
-
-All monetary transactions, payment IDs, UTRs, and bank entries generated within this project are synthetic simulations created for demonstration and testing purposes. No real financial transactions or live Razorpay credentials are used.
+1. **Synthetic Data**: All transaction records, payment IDs, UTRs, and bank entries are synthetic simulations created for evaluation and testing purposes.
+2. **No Real Money Movement**: The application is an analytical reconciliation controller and does not initiate banking transfers or modify live payment gateway balances.
+3. **No Production Razorpay Connection**: Designed as a standalone buildathon prototype using synthetic data and CSV ingestion rather than live Razorpay OAuth endpoints.
+4. **Session-Based State**: Reviewer decisions and uploaded batches reside in client session memory; production implementation would require a durable PostgreSQL/Ledger store.
+5. **Gemini Advisory Role**: Gemini operates strictly as an advisory exception copilot and cannot approve matches, reject transactions, or alter deterministic scores.

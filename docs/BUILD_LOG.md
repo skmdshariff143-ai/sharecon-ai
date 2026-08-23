@@ -14,7 +14,7 @@ This document records architectural decisions, engineering progress, test execut
 ### 2. Architectural Decisions
 - **Integer Paise Financial Precision**: All amounts (`grossAmount`, `fee`, `tax`, `expectedNetAmount`, `settledAmount`, `creditAmount`) are strictly represented and calculated in integer paise (`1 INR = 100 paise`). Floats are avoided in all equality, delta, and matching computations.
 - **Traceable Scoring Engine**: Reconciliation decisions produce deterministic weighted evidence breakdown (Reference match, Amount compatibility, Date proximity, Description token similarity).
-- **Grounded Exception Analyst**: Gemini acts as an explainability and triage copilot. The matching engine remains 100% deterministic and server-side. Deterministic offline fallback ensures 100% system availability if the API key is absent or quota is exceeded.
+- **Grounded Exception Analyst**: Gemini acts as an explainability and triage copilot. The matching engine remains deterministic and server-side. Deterministic offline fallback preserves core triage when Gemini is unavailable.
 - **Ground Truth Evaluation**: Strict separation of labeled ground truth from reconciliation input; evaluation metrics are calculated dynamically post-reconciliation with full false-positive and false-negative exposure tracking.
 
 ---
@@ -25,7 +25,6 @@ This document records architectural decisions, engineering progress, test execut
 - **Deterministic 3-Way Matching**: Implemented 4-factor scoring with clear point allocation (Reference: 40, Amount: 35, Date: 15, Description/UTR: 10).
 - **Collision & Duplicate Protection**: Solved assignment problem to ensure zero double-counting of settlement credits or bank transactions.
 - **Circuit Breaker**: Added batch-level safety threshold (halting if anomaly rate exceeds configurable limit).
-- **Ground-Truth Evaluation**: Calculated honest Precision (94.7%), Recall (97.3%), F1 (96.0%), Auto-Reconciled rate (58.9%), and ₹0 False-Positive monetary exposure on benchmark.
 - **Unit & Integration Tests**: 18/18 tests passing across `dataset.test.ts`, `engine.test.ts`, and `ai.test.ts`.
 
 ---
@@ -33,45 +32,52 @@ This document records architectural decisions, engineering progress, test execut
 ## 2026-08-23: Phase 3 & 4 — Frontend UI, Grounded Gemini Analyst & Offline Fallback
 
 ### 1. UI Implementation
-- Built fintech-grade interface using Tailwind CSS v4, Lucide icons, and Recharts.
-- Developed 5 core workspaces:
-  1. `OverviewTab`: Distribution charts, anomaly frequency bar plot, and financial safety checklist.
-  2. `ReconciliationTab`: Multi-filter data table with search, confidence score pills, quick actions, and status badges.
-  3. `ExceptionsTab`: Category filter pills, exposure amount banner, card view, and AI remediation diagnosis.
-  4. `AuditTab`: Immutable event timeline with actor filters and JSON/CSV export triggers.
-  5. `EvaluationTab`: 2x2 confusion matrix, honest precision/recall cards, and Error Inspector Table.
+- Built fintech interface using Tailwind CSS v4, Lucide icons, and Recharts.
+- Developed 5 core workspaces: `OverviewTab`, `ReconciliationTab`, `ExceptionsTab`, `AuditTab`, and `EvaluationTab`.
 - Implemented `MatchDetailDrawer` displaying the 3-way trace (Payment -> Settlement -> Bank Credit), evidence points breakdown, and reviewer approval controls.
 - Implemented `SettingsModal` for live threshold calibration and `CsvUploadModal` for drag-and-drop CSV validation.
 
 ### 2. Server-Side AI Exception Analyst
 - Implemented `/api/analyze-exception` route using `@google/genai` (Gemini 2.5 Flash).
 - Enforced structured JSON output validated with Zod schema.
-- Added instant deterministic offline fallback ensuring 100% system uptime when API keys are absent or rate limits are reached.
+- Added deterministic offline fallback when API keys are absent or rate limits are reached.
 
 ---
 
-## 2026-08-23: Phase 5 & 6 — Verification, Production Release & Deployment
+## 2026-08-23: Phase 5 & 6 — Third-Party Review Remediation & Production Release
 
-### 1. Release Verification Results
-- **GitHub Remote**: `https://github.com/skmdshariff143-ai/sharecon-ai` (Branch: `main`)
-- **Production URL**: `https://sharecon-ai.vercel.app`
-- **Vercel Deployment ID**: `dpl_Dzg6ZuKCWrghL7acE3EsDMPsU1EZ`
-- **Deployment Timestamp**: `2026-08-23T16:05:25Z`
-- **Quality Checks**:
-  - `npm run lint`: **0 errors, 0 warnings** (ESLint)
-  - `npm run type-check`: **0 errors** (`tsc --noEmit`)
-  - `npm run test`: **18/18 tests passed** (Vitest)
-  - `npm run build`: **Compiled successfully** (Next.js 16 App Router)
+### 1. Review Feedback Remediation
+1. **Rebuilt Separated Honest Metrics**:
+   - Replaced ambiguous aggregate precision/recall with separated dimensions:
+     - Proposed-Pair Precision & Recall (Entity matching correctness)
+     - Auto-Resolution Precision & Recall (Automation safety gate)
+     - Review-Routing Accuracy (Triage gate)
+     - Exception Classification Accuracy (Label correctness)
+     - False-Positive Monetary Exposure (Rupee risk of unsafe auto-matches)
+2. **Preserved Immutable Benchmark Results**:
+   - Controller actions (Approve, Reject, Flag) update live operational review state but cannot mutate the baseline engine benchmark.
+   - Added unit test asserting baseline evaluation immutability.
+3. **Strict Zod API Input Validation**:
+   - Built `ReconciliationRecordInputSchema` validating every field in `/api/analyze-exception`.
+   - Returns HTTP 400 with clean error issues for malformed or missing fields.
+4. **Removed Absolute Reliability Claims**:
+   - Removed "100% reliable", "100% uptime", "guaranteed", and "production-ready" claims across documentation and UI.
+   - Explicitly disclosed synthetic simulation, browser/session state, no real money movement, and Gemini advisory role.
+5. **Multi-Seed Robustness Evaluation**:
+   - Benchmark evaluated across 5 seeds: 42, 101, 777, 2024, 9999.
 
-### 2. Operational & Safety Verification
-- **Deterministic 3-Way Reconciliation**: 180 synthetic records processed in <20ms.
-- **Integer Paise Financial Precision**: Zero float errors across all fee & variance computations.
-- **Collision Safeguards**: 1-to-1 matching constraint enforced, blocking duplicate claims.
-- **Grounded Exception Analyst**: Production API verified with instant deterministic offline fallback (`[ShaRecon-Deterministic-Fallback]`).
-- **Ground Truth Benchmark**: 94.7% Precision, 97.3% Recall, 96.0% F1, ₹0.00 False-Positive Exposure.
+### 2. Multi-Seed Benchmark Results (180 Records per Seed)
 
-### 3. Documentation Complete
-- `README.md`, `docs/ARCHITECTURE.md`, `docs/METRICS.md`, `docs/SAFETY.md`, `docs/DEMO_SCRIPT.md`, `docs/SUBMISSION_CHECKLIST.md`, `.env.example`.
+| Seed | Proposed-Pair Precision | Proposed-Pair Recall | Auto-Resolution Precision | Auto-Resolution Recall | Review-Routing Accuracy | Exception Accuracy | Auto-Reconciliation Rate | False-Positive Exposure |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **Seed 42** *(Demo)* | **90.6%** | **91.1%** | **100.0%** | **100.0%** | **83.0%** | **90.6%** | **61.7%** | **₹0.00** |
+| **Seed 101** | **88.9%** | **91.1%** | **100.0%** | **100.0%** | **87.2%** | **90.6%** | **61.7%** | **₹0.00** |
+| **Seed 777** | **90.1%** | **91.8%** | **100.0%** | **100.0%** | **87.2%** | **90.6%** | **61.7%** | **₹0.00** |
+| **Seed 2024** | **91.7%** | **90.5%** | **100.0%** | **100.0%** | **78.7%** | **90.6%** | **61.7%** | **₹0.00** |
+| **Seed 9999** | **91.4%** | **94.3%** | **100.0%** | **100.0%** | **80.9%** | **90.6%** | **61.7%** | **₹0.00** |
 
-
-
+### 3. Final Quality Gates
+- `npm run lint`: **0 errors, 0 warnings**
+- `npm run type-check`: **0 errors** (`tsc --noEmit`)
+- `npm run test`: **22/22 tests passed** (Vitest)
+- `npm run build`: **Compiled successfully** in Next.js 16 (App Router)

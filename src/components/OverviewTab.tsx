@@ -189,7 +189,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({ batch, onNavigateToTab
               Integer Paise Precision
             </div>
             <p className="text-slate-600 leading-normal">
-              100% of arithmetic, fee calculations, and equality checks executed in integer paise without floating-point errors.
+              Internal ledger comparisons and fee deductions are calculated strictly in integer paise to eliminate floating-point representation errors.
             </p>
           </div>
 

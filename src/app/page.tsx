@@ -164,17 +164,13 @@ export default function Home() {
     };
 
     const updatedAuditEvents = [newAuditEvent, ...batch.auditEvents];
-    const evaluation = evaluateReconciliation(
-      updatedRecords,
-      groundTruth,
-      batch.evaluation?.processingDurationMs || 0
-    );
 
+    // Preserves the immutable baseline engine benchmark across reviewer decisions
     setBatch({
       ...batch,
       records: updatedRecords,
       auditEvents: updatedAuditEvents,
-      evaluation,
+      // evaluation remains the original baseline engine benchmark
     });
 
     // Update selected record in drawer if open
@@ -480,7 +476,10 @@ export default function Home() {
             )}
 
             {activeTab === 'evaluation' && (
-              <EvaluationTab evaluation={batch.evaluation} />
+              <EvaluationTab
+                evaluation={batch.evaluation}
+                records={batch.records}
+              />
             )}
           </div>
         )}

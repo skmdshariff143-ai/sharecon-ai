@@ -170,24 +170,47 @@ export interface ErrorInspectionItem {
 
 export interface EvaluationMetrics {
   totalRecordsProcessed: number;
-  correctMatches: number;
-  incorrectMatches: number; // False Positives
-  missedMatches: number; // False Negatives
-  trueNegatives: number;
-  precision: number; // TP / (TP + FP)
-  recall: number; // TP / (TP + FN)
+
+  // 1. Proposed-Pair Metrics (Entity Matching Correctness)
+  proposedPairPrecision: number; // Correct proposed pairs / Total proposed pairs
+  proposedPairRecall: number; // Correct proposed pairs / Total expected pairs in ground truth
+  totalProposedPairs: number;
+  correctProposedPairs: number;
+  totalExpectedPairs: number;
+
+  // 2. Auto-Resolution Safety Metrics (Workflow Correctness)
+  autoResolutionPrecision: number; // Valid safe auto-reconciled / Total auto-reconciled
+  autoResolutionRecall: number; // Correctly auto-reconciled / Total expected auto-safe
+  totalAutoReconciled: number;
+  correctAutoReconciled: number;
+  totalExpectedAutoSafe: number;
+
+  // 3. Review-Routing Metric
+  reviewRoutingAccuracy: number; // Correctly routed to review / Total expected review cases
+  totalExpectedReview: number;
+  correctReviewRouted: number;
+
+  // 4. Exception Classification Accuracy
+  exceptionDetectionAccuracy: number;
+  correctExceptionCount: number;
+
+  // 5. Financial & Safety Impact
+  falsePositiveExposurePaise: number; // Total rupee value of unsafe auto-matches
+  totalGrossAmountPaise: number;
+  matchedAmountPaise: number;
+  amountCoverageRate: number;
+  totalFinancialExposurePaise: number;
+
+  // Standard legacy aliases
+  precision: number;
+  recall: number;
   f1Score: number;
   autoReconciledCount: number;
   autoReconciliationRate: number;
   manualReviewCount: number;
   manualReviewRate: number;
   exceptionCount: number;
-  exceptionDetectionAccuracy: number;
-  totalGrossAmountPaise: number;
-  matchedAmountPaise: number;
-  amountCoverageRate: number;
-  falsePositiveExposurePaise: number;
-  totalFinancialExposurePaise: number;
+
   processingDurationMs: number;
   errors: ErrorInspectionItem[];
 }

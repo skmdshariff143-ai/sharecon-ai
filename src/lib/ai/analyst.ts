@@ -12,6 +12,82 @@ import {
 } from '@/types/reconciliation';
 import { formatINR } from '@/lib/money';
 
+export const PaymentInputSchema = z.object({
+  paymentId: z.string().min(1, 'paymentId is required'),
+  orderId: z.string().min(1, 'orderId is required'),
+  grossAmount: z.number().int('grossAmount must be an integer paise').positive('grossAmount must be positive'),
+  fee: z.number().int('fee must be an integer paise').nonnegative(),
+  tax: z.number().int('tax must be an integer paise').nonnegative(),
+  expectedNetAmount: z.number().int('expectedNetAmount must be an integer paise').positive(),
+  currency: z.string().min(1, 'currency is required'),
+  status: z.enum(['captured', 'failed', 'refunded', 'pending']),
+  createdAt: z.string().min(1, 'createdAt timestamp is required'),
+});
+
+export const SettlementInputSchema = z.object({
+  settlementId: z.string().min(1, 'settlementId is required'),
+  paymentReference: z.string().min(1, 'paymentReference is required'),
+  settledAmount: z.number().int('settledAmount must be an integer paise').positive(),
+  utr: z.string().min(1, 'utr is required'),
+  settledAt: z.string().min(1, 'settledAt timestamp is required'),
+  status: z.enum(['created', 'processed', 'failed']),
+});
+
+export const BankTransactionInputSchema = z.object({
+  bankTransactionId: z.string().min(1, 'bankTransactionId is required'),
+  utr: z.string().min(1, 'utr is required'),
+  creditAmount: z.number().int('creditAmount must be an integer paise').positive(),
+  description: z.string().min(1, 'description is required'),
+  creditedAt: z.string().min(1, 'creditedAt timestamp is required'),
+});
+
+export const EvidenceBreakdownInputSchema = z.object({
+  referenceScore: z.number().nonnegative(),
+  amountScore: z.number().nonnegative(),
+  dateScore: z.number().nonnegative(),
+  descriptionScore: z.number().nonnegative(),
+  totalConfidence: z.number().nonnegative(),
+  details: z.record(z.string(), z.unknown()),
+});
+
+export const ReconciliationRecordInputSchema = z.object({
+  recordId: z.string().min(1, 'recordId is required'),
+  payment: PaymentInputSchema,
+  matchedSettlement: SettlementInputSchema.nullable().optional(),
+  matchedBankTransaction: BankTransactionInputSchema.nullable().optional(),
+  status: z.enum([
+    'AUTO_RECONCILED',
+    'PENDING_REVIEW',
+    'MANUALLY_APPROVED',
+    'MANUALLY_REJECTED',
+    'UNMATCHED_EXCEPTION',
+  ]),
+  confidence: z.number().min(0).max(100),
+  exceptionType: z.enum([
+    'CLEAN_MATCH',
+    'DATE_SKEW_MATCH',
+    'MISSING_BANK_CREDIT',
+    'MISSING_SETTLEMENT',
+    'DUPLICATE_SETTLEMENT',
+    'DUPLICATE_BANK_CREDIT',
+    'AMOUNT_MISMATCH',
+    'FEE_TAX_ANOMALY',
+    'DELAYED_SETTLEMENT',
+    'INCONSISTENT_DESCRIPTION',
+    'PARTIALLY_MISSING_REF',
+    'AMBIGUOUS_AMOUNT',
+    'MALFORMED_ROW',
+    'UNSUPPORTED_CURRENCY',
+  ]),
+  financialExposurePaise: z.number().int().nonnegative(),
+  evidence: EvidenceBreakdownInputSchema,
+  explanation: z.string().min(1, 'explanation is required'),
+});
+
+export const AnalyzeExceptionRequestBodySchema = z.object({
+  record: ReconciliationRecordInputSchema,
+});
+
 export const ExceptionAnalysisResponseSchema = z.object({
   exceptionCategory: z.enum([
     'CLEAN_MATCH',
@@ -38,7 +114,7 @@ export const ExceptionAnalysisResponseSchema = z.object({
 
 /**
  * Deterministic rule-based fallback analyst
- * Guaranteed to execute instantly with zero external network dependencies.
+ * Preserves core triage recommendations when Gemini is unavailable.
  */
 export function generateDeterministicFallbackAnalysis(
   record: ReconciliationRecord

@@ -4,7 +4,7 @@ import './globals.css';
 export const metadata: Metadata = {
   title: 'ShaRecon AI — Explainable Reconciliation & Financial Control',
   description:
-    'Production-grade 3-way financial reconciliation platform for Razorpay payments, settlements, and bank credits with grounded AI exception analysis.',
+    'Explainable 3-way financial reconciliation prototype for Razorpay payments, settlements, and bank credits with grounded AI exception analysis.',
 };
 
 export default function RootLayout({

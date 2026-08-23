@@ -1,6 +1,11 @@
 /**
  * Ground Truth Evaluation Engine for ShaRecon AI
- * Accurately measures precision, recall, F1, and financial exposure against labeled benchmark.
+ * Accurately and honestly measures separated metrics:
+ * 1. Proposed-Pair Precision & Recall (Entity matching accuracy)
+ * 2. Auto-Resolution Precision & Recall (Safety workflow accuracy)
+ * 3. Review-Routing Accuracy
+ * 4. Exception Classification Accuracy
+ * 5. False-Positive Monetary Exposure (Rupee exposure of unsafe auto-matches)
  */
 
 import {
@@ -18,10 +23,16 @@ export function evaluateReconciliation(
   const gtByPaymentId = new Map<string, GroundTruth>();
   groundTruth.forEach((gt) => gtByPaymentId.set(gt.paymentId, gt));
 
-  let truePositives = 0;
-  let falsePositives = 0;
-  let falseNegatives = 0;
-  let trueNegatives = 0;
+  let totalProposedPairs = 0;
+  let correctProposedPairs = 0;
+  let totalExpectedPairs = 0;
+
+  let totalAutoReconciled = 0;
+  let correctAutoReconciled = 0;
+  let totalExpectedAutoSafe = 0;
+
+  let totalExpectedReview = 0;
+  let correctReviewRouted = 0;
 
   let correctExceptionCount = 0;
   let autoReconciledCount = 0;
@@ -35,6 +46,19 @@ export function evaluateReconciliation(
 
   const errors: ErrorInspectionItem[] = [];
 
+  // 1. Calculate expected ground truth counts
+  groundTruth.forEach((gt) => {
+    if (gt.expectedSettlementId !== null && gt.expectedBankTransactionId !== null) {
+      totalExpectedPairs++;
+    }
+    if (gt.expectedOutcome === 'auto_reconciled') {
+      totalExpectedAutoSafe++;
+    } else if (gt.expectedOutcome === 'manual_review') {
+      totalExpectedReview++;
+    }
+  });
+
+  // 2. Evaluate each predicted record against ground truth
   records.forEach((record) => {
     const gt = gtByPaymentId.get(record.payment.paymentId);
     const grossPaise = record.payment.grossAmount;
@@ -43,6 +67,7 @@ export function evaluateReconciliation(
 
     if (record.status === 'AUTO_RECONCILED') {
       autoReconciledCount++;
+      totalAutoReconciled++;
       matchedAmountPaise += grossPaise;
     } else if (record.status === 'PENDING_REVIEW' || record.status === 'MANUALLY_APPROVED') {
       manualReviewCount++;
@@ -52,47 +77,59 @@ export function evaluateReconciliation(
 
     if (!gt) return;
 
-    // Exception classification accuracy check
+    // Check exception classification match
     if (record.exceptionType === gt.expectedExceptionType) {
       correctExceptionCount++;
+    }
+
+    const hasProposedPair =
+      record.matchedSettlement !== null && record.matchedBankTransaction !== null;
+
+    if (hasProposedPair) {
+      totalProposedPairs++;
     }
 
     const isSettlementCorrect =
       record.matchedSettlement?.settlementId === gt.expectedSettlementId;
     const isBankCorrect =
       record.matchedBankTransaction?.bankTransactionId === gt.expectedBankTransactionId;
+    const isPairCorrect = hasProposedPair && isSettlementCorrect && isBankCorrect;
 
-    if (gt.expectedOutcome === 'auto_reconciled') {
-      if (record.status === 'AUTO_RECONCILED') {
-        if (isSettlementCorrect && isBankCorrect) {
-          truePositives++;
-        } else {
-          // Dangerous Auto-Match to wrong entity
-          falsePositives++;
-          falsePositiveExposurePaise += grossPaise;
-          errors.push({
-            paymentId: record.payment.paymentId,
-            grossAmountPaise: grossPaise,
-            predictedOutcome: record.status,
-            expectedOutcome: gt.expectedOutcome,
-            predictedSettlementId: record.matchedSettlement?.settlementId || null,
-            expectedSettlementId: gt.expectedSettlementId,
-            predictedBankTransactionId: record.matchedBankTransaction?.bankTransactionId || null,
-            expectedBankTransactionId: gt.expectedBankTransactionId,
-            predictedExceptionType: record.exceptionType,
-            expectedExceptionType: gt.expectedExceptionType,
-            confidence: record.confidence,
-            errorClassification: 'FALSE_POSITIVE',
-            explanation: `Auto-reconciled wrong entity: Predicted [${record.matchedSettlement?.settlementId}] vs Expected [${gt.expectedSettlementId}]`,
-            monetaryExposurePaise: grossPaise,
-          });
-        }
-      } else if (record.status === 'PENDING_REVIEW') {
-        // Safe escalation to review (counted as conservative true match)
-        truePositives++;
+    if (isPairCorrect) {
+      correctProposedPairs++;
+    }
+
+    // Evaluate Auto-Resolution Precision & Recall
+    if (record.status === 'AUTO_RECONCILED') {
+      if (gt.expectedOutcome === 'auto_reconciled' && isPairCorrect) {
+        correctAutoReconciled++;
       } else {
-        // False negative: missed clean match
-        falseNegatives++;
+        // Unsafe Auto-Match (Dangerous False Positive with monetary exposure)
+        falsePositiveExposurePaise += grossPaise;
+        errors.push({
+          paymentId: record.payment.paymentId,
+          grossAmountPaise: grossPaise,
+          predictedOutcome: record.status,
+          expectedOutcome: gt.expectedOutcome,
+          predictedSettlementId: record.matchedSettlement?.settlementId || null,
+          expectedSettlementId: gt.expectedSettlementId,
+          predictedBankTransactionId: record.matchedBankTransaction?.bankTransactionId || null,
+          expectedBankTransactionId: gt.expectedBankTransactionId,
+          predictedExceptionType: record.exceptionType,
+          expectedExceptionType: gt.expectedExceptionType,
+          confidence: record.confidence,
+          errorClassification: 'FALSE_POSITIVE',
+          explanation: `Unsafe auto-reconciliation: Expected ${gt.expectedOutcome} (${gt.scenarioDescription}) but engine automatically reconciled.`,
+          monetaryExposurePaise: grossPaise,
+        });
+      }
+    }
+
+    // Evaluate Review-Routing Accuracy
+    if (gt.expectedOutcome === 'manual_review') {
+      if (record.status === 'PENDING_REVIEW' || record.status === 'MANUALLY_APPROVED') {
+        correctReviewRouted++;
+      } else if (record.status === 'UNMATCHED_EXCEPTION') {
         errors.push({
           paymentId: record.payment.paymentId,
           grossAmountPaise: grossPaise,
@@ -106,105 +143,107 @@ export function evaluateReconciliation(
           expectedExceptionType: gt.expectedExceptionType,
           confidence: record.confidence,
           errorClassification: 'FALSE_NEGATIVE',
-          explanation: `Missed auto-reconcile match: Left as ${record.status}`,
+          explanation: `Review routing failure: Expected manual_review but record dropped into unmatched_exception.`,
           monetaryExposurePaise: grossPaise,
         });
       }
-    } else if (gt.expectedOutcome === 'manual_review') {
-      if (record.status === 'PENDING_REVIEW' || record.status === 'MANUALLY_APPROVED') {
-        // Correctly flagged for review
-        truePositives++;
-      } else if (record.status === 'AUTO_RECONCILED') {
-        // Unsafe Auto-Reconcile on ambiguous/review case
-        falsePositives++;
-        falsePositiveExposurePaise += grossPaise;
-        errors.push({
-          paymentId: record.payment.paymentId,
-          grossAmountPaise: grossPaise,
-          predictedOutcome: record.status,
-          expectedOutcome: gt.expectedOutcome,
-          predictedSettlementId: record.matchedSettlement?.settlementId || null,
-          expectedSettlementId: gt.expectedSettlementId,
-          predictedBankTransactionId: record.matchedBankTransaction?.bankTransactionId || null,
-          expectedBankTransactionId: gt.expectedBankTransactionId,
-          predictedExceptionType: record.exceptionType,
-          expectedExceptionType: gt.expectedExceptionType,
-          confidence: record.confidence,
-          errorClassification: 'FALSE_POSITIVE',
-          explanation: `Unsafe auto-reconcile on review-required transaction (${gt.scenarioDescription})`,
-          monetaryExposurePaise: grossPaise,
-        });
-      } else {
-        // Classified as unmatched exception rather than review
-        trueNegatives++;
-      }
-    } else {
-      // Expected outcome is 'unmatched_exception'
-      if (record.status === 'UNMATCHED_EXCEPTION') {
-        trueNegatives++;
-      } else if (record.status === 'AUTO_RECONCILED') {
-        // False positive on an invalid/missing transaction
-        falsePositives++;
-        falsePositiveExposurePaise += grossPaise;
-        errors.push({
-          paymentId: record.payment.paymentId,
-          grossAmountPaise: grossPaise,
-          predictedOutcome: record.status,
-          expectedOutcome: gt.expectedOutcome,
-          predictedSettlementId: record.matchedSettlement?.settlementId || null,
-          expectedSettlementId: gt.expectedSettlementId,
-          predictedBankTransactionId: record.matchedBankTransaction?.bankTransactionId || null,
-          expectedBankTransactionId: gt.expectedBankTransactionId,
-          predictedExceptionType: record.exceptionType,
-          expectedExceptionType: gt.expectedExceptionType,
-          confidence: record.confidence,
-          errorClassification: 'FALSE_POSITIVE',
-          explanation: `Unsafe match on missing/invalid record (${gt.scenarioDescription})`,
-          monetaryExposurePaise: grossPaise,
-        });
-      } else {
-        // Escalated to review
-        trueNegatives++;
-      }
+    }
+
+    // Evaluate missed auto-reconcile matches (False Negatives for Auto-Resolution)
+    if (gt.expectedOutcome === 'auto_reconciled' && record.status !== 'AUTO_RECONCILED') {
+      errors.push({
+        paymentId: record.payment.paymentId,
+        grossAmountPaise: grossPaise,
+        predictedOutcome: record.status,
+        expectedOutcome: gt.expectedOutcome,
+        predictedSettlementId: record.matchedSettlement?.settlementId || null,
+        expectedSettlementId: gt.expectedSettlementId,
+        predictedBankTransactionId: record.matchedBankTransaction?.bankTransactionId || null,
+        expectedBankTransactionId: gt.expectedBankTransactionId,
+        predictedExceptionType: record.exceptionType,
+        expectedExceptionType: gt.expectedExceptionType,
+        confidence: record.confidence,
+        errorClassification: 'FALSE_NEGATIVE',
+        explanation: `Missed auto-resolution: Valid safe match left in ${record.status}.`,
+        monetaryExposurePaise: grossPaise,
+      });
     }
   });
 
   const totalRecords = records.length;
-  const precisionDenominator = truePositives + falsePositives;
-  const recallDenominator = truePositives + falseNegatives;
 
-  const precision = precisionDenominator > 0 ? truePositives / precisionDenominator : 1.0;
-  const recall = recallDenominator > 0 ? truePositives / recallDenominator : 1.0;
-  const f1Score =
-    precision + recall > 0 ? (2 * precision * recall) / (precision + recall) : 0;
+  // 1. Proposed-Pair Precision & Recall
+  const proposedPairPrecision =
+    totalProposedPairs > 0 ? correctProposedPairs / totalProposedPairs : 1.0;
+  const proposedPairRecall =
+    totalExpectedPairs > 0 ? correctProposedPairs / totalExpectedPairs : 1.0;
 
-  const autoReconciliationRate = totalRecords > 0 ? autoReconciledCount / totalRecords : 0;
-  const manualReviewRate = totalRecords > 0 ? manualReviewCount / totalRecords : 0;
+  // 2. Auto-Resolution Precision & Recall
+  const autoResolutionPrecision =
+    totalAutoReconciled > 0 ? correctAutoReconciled / totalAutoReconciled : 1.0;
+  const autoResolutionRecall =
+    totalExpectedAutoSafe > 0 ? correctAutoReconciled / totalExpectedAutoSafe : 1.0;
+
+  // 3. Review-Routing Accuracy
+  const reviewRoutingAccuracy =
+    totalExpectedReview > 0 ? correctReviewRouted / totalExpectedReview : 1.0;
+
+  // 4. Exception Classification Accuracy
   const exceptionDetectionAccuracy =
     totalRecords > 0 ? correctExceptionCount / totalRecords : 0;
+
+  // Rates & Coverage
+  const autoReconciliationRate = totalRecords > 0 ? autoReconciledCount / totalRecords : 0;
+  const manualReviewRate = totalRecords > 0 ? manualReviewCount / totalRecords : 0;
   const amountCoverageRate =
     totalGrossAmountPaise > 0 ? matchedAmountPaise / totalGrossAmountPaise : 0;
 
+  // Harmonic mean of auto-resolution precision & recall
+  const f1Score =
+    autoResolutionPrecision + autoResolutionRecall > 0
+      ? (2 * autoResolutionPrecision * autoResolutionRecall) /
+        (autoResolutionPrecision + autoResolutionRecall)
+      : 0;
+
   return {
     totalRecordsProcessed: totalRecords,
-    correctMatches: truePositives,
-    incorrectMatches: falsePositives,
-    missedMatches: falseNegatives,
-    trueNegatives,
-    precision,
-    recall,
+
+    // Separated Honest Metrics
+    proposedPairPrecision,
+    proposedPairRecall,
+    totalProposedPairs,
+    correctProposedPairs,
+    totalExpectedPairs,
+
+    autoResolutionPrecision,
+    autoResolutionRecall,
+    totalAutoReconciled,
+    correctAutoReconciled,
+    totalExpectedAutoSafe,
+
+    reviewRoutingAccuracy,
+    totalExpectedReview,
+    correctReviewRouted,
+
+    exceptionDetectionAccuracy,
+    correctExceptionCount,
+
+    falsePositiveExposurePaise,
+    totalGrossAmountPaise,
+    matchedAmountPaise,
+    amountCoverageRate,
+    totalFinancialExposurePaise,
+
+    // Aliases
+    precision: proposedPairPrecision,
+    recall: proposedPairRecall,
     f1Score,
     autoReconciledCount,
     autoReconciliationRate,
     manualReviewCount,
     manualReviewRate,
     exceptionCount,
-    exceptionDetectionAccuracy,
-    totalGrossAmountPaise,
-    matchedAmountPaise,
-    amountCoverageRate,
-    falsePositiveExposurePaise,
-    totalFinancialExposurePaise,
+
     processingDurationMs,
     errors,
   };
