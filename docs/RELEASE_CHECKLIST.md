@@ -18,6 +18,7 @@ This checklist tracks quality criteria, accessibility standards, and release ver
 | **Methodology Panel** | In-product architectural diagram, integer-paise explanation, 4-factor rules reference | ✅ Complete |
 | **Guided Demo Tour** | 8-step skippable interactive walkthrough highlighting key innovations | ✅ Complete |
 | **Toast & Modals** | Accessible toast feedback, confirmation dialogs, focus trap & Escape key support | ✅ Complete |
-| **Responsiveness** | Verified usable at 1440×900, 1024×768, and 390×844 | ✅ Complete |
-| **Quality Gates** | `npm run lint` (0 errors), `npm run type-check` (0 errors), `npm run test` (25/25 pass), `npm run build` | ✅ Complete |
+| **Responsiveness** | Verified usable at 1440×900, 1024×768, and 390×844 (5 screenshots saved) | ✅ Complete |
+| **Quality Gates** | `npm run lint` (0 errors), `npm run type-check` (0 errors), `npm run test` (27/27 pass), `npm run build` | ✅ Complete |
+| **Browser QA** | Automated Playwright suite (17/17 interactive user journeys passed, 0 console errors) | ✅ Complete |
 | **Deployment** | Preview deployed on Vercel, verified against production, merged to main & redeployed | ✅ Complete |

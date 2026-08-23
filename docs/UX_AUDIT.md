@@ -83,3 +83,20 @@ ShaRecon AI has a verified deterministic reconciliation engine, strict integer-p
   - Semantic `<button>`, `<nav>`, `<main>`, `<dialog>`, and ARIA attributes.
   - Keyboard navigation: `Tab` order, `Escape` key to close overlays, `Enter`/`Space` activation.
   - Reduced motion query (`prefers-reduced-motion: reduce`) support.
+
+---
+
+## 4. Verified Accessibility & Browser QA Results
+
+- **Automated Chromium Browser QA**: 17/17 interactive checks passed with 0 console errors.
+- **Keyboard Navigation**:
+  - `Escape` key reliably dismisses: Command Palette, Evidence Drawer, Confirmation Modal, Settings Modal, and CSV Upload Modal.
+  - `ArrowLeft` / `ArrowRight` advances and reverses Guided Demo Tour.
+  - Focus is explicitly transferred into confirmation dialogs and returns to triggering controls upon dismissal.
+- **Screen Reader Support**:
+  - Table captions provided via `<caption className="sr-only">`.
+  - Sliders labeled with explicit `<label htmlFor="...">` and `aria-label`.
+  - Icon-only buttons provided with descriptive `aria-label` and `title` tooltips.
+- **Responsive Adaptability**:
+  - Verified and captured across 1440×900, 1024×768, and 390×844 without text clipping or horizontal overflow.
+

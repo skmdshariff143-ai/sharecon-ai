@@ -118,3 +118,44 @@ This document records architectural decisions, engineering progress, test execut
 10. **Toast & Feedback System**:
     - Accessible non-blocking toast notifications for reviewer decisions, exports, threshold updates, and demo reloads.
 
+---
+
+## 2026-08-23: Phase 8 — Release Integrity, Real Policy Simulator & Automated Browser QA
+
+### 1. Dynamic Multi-Seed Benchmark Computation
+- Completely removed static/hard-coded benchmark strings.
+- Implemented `runMultiSeedBenchmark(seeds, config)` that dynamically executes data generation, reconciliation, and honest ground-truth evaluation across Seeds 42, 101, 777, 2024, 9999.
+- Added live on-demand recalculation with spinner feedback.
+
+### 2. Genuine Policy Threshold Simulator
+- Replaced naive UI filter with a genuine simulator (`simulatePolicyThresholds`) that re-runs matching and evaluation against ground truth using cloned configurations.
+- Calculates true auto-resolution precision/recall, review load, and false-positive exposure.
+- Enforces strict validation (`mediumThreshold <= highThreshold`).
+- Guarantees zero mutation of baseline benchmarks or operational records.
+
+### 3. Pure Reviewer Operational State & Immutability Verification
+- Extracted operational decisions into `applyReviewerDecision(...)` in `src/lib/engine/operations.ts`.
+- Verified deep equality immutability of baseline evaluations across consecutive Approve, Reject, and Flag actions (`expect(baselineEval).toEqual(originalSnapshot)`).
+
+### 4. Marketing Claim Scoping & Accuracy
+- Removed exaggerated terms ("institutional-grade", "production-ready", "ensuring zero").
+- Accurately scoped claims to synthetic benchmark evidence and buildathon prototype context.
+
+### 5. Automated Playwright Browser QA & Responsive Capture
+- Executed 17-point automated Playwright test suite against live deployment.
+- 17/17 tests passed with 0 console errors.
+- Captured and verified 5 responsive screenshots:
+  - `control-center-desktop.png` (1440 × 900)
+  - `evidence-drawer-desktop.png` (1440 × 900)
+  - `evaluation-desktop.png` (1440 × 900)
+  - `reconciliation-tablet.png` (1024 × 768)
+  - `exception-mobile.png` (390 × 844)
+
+### 6. Final Verified Status
+- `npm run lint`: **0 errors, 0 warnings**
+- `npm run type-check`: **0 errors** (`tsc --noEmit`)
+- `npm run test`: **27/27 tests passed (100%)**
+- `npm run build`: **Compiled successfully** in Next.js 16 (App Router)
+- Live Production: **https://sharecon-ai.vercel.app**
+
+

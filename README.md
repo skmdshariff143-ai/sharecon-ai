@@ -59,6 +59,18 @@ graph TD
 
 ---
 
+## 📸 Product Walkthrough & Responsive UI Screenshots
+
+| Desktop Control Center (1440 × 900) | Evidence Drawer 3-Way Trace (1440 × 900) |
+| :---: | :---: |
+| ![Desktop Control Center](docs/assets/screenshots/control-center-desktop.png) | ![Evidence Drawer](docs/assets/screenshots/evidence-drawer-desktop.png) |
+
+| Evaluation Lab & Simulator (1440 × 900) | Tablet Reconciliation Grid (1024 × 768) | Mobile Exception Center (390 × 844) |
+| :---: | :---: | :---: |
+| ![Evaluation Lab](docs/assets/screenshots/evaluation-desktop.png) | ![Tablet Reconciliation](docs/assets/screenshots/reconciliation-tablet.png) | ![Mobile Exception](docs/assets/screenshots/exception-mobile.png) |
+
+---
+
 ## 📊 Honest Evaluation Benchmark & Multi-Seed Robustness
 
 To ensure transparent evaluation, metrics are separated into distinct mathematical categories rather than grouped into a single ambiguous aggregate:
