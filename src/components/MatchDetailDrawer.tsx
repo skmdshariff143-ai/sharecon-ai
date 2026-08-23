@@ -35,6 +35,7 @@ export const MatchDetailDrawer: React.FC<MatchDetailDrawerProps> = ({
   isAnalyzingAi = false,
 }) => {
   const [reviewerNote, setReviewerNote] = useState('');
+  const [confirmAction, setConfirmAction] = useState<'APPROVED' | 'REJECTED' | 'FLAGGED' | null>(null);
   React.useEffect(() => {
     if (!record) return;
     const handleKeyDown = (e: KeyboardEvent) => {
