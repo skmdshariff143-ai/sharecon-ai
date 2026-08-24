@@ -102,23 +102,23 @@ export const ReconciliationTab: React.FC<ReconciliationTabProps> = ({
       case 'AUTO_RECONCILED':
       case 'MANUALLY_APPROVED':
         return (
-          <span className="status-badge bg-emerald-50 text-emerald-800 border border-emerald-200">
-            <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+          <span className="status-badge bg-[#ecfdf5] text-[#065f46] border border-[#a7f3d0]">
+            <CheckCircle2 className="w-3 h-3 text-[#098f74]" />
             {status === 'AUTO_RECONCILED' ? 'Auto-Reconciled' : 'Approved'}
           </span>
         );
       case 'PENDING_REVIEW':
         return (
-          <span className="status-badge bg-amber-50 text-amber-800 border border-amber-300">
-            <Clock className="w-3 h-3 text-amber-600" />
+          <span className="status-badge bg-[#fffbeb] text-[#92400e] border border-[#fde68a]">
+            <Clock className="w-3 h-3 text-[#b76e00]" />
             Review Needed
           </span>
         );
       case 'UNMATCHED_EXCEPTION':
       case 'MANUALLY_REJECTED':
         return (
-          <span className="status-badge bg-rose-50 text-rose-800 border border-rose-200">
-            <AlertCircle className="w-3 h-3 text-rose-600" />
+          <span className="status-badge bg-[#fef2f2] text-[#991b1b] border border-[#fecdd3]">
+            <AlertCircle className="w-3 h-3 text-[#d64550]" />
             {status === 'UNMATCHED_EXCEPTION' ? 'Exception' : 'Rejected'}
           </span>
         );
@@ -138,7 +138,7 @@ export const ReconciliationTab: React.FC<ReconciliationTabProps> = ({
               placeholder="Search Payment ID, Order Ref, Gateway UTR..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 bg-slate-50/80 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder:text-slate-400 focus:outline-hidden focus:ring-1 focus:ring-indigo-500 focus:bg-white transition-colors"
+              className="w-full pl-9 pr-4 py-2 bg-slate-50/80 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder:text-slate-400 focus:outline-hidden focus:ring-1 focus:ring-[#635bff] focus:bg-white transition-colors"
             />
           </div>
 
@@ -178,7 +178,7 @@ export const ReconciliationTab: React.FC<ReconciliationTabProps> = ({
                 onClick={() => setViewMode('TABLE')}
                 className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
                   viewMode === 'TABLE'
-                    ? 'bg-white text-indigo-600 shadow-2xs font-semibold'
+                    ? 'bg-white text-[#635bff] shadow-2xs font-semibold'
                     : 'text-slate-500 hover:text-slate-700'
                 }`}
                 title="Table Grid View"
@@ -189,7 +189,7 @@ export const ReconciliationTab: React.FC<ReconciliationTabProps> = ({
                 onClick={() => setViewMode('CARDS')}
                 className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
                   viewMode === 'CARDS'
-                    ? 'bg-white text-indigo-600 shadow-2xs font-semibold'
+                    ? 'bg-white text-[#635bff] shadow-2xs font-semibold'
                     : 'text-slate-500 hover:text-slate-700'
                 }`}
                 title="Card List View"
@@ -211,24 +211,24 @@ export const ReconciliationTab: React.FC<ReconciliationTabProps> = ({
 
         {/* Active Filter Chips */}
         {hasActiveFilters && (
-          <div className="flex items-center flex-wrap gap-2 pt-2.5 border-t border-slate-100 text-xs">
+          <div className="flex items-center flex-wrap gap-2 pt-2.5 border-t border-slate-100 text-xs font-sans">
             <span className="text-[11px] text-slate-500 font-semibold font-mono">Active Filters:</span>
             {searchQuery && (
-              <span className="inline-flex items-center gap-1 bg-indigo-50 text-indigo-700 px-2.5 py-0.5 rounded-lg text-[11px] font-medium border border-indigo-200">
+              <span className="inline-flex items-center gap-1 bg-[#f4f3ff] text-[#635bff] px-2.5 py-0.5 rounded-lg text-[11px] font-medium border border-[#d9d6fe]">
                 Search: &quot;{searchQuery}&quot;
-                <X className="w-3 h-3 cursor-pointer hover:text-indigo-900" onClick={() => setSearchQuery('')} />
+                <X className="w-3 h-3 cursor-pointer hover:text-[#4338ca]" onClick={() => setSearchQuery('')} />
               </span>
             )}
             {statusFilter !== 'ALL' && (
-              <span className="inline-flex items-center gap-1 bg-indigo-50 text-indigo-700 px-2.5 py-0.5 rounded-lg text-[11px] font-medium border border-indigo-200">
+              <span className="inline-flex items-center gap-1 bg-[#f4f3ff] text-[#635bff] px-2.5 py-0.5 rounded-lg text-[11px] font-medium border border-[#d9d6fe]">
                 Status: {statusFilter.replace(/_/g, ' ')}
-                <X className="w-3 h-3 cursor-pointer hover:text-indigo-900" onClick={() => setStatusFilter('ALL')} />
+                <X className="w-3 h-3 cursor-pointer hover:text-[#4338ca]" onClick={() => setStatusFilter('ALL')} />
               </span>
             )}
             {exceptionFilter !== 'ALL' && (
-              <span className="inline-flex items-center gap-1 bg-indigo-50 text-indigo-700 px-2.5 py-0.5 rounded-lg text-[11px] font-medium border border-indigo-200">
+              <span className="inline-flex items-center gap-1 bg-[#f4f3ff] text-[#635bff] px-2.5 py-0.5 rounded-lg text-[11px] font-medium border border-[#d9d6fe]">
                 Category: {exceptionFilter.replace(/_/g, ' ')}
-                <X className="w-3 h-3 cursor-pointer hover:text-indigo-900" onClick={() => setExceptionFilter('ALL')} />
+                <X className="w-3 h-3 cursor-pointer hover:text-[#4338ca]" onClick={() => setExceptionFilter('ALL')} />
               </span>
             )}
             <button
@@ -295,7 +295,7 @@ export const ReconciliationTab: React.FC<ReconciliationTabProps> = ({
                       className="hover:bg-slate-50/80 transition-colors cursor-pointer group"
                       onClick={() => onSelectRecord(record)}
                     >
-                      <td className="py-3 px-3.5 font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
+                      <td className="py-3 px-3.5 font-bold text-slate-900 group-hover:text-[#635bff] transition-colors">
                         {record.payment.paymentId}
                       </td>
                       <td className="py-3 px-3.5 text-slate-600">{record.payment.orderId}</td>
@@ -306,7 +306,7 @@ export const ReconciliationTab: React.FC<ReconciliationTabProps> = ({
                         {record.matchedSettlement ? (
                           record.matchedSettlement.settlementId
                         ) : (
-                          <span className="text-rose-500 font-sans text-[11px] font-semibold">Missing</span>
+                          <span className="text-[#d64550] font-sans text-[11px] font-semibold">Missing</span>
                         )}
                       </td>
                       <td className="py-3 px-3.5 text-slate-600">
@@ -320,10 +320,10 @@ export const ReconciliationTab: React.FC<ReconciliationTabProps> = ({
                         <span
                           className={`font-bold tabular-nums ${
                             record.confidence >= 85
-                              ? 'text-emerald-700'
+                              ? 'text-[#098f74]'
                               : record.confidence >= 50
-                              ? 'text-amber-700'
-                              : 'text-rose-700'
+                              ? 'text-[#b76e00]'
+                              : 'text-[#d64550]'
                           }`}
                         >
                           {record.confidence}%
@@ -342,14 +342,14 @@ export const ReconciliationTab: React.FC<ReconciliationTabProps> = ({
                           <div className="flex items-center justify-end gap-1">
                             <button
                               onClick={() => onQuickApprove(record.recordId)}
-                              className="p-1.5 rounded-lg text-emerald-600 hover:bg-emerald-50 border border-emerald-200 cursor-pointer transition-colors"
+                              className="p-1.5 rounded-lg text-[#098f74] hover:bg-[#ecfdf5] border border-[#a7f3d0] cursor-pointer transition-colors"
                               title="Quick Approve"
                             >
                               <CheckCircle2 className="w-3.5 h-3.5" />
                             </button>
                             <button
                               onClick={() => onQuickReject(record.recordId)}
-                              className="p-1.5 rounded-lg text-rose-600 hover:bg-rose-50 border border-rose-200 cursor-pointer transition-colors"
+                              className="p-1.5 rounded-lg text-[#d64550] hover:bg-[#fef2f2] border border-[#fecdd3] cursor-pointer transition-colors"
                               title="Quick Reject"
                             >
                               <Ban className="w-3.5 h-3.5" />
@@ -358,7 +358,7 @@ export const ReconciliationTab: React.FC<ReconciliationTabProps> = ({
                         ) : (
                           <button
                             onClick={() => onSelectRecord(record)}
-                            className="text-xs font-semibold text-indigo-600 hover:text-indigo-700 inline-flex items-center gap-1 cursor-pointer"
+                            className="text-xs font-semibold text-[#635bff] hover:text-[#5147e8] inline-flex items-center gap-1 cursor-pointer"
                           >
                             Trace <ExternalLink className="w-3 h-3" />
                           </button>
@@ -381,7 +381,7 @@ export const ReconciliationTab: React.FC<ReconciliationTabProps> = ({
               className="surface-card-interactive p-4 space-y-2.5 group"
             >
               <div className="flex items-center justify-between">
-                <span className="font-mono font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
+                <span className="font-mono font-bold text-slate-900 group-hover:text-[#635bff] transition-colors">
                   {record.payment.paymentId}
                 </span>
                 {getStatusBadge(record.status)}
@@ -394,7 +394,7 @@ export const ReconciliationTab: React.FC<ReconciliationTabProps> = ({
                 </div>
                 <div>
                   <span className="text-[10px] uppercase font-bold text-slate-400 font-sans block">Confidence</span>
-                  <strong className="text-indigo-700 font-bold tabular-nums">{record.confidence}%</strong>
+                  <strong className="text-[#635bff] font-bold tabular-nums">{record.confidence}%</strong>
                 </div>
               </div>
 
@@ -407,7 +407,7 @@ export const ReconciliationTab: React.FC<ReconciliationTabProps> = ({
                 <span className="text-[11px] text-slate-500 font-semibold">
                   {record.exceptionType.replace(/_/g, ' ')}
                 </span>
-                <span className="text-xs font-semibold text-indigo-600 group-hover:text-indigo-700 flex items-center gap-1">
+                <span className="text-xs font-semibold text-[#635bff] group-hover:text-[#5147e8] flex items-center gap-1">
                   Inspect 3-Way <ExternalLink className="w-3 h-3" />
                 </span>
               </div>

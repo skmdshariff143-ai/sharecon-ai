@@ -143,64 +143,65 @@ export const LiveRunnerModal: React.FC<LiveRunnerModalProps> = ({
 
   const handleClose = () => {
     if (timerRef.current) clearInterval(timerRef.current);
-    setCurrentStageIdx(0);
-    setIsPlaying(true);
+    setIsPlaying(false);
     onClose();
   };
 
   return (
     <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/75 backdrop-blur-xs animate-in fade-in duration-200"
       role="dialog"
       aria-modal="true"
       aria-labelledby="live-runner-title"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs animate-in fade-in duration-150"
     >
-      <div className="surface-modal w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh] shadow-2xl">
+      <div className="surface-modal w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] border border-slate-200">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-slate-200 bg-slate-50/80 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-xs">
-              <Zap className="w-4 h-4" />
+        <div className="p-5 bg-gradient-to-r from-[#0b1220] via-[#121c31] to-[#0b1220] text-white flex items-center justify-between shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-[#635bff] flex items-center justify-center text-white shadow-md">
+              <Zap className="w-5 h-5" />
             </div>
             <div>
-              <h3 id="live-runner-title" className="text-sm font-extrabold text-slate-900 flex items-center gap-2 font-mono">
-                <span>Deterministic 3-Way Reconciliation Pipeline</span>
-                <span className="text-[10px] bg-indigo-100 text-indigo-800 font-bold px-2 py-0.5 rounded font-mono">
-                  8-Stage Engine
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[#818cf8] font-mono">
+                  Engine Observable Pipeline
                 </span>
+                <span className="bg-[#098f74]/20 text-[#34d399] border border-[#098f74]/40 text-[9px] font-bold px-1.5 py-0.2 rounded font-mono">
+                  Active
+                </span>
+              </div>
+              <h3 id="live-runner-title" className="text-base font-extrabold text-white font-mono">
+                Live 8-Stage Reconciliation Execution Runner
               </h3>
-              <p className="text-xs text-slate-500">
-                Observable transaction state execution &amp; 1-to-1 graph resolution
-              </p>
             </div>
           </div>
 
           <button
             onClick={handleClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200 transition-colors cursor-pointer"
-            aria-label="Close runner modal"
+            className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+            aria-label="Close runner"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Live Counters Banner */}
-        <div className="px-6 py-2.5 bg-slate-100/80 border-b border-slate-200 grid grid-cols-4 gap-2 text-center text-xs font-mono">
+        {/* Live Batch KPI Banner */}
+        <div className="bg-slate-100/90 px-6 py-2.5 border-b border-slate-200/80 grid grid-cols-4 gap-2 text-center text-xs font-mono shrink-0">
           <div className="bg-white border border-slate-200/80 rounded-xl p-2">
-            <div className="text-[10px] uppercase font-semibold text-slate-500 font-sans">Processed</div>
-            <div className="text-sm font-bold text-slate-900 tabular-nums">{records.length || 180}</div>
+            <div className="text-[10px] uppercase font-semibold text-slate-400 font-sans">Batch Size</div>
+            <div className="text-sm font-bold text-slate-900 tabular-nums">{records.length}</div>
           </div>
           <div className="bg-white border border-slate-200/80 rounded-xl p-2">
-            <div className="text-[10px] uppercase font-semibold text-emerald-600 font-sans">Auto-Reconciled</div>
-            <div className="text-sm font-bold text-emerald-700 tabular-nums">{autoReconciledCount}</div>
+            <div className="text-[10px] uppercase font-semibold text-[#098f74] font-sans">Auto-Reconciled</div>
+            <div className="text-sm font-bold text-[#098f74] tabular-nums">{autoReconciledCount}</div>
           </div>
           <div className="bg-white border border-slate-200/80 rounded-xl p-2">
-            <div className="text-[10px] uppercase font-semibold text-amber-600 font-sans">Pending Review</div>
-            <div className="text-sm font-bold text-amber-700 tabular-nums">{reviewCount}</div>
+            <div className="text-[10px] uppercase font-semibold text-[#b76e00] font-sans">Review Queue</div>
+            <div className="text-sm font-bold text-[#b76e00] tabular-nums">{reviewCount}</div>
           </div>
           <div className="bg-white border border-slate-200/80 rounded-xl p-2">
-            <div className="text-[10px] uppercase font-semibold text-rose-600 font-sans">Exceptions</div>
-            <div className="text-sm font-bold text-rose-700 tabular-nums">{exceptionCount}</div>
+            <div className="text-[10px] uppercase font-semibold text-[#d64550] font-sans">Exceptions</div>
+            <div className="text-sm font-bold text-[#d64550] tabular-nums">{exceptionCount}</div>
           </div>
         </div>
 
@@ -209,28 +210,28 @@ export const LiveRunnerModal: React.FC<LiveRunnerModalProps> = ({
           {/* Progress Bar */}
           <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
             <div
-              className="bg-indigo-600 h-full transition-all duration-300 rounded-full shadow-xs"
+              className="bg-[#635bff] h-full transition-all duration-300 rounded-full shadow-xs"
               style={{ width: `${stageProgress * 100}%` }}
             />
           </div>
 
           {/* Active Stage Callout Box */}
-          <div className="bg-indigo-50/80 border border-indigo-200 rounded-2xl p-4.5 space-y-2">
+          <div className="bg-[#f4f3ff] border border-[#d9d6fe] rounded-2xl p-4.5 space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-bold uppercase tracking-wider bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded font-mono">
+              <span className="text-[10px] font-bold uppercase tracking-wider bg-[#d9d6fe] text-[#4338ca] px-2 py-0.5 rounded font-mono">
                 {currentStage.badge}
               </span>
-              <span className="text-xs font-semibold text-indigo-700 font-mono">
+              <span className="text-xs font-semibold text-[#635bff] font-mono">
                 {Math.round(stageProgress * 100)}% Completed
               </span>
             </div>
-            <h4 className="text-sm font-bold text-slate-900">
+            <h4 className="text-sm font-extrabold text-slate-900 font-mono">
               {currentStage.name}
             </h4>
             <p className="text-xs text-slate-700 leading-relaxed font-sans">
               {currentStage.description}
             </p>
-            <div className="text-[11px] font-mono text-indigo-950 bg-white/90 p-2.5 rounded-xl border border-indigo-200/60 leading-snug">
+            <div className="text-[11px] font-mono text-indigo-950 bg-white/90 p-2.5 rounded-xl border border-[#d9d6fe]/70 leading-snug">
               ▶ {currentStage.detail}
             </div>
           </div>
@@ -249,7 +250,7 @@ export const LiveRunnerModal: React.FC<LiveRunnerModalProps> = ({
                   key={stage.id}
                   className={`px-3 py-2 rounded-xl text-xs flex items-center justify-between border transition-colors ${
                     isCurrent
-                      ? 'bg-indigo-50/60 border-indigo-300 text-slate-900 font-semibold shadow-2xs'
+                      ? 'bg-[#f4f3ff] border-[#818cf8] text-slate-900 font-semibold shadow-2xs'
                       : isPast
                       ? 'bg-slate-50 border-slate-200 text-slate-700'
                       : 'border-transparent text-slate-400'
@@ -257,9 +258,9 @@ export const LiveRunnerModal: React.FC<LiveRunnerModalProps> = ({
                 >
                   <div className="flex items-center gap-2.5">
                     {isPast ? (
-                      <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                      <CheckCircle2 className="w-4 h-4 text-[#098f74] shrink-0" />
                     ) : isCurrent ? (
-                      <div className="w-4 h-4 rounded-full border-2 border-indigo-600 border-t-transparent animate-spin shrink-0" />
+                      <div className="w-4 h-4 rounded-full border-2 border-[#635bff] border-t-transparent animate-spin shrink-0" />
                     ) : (
                       <div className="w-4 h-4 rounded-full border border-slate-300 shrink-0" />
                     )}
@@ -336,7 +337,7 @@ export const LiveRunnerModal: React.FC<LiveRunnerModalProps> = ({
                 handleClose();
                 onComplete();
               }}
-              className="px-4 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-xs cursor-pointer min-h-[34px]"
+              className="px-4 py-1.5 rounded-xl bg-[#635bff] hover:bg-[#5147e8] text-white text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-xs cursor-pointer min-h-[34px]"
             >
               <span>{isFinished ? 'View Reconciled Results' : 'Close Runner'}</span>
               <ArrowRight className="w-3.5 h-3.5" />

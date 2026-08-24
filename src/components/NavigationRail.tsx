@@ -59,7 +59,7 @@ export const NavigationRail: React.FC<NavigationRailProps> = ({
       icon: Layers,
       badge:
         pendingReviewCount > 0 ? (
-          <span className="bg-amber-400/20 text-amber-300 border border-amber-400/40 text-[10px] font-bold px-1.5 py-0.5 rounded-full font-mono">
+          <span className="bg-[#b76e00]/25 text-[#fde68a] border border-[#b76e00]/40 text-[10px] font-bold px-2 py-0.5 rounded-full font-mono">
             {pendingReviewCount}
           </span>
         ) : null,
@@ -71,7 +71,7 @@ export const NavigationRail: React.FC<NavigationRailProps> = ({
       icon: AlertTriangle,
       badge:
         exceptionCount > 0 ? (
-          <span className="bg-rose-500/20 text-rose-300 border border-rose-500/40 text-[10px] font-bold px-1.5 py-0.5 rounded-full font-mono">
+          <span className="bg-[#d64550]/25 text-[#fecdd3] border border-[#d64550]/40 text-[10px] font-bold px-2 py-0.5 rounded-full font-mono">
             {exceptionCount}
           </span>
         ) : null,
@@ -89,7 +89,7 @@ export const NavigationRail: React.FC<NavigationRailProps> = ({
       label: 'Evaluation Lab',
       icon: Scale,
       badge: (
-        <span className="bg-indigo-500/25 text-indigo-300 border border-indigo-400/40 text-[9px] font-bold px-1.5 py-0.5 rounded font-mono">
+        <span className="bg-[#635bff]/25 text-[#d9d6fe] border border-[#635bff]/40 text-[9px] font-bold px-1.5 py-0.5 rounded font-mono">
           Honest
         </span>
       ),
@@ -123,7 +123,7 @@ export const NavigationRail: React.FC<NavigationRailProps> = ({
 
       {/* Rail Container */}
       <aside
-        className={`fixed top-0 bottom-0 left-0 z-40 bg-[#0c1220] text-slate-300 flex flex-col transition-all duration-200 ease-in-out border-r border-slate-800/80 shadow-2xl ${
+        className={`fixed top-0 bottom-0 left-0 z-40 bg-[#0b1220] text-slate-300 flex flex-col transition-all duration-200 ease-in-out border-r border-slate-800/80 shadow-2xl ${
           isCollapsed ? 'w-18' : 'w-64'
         } ${
           isMobileOpen
@@ -134,14 +134,14 @@ export const NavigationRail: React.FC<NavigationRailProps> = ({
         {/* Brand Header */}
         <div className="h-16 px-4 flex items-center justify-between border-b border-slate-800/80 shrink-0 bg-slate-950/40">
           <div className="flex items-center gap-3 overflow-hidden">
-            <div className="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center text-white shrink-0 shadow-[0_0_12px_rgba(79,70,229,0.35)] border border-indigo-400/30">
+            <div className="w-9 h-9 rounded-xl bg-[#635bff] flex items-center justify-center text-white shrink-0 shadow-[0_0_12px_rgba(99,91,255,0.4)] border border-[#818cf8]/40">
               <ShieldCheck className="w-5 h-5" />
             </div>
             {!isCollapsed && (
               <div className="truncate">
-                <div className="font-bold text-white tracking-tight flex items-center gap-1.5 text-sm">
+                <div className="font-bold text-white tracking-tight flex items-center gap-1.5 text-sm font-mono">
                   <span>ShaRecon</span>
-                  <span className="text-indigo-400 font-extrabold">AI</span>
+                  <span className="text-[#818cf8] font-extrabold">AI</span>
                 </div>
                 <div className="text-[10px] text-slate-400 font-medium">
                   AI Finance Controller
@@ -153,7 +153,7 @@ export const NavigationRail: React.FC<NavigationRailProps> = ({
           {/* Close on mobile */}
           <button
             onClick={onCloseMobile}
-            className="lg:hidden p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/80 transition-colors cursor-pointer"
+            className="lg:hidden p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/80 transition-colors cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center"
             aria-label="Close navigation"
           >
             <X className="w-5 h-5" />
@@ -161,7 +161,7 @@ export const NavigationRail: React.FC<NavigationRailProps> = ({
         </div>
 
         {/* Navigation Items */}
-        <nav className="flex-1 px-2.5 py-4 space-y-1 overflow-y-auto">
+        <nav className="flex-1 px-2.5 py-4 space-y-1.5 overflow-y-auto custom-scrollbar">
           {!isCollapsed && (
             <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-2 font-mono">
               Workspaces
@@ -181,9 +181,9 @@ export const NavigationRail: React.FC<NavigationRailProps> = ({
                 }}
                 aria-current={isActive ? 'page' : undefined}
                 aria-label={item.label}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium transition-all duration-150 cursor-pointer group relative ${
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium transition-all duration-150 cursor-pointer group relative min-h-[42px] ${
                   isActive
-                    ? 'bg-indigo-600 text-white font-semibold shadow-[0_2px_8px_rgba(79,70,229,0.3)] border border-indigo-400/40'
+                    ? 'bg-[#635bff] text-white font-bold shadow-[0_2px_10px_rgba(99,91,255,0.4)] border border-[#818cf8]/40'
                     : 'text-slate-300 hover:bg-slate-800/60 hover:text-white'
                 } ${isCollapsed ? 'justify-center px-0' : 'justify-between'}`}
                 title={item.label}
@@ -198,7 +198,7 @@ export const NavigationRail: React.FC<NavigationRailProps> = ({
                   />
                   {!isCollapsed && (
                     <div className="text-left truncate">
-                      <div className="truncate">{item.label}</div>
+                      <div className="truncate font-sans">{item.label}</div>
                     </div>
                   )}
                 </div>
@@ -215,7 +215,7 @@ export const NavigationRail: React.FC<NavigationRailProps> = ({
             <div className="bg-slate-800/60 rounded-xl p-2.5 mb-2 border border-slate-700/40">
               <div className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-200 mb-0.5">
                 <Zap className="w-3.5 h-3.5 text-amber-400" />
-                <span>Razorpay Buildathon</span>
+                <span className="font-mono">Razorpay Buildathon</span>
               </div>
               <p className="text-[10px] text-slate-400 leading-tight">
                 AI Finance Controller Track Prototype
@@ -225,7 +225,7 @@ export const NavigationRail: React.FC<NavigationRailProps> = ({
 
           <button
             onClick={onToggleCollapse}
-            className="hidden lg:flex w-full items-center justify-center p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/60 transition-colors cursor-pointer"
+            className="hidden lg:flex w-full items-center justify-center p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-colors cursor-pointer min-h-[38px]"
             aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >
             {isCollapsed ? (

@@ -1,59 +1,61 @@
 @import "tailwindcss";
 
 :root {
-  /* Canvas & Base Surfaces */
-  --canvas-bg: #f4f6f9;
+  /* Brand Palette */
+  --midnight: #0b1220;
+  --deep-surface: #121c31;
+  --canvas-bg: #f4f6fb;
+  --surface-raised: rgba(255, 255, 255, 0.92);
   --surface-card: #ffffff;
   --surface-card-subtle: #f8fafc;
-  --surface-inset: #f1f5f9;
-  --surface-glass: rgba(255, 255, 255, 0.88);
+  --surface-inset: #eef2f8;
+  --surface-glass: rgba(255, 255, 255, 0.85);
   --surface-glass-border: rgba(226, 232, 240, 0.85);
   --surface-modal: #ffffff;
   
-  /* Ink / Typography */
-  --ink-primary: #090d16;
-  --ink-secondary: #27364b;
-  --ink-muted: #57687d;
-  --ink-faint: #8da0b6;
+  /* Ink & Typography */
+  --ink-primary: #101828;
+  --ink-secondary: #344054;
+  --ink-muted: #667085;
+  --ink-faint: #98a2b3;
   
   /* Borders */
-  --border-subtle: #e4e9f0;
-  --border-medium: #c8d3e0;
-  --border-strong: #96a7bc;
+  --border-subtle: #e4e7ec;
+  --border-medium: #d0d5dd;
+  --border-strong: #98a2b3;
   
-  /* Brand Accent (Indigo/Cobalt) */
-  --brand-primary: #4338ca;
-  --brand-hover: #3730a3;
-  --brand-light: #eef2ff;
-  --brand-border: #c7d2fe;
-  --brand-glow: rgba(67, 56, 202, 0.15);
+  /* Brand Accents */
+  --brand-primary: #635bff;
+  --brand-hover: #5147e8;
+  --brand-light: #f4f3ff;
+  --brand-border: #d9d6fe;
+  --brand-glow: rgba(99, 91, 255, 0.15);
 
   /* Semantic Status Roles */
-  --success-teal: #0d9488;
-  --success-emerald: #059669;
-  --success-light: #f0fdf4;
-  --success-border: #bbf7d0;
+  --status-verified-text: #098f74;
+  --status-verified-bg: #ecfdf5;
+  --status-verified-border: #a7f3d0;
 
-  --warning-amber: #d97706;
-  --warning-light: #fffbeb;
-  --warning-border: #fde68a;
+  --status-review-text: #b76e00;
+  --status-review-bg: #fffbeb;
+  --status-review-border: #fde68a;
 
-  --risk-coral: #e11d48;
-  --risk-light: #fff1f2;
-  --risk-border: #fecdd3;
+  --status-risk-text: #d64550;
+  --status-risk-bg: #fef2f2;
+  --status-risk-border: #fecdd3;
 
-  --ai-violet: #7c3aed;
-  --ai-light: #f5f3ff;
-  --ai-border: #ddd6fe;
+  --status-advisory-text: #6d28d9;
+  --status-advisory-bg: #f1efff;
+  --status-advisory-border: #ddd6fe;
 
-  --focus-ring: rgba(67, 56, 202, 0.35);
+  --focus-ring: rgba(99, 91, 255, 0.35);
 
-  /* Elevation System (Multi-Layer Shadows) */
-  --shadow-elevation-1: inset 0 1px 2px rgba(9, 13, 22, 0.04), 0 1px 1px rgba(9, 13, 22, 0.02);
-  --shadow-elevation-2: 0 1px 3px 0 rgba(9, 13, 22, 0.04), 0 1px 2px -1px rgba(9, 13, 22, 0.04), 0 0 0 1px rgba(228, 233, 240, 0.9);
-  --shadow-elevation-3: 0 4px 6px -1px rgba(9, 13, 22, 0.06), 0 2px 4px -2px rgba(9, 13, 22, 0.04), 0 0 0 1px rgba(200, 211, 224, 0.7);
-  --shadow-elevation-4: 0 10px 15px -3px rgba(9, 13, 22, 0.08), 0 4px 6px -4px rgba(9, 13, 22, 0.04), 0 0 0 1px rgba(228, 233, 240, 0.95);
-  --shadow-elevation-5: 0 20px 25px -5px rgba(9, 13, 22, 0.14), 0 8px 10px -6px rgba(9, 13, 22, 0.08), 0 0 0 1px rgba(9, 13, 22, 0.08);
+  /* Elevation System (Multi-Tier Layered Shadows) */
+  --shadow-elevation-1: inset 0 1px 2px rgba(16, 24, 40, 0.04), 0 1px 1px rgba(16, 24, 40, 0.02);
+  --shadow-elevation-2: 0 1px 3px 0 rgba(16, 24, 40, 0.05), 0 1px 2px -1px rgba(16, 24, 40, 0.05), 0 0 0 1px rgba(228, 231, 236, 0.9);
+  --shadow-elevation-3: 0 6px 12px -2px rgba(16, 24, 40, 0.08), 0 3px 6px -3px rgba(16, 24, 40, 0.04), 0 0 0 1px rgba(208, 213, 221, 0.7);
+  --shadow-elevation-4: 0 12px 20px -4px rgba(16, 24, 40, 0.1), 0 4px 8px -4px rgba(16, 24, 40, 0.06), 0 0 0 1px rgba(228, 231, 236, 0.95);
+  --shadow-elevation-5: 0 24px 38px -6px rgba(16, 24, 40, 0.16), 0 12px 16px -8px rgba(16, 24, 40, 0.1), 0 0 0 1px rgba(16, 24, 40, 0.08);
 }
 
 body {
@@ -65,13 +67,13 @@ body {
   min-height: 100vh;
 }
 
-/* Background Subtle Financial Grid Canvas Texture */
+/* Background Subtle Financial Canvas Texture */
 .app-canvas {
   background-color: var(--canvas-bg);
   background-image: 
-    radial-gradient(at 0% 0%, rgba(67, 56, 202, 0.025) 0px, transparent 50%),
-    radial-gradient(at 100% 0%, rgba(13, 148, 136, 0.02) 0px, transparent 50%),
-    radial-gradient(at 50% 100%, rgba(124, 58, 237, 0.02) 0px, transparent 50%);
+    radial-gradient(at 0% 0%, rgba(99, 91, 255, 0.035) 0px, transparent 45%),
+    radial-gradient(at 100% 0%, rgba(9, 143, 116, 0.025) 0px, transparent 45%),
+    radial-gradient(at 50% 100%, rgba(109, 40, 217, 0.02) 0px, transparent 50%);
 }
 
 /* Surface Elevation Utility Classes */
@@ -112,6 +114,12 @@ body {
   box-shadow: var(--shadow-elevation-4);
 }
 
+.surface-floating {
+  background-color: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-elevation-4);
+}
+
 .surface-modal {
   background-color: var(--surface-modal);
   border: 1px solid var(--border-subtle);
@@ -119,6 +127,20 @@ body {
 }
 
 /* Typography & Numerals */
+.metric-primary {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.04em;
+  font-weight: 800;
+  color: var(--ink-primary);
+}
+
+.metric-secondary {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.025em;
+  font-weight: 700;
+  color: var(--ink-secondary);
+}
+
 .metric-value {
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.035em;
@@ -126,14 +148,22 @@ body {
   color: var(--ink-primary);
 }
 
+.metric-label {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
 .tabular-num {
   font-variant-numeric: tabular-nums;
 }
 
 .section-heading {
-  font-size: 0.875rem;
-  font-weight: 700;
-  letter-spacing: -0.015em;
+  font-size: 0.9375rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
   color: var(--ink-primary);
 }
 
@@ -154,6 +184,30 @@ body {
   font-weight: 700;
   letter-spacing: 0.01em;
   line-height: 1;
+}
+
+.status-verified {
+  color: var(--status-verified-text);
+  background-color: var(--status-verified-bg);
+  border: 1px solid var(--status-verified-border);
+}
+
+.status-review {
+  color: var(--status-review-text);
+  background-color: var(--status-review-bg);
+  border: 1px solid var(--status-review-border);
+}
+
+.status-risk {
+  color: var(--status-risk-text);
+  background-color: var(--status-risk-bg);
+  border: 1px solid var(--status-risk-border);
+}
+
+.status-advisory {
+  color: var(--status-advisory-text);
+  background-color: var(--status-advisory-bg);
+  border: 1px solid var(--status-advisory-border);
 }
 
 /* Custom Financial Grid Scrollbar */

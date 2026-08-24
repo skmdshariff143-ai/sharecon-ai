@@ -20,6 +20,9 @@ import {
   Zap,
   Activity,
   CheckCircle,
+  FileCheck,
+  CreditCard,
+  Landmark,
 } from 'lucide-react';
 import { BatchReconciliationResult, ReconciliationRecord } from '@/types/reconciliation';
 import { formatINR } from '@/lib/money';
@@ -89,7 +92,7 @@ export const ControlCenterTab: React.FC<ControlCenterTabProps> = ({
     );
   }
 
-  // 3-Way Funnel Calculations
+  // 3-Way Story Calculations
   const totalPayments = records.length;
   const totalSettlementsProcessed = records.filter(
     (r) => r.exceptionType !== 'MISSING_SETTLEMENT'
@@ -100,245 +103,333 @@ export const ControlCenterTab: React.FC<ControlCenterTabProps> = ({
       r.exceptionType !== 'MISSING_SETTLEMENT'
   ).length;
 
+  const totalGrossAmount = evaluation?.totalGrossAmountPaise || 0;
+  const matchedAmount = evaluation?.matchedAmountPaise || 0;
+  const resolutionPercentage = records.length > 0
+    ? ((autoRecords.length / records.length) * 100).toFixed(1)
+    : '0.0';
+
   return (
     <div className="space-y-6">
-      {/* Executive Operational Header Bar */}
-      <div className="surface-card p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 border-l-4 border-l-indigo-600">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 border border-indigo-200/80 text-[10px] font-bold uppercase tracking-wider font-mono">
-              <Activity className="w-3 h-3" />
-              Batch Execution Engine
-            </span>
-            <span className="text-[11px] text-slate-400 font-mono">|</span>
-            <span className="text-[11px] text-slate-500 font-medium">3-Way Ledger Sync</span>
-          </div>
-          <h2 className="text-base font-extrabold text-slate-900 tracking-tight">
-            Executive Financial Operations Control Center
-          </h2>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Continuous deterministic reconciliation across Gateway Payments, Nodal Settlements, and Merchant Bank Statements.
-          </p>
-        </div>
+      {/* SECTION B: Signature Reconciliation Health Hero */}
+      <div className="relative overflow-hidden rounded-2xl bg-[#0b1220] border border-slate-800 text-white shadow-xl">
+        {/* Subtle Ambient Radial Glow */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-[#635bff]/20 via-[#098f74]/10 to-transparent blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-1/3 w-64 h-64 bg-[#635bff]/10 blur-2xl pointer-events-none" />
 
-        <div className="flex flex-wrap items-center gap-2 shrink-0">
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200/80 text-xs font-semibold">
-            <CheckCircle className="w-3.5 h-3.5 text-emerald-600" />
-            <span>Dry-Run Active</span>
+        <div className="relative p-6 sm:p-7 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+          {/* Left Column: Command Plane Identity */}
+          <div className="space-y-3 max-w-xl">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#635bff]/20 text-[#a5b4fc] border border-[#635bff]/40 text-[10px] font-bold uppercase tracking-wider font-mono">
+                <Activity className="w-3.5 h-3.5 text-[#818cf8]" />
+                Three-way reconciliation control plane
+              </span>
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#098f74]/20 text-[#6ee7b7] border border-[#098f74]/40 text-[10px] font-semibold font-mono">
+                <CheckCircle className="w-3 h-3 text-[#34d399]" />
+                Dry-Run Safety Active
+              </span>
+            </div>
+
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white leading-tight font-mono">
+                Every settlement accounted for.
+              </h1>
+              <p className="text-xs sm:text-sm text-slate-300 mt-1.5 leading-relaxed font-sans">
+                Continuous deterministic 3-way reconciliation connecting Razorpay captured payments, nodal gateway settlements, and merchant bank account credits.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3 pt-1 text-xs text-slate-400 font-mono">
+              <span className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-[#10b981] animate-pulse"></span>
+                <span>Batch Sync: <strong>{records.length} Records</strong></span>
+              </span>
+              <span>•</span>
+              <span className="flex items-center gap-1.5">
+                <Clock className="w-3.5 h-3.5 text-slate-400" />
+                <span>Engine Latency: <strong>~4.8ms</strong></span>
+              </span>
+            </div>
           </div>
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 border border-slate-200 text-xs font-mono">
-            <Clock className="w-3.5 h-3.5 text-slate-500" />
-            <span>~4.8ms Latency</span>
+
+          {/* Right Column: Transparent Reconciliation Health Visualization */}
+          <div className="bg-[#121c31]/90 border border-slate-700/70 rounded-xl p-4.5 sm:p-5 flex flex-col justify-between shrink-0 shadow-lg lg:w-84">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-700/60">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 font-mono">
+                Reconciliation Health
+              </span>
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#098f74]/20 text-[#34d399] border border-[#098f74]/40 font-mono">
+                {resolutionPercentage}% Resolved
+              </span>
+            </div>
+
+            <div className="py-3 space-y-2">
+              <div className="flex items-baseline justify-between">
+                <span className="text-xs text-slate-300">Accounted Volume:</span>
+                <span className="text-lg font-bold text-white font-mono tabular-nums">
+                  {formatINR(matchedAmount)}
+                </span>
+              </div>
+              <div className="flex items-baseline justify-between text-xs text-slate-400">
+                <span>Total Batch Volume:</span>
+                <span className="font-mono tabular-nums">{formatINR(totalGrossAmount)}</span>
+              </div>
+              {/* Mini Health Bar */}
+              <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden flex border border-slate-700">
+                <div
+                  style={{ width: `${(autoRecords.length / records.length) * 100}%` }}
+                  className="bg-[#098f74] h-full"
+                  title={`Safely Resolved: ${autoRecords.length}`}
+                />
+                <div
+                  style={{ width: `${(reviewRecords.length / records.length) * 100}%` }}
+                  className="bg-[#b76e00] h-full"
+                  title={`Pending Review: ${reviewRecords.length}`}
+                />
+                <div
+                  style={{ width: `${(exceptionRecords.length / records.length) * 100}%` }}
+                  className="bg-[#d64550] h-full"
+                  title={`Unmatched Exceptions: ${exceptionRecords.length}`}
+                />
+              </div>
+            </div>
+
+            <div className="pt-2.5 border-t border-slate-700/60 flex items-center justify-between text-[11px] text-slate-400">
+              <span>Attention Required:</span>
+              <span className="font-bold text-[#fde68a] font-mono">
+                {reviewRecords.length + exceptionRecords.length} records
+              </span>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* 5 Primary Elevated KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
-        {/* Total Volume */}
-        <div className="surface-card p-4.5 flex flex-col justify-between border-t-2 border-t-slate-400">
+      {/* SECTIONS C & D: Responsive 12-Column KPI Composition & Hierarchy */}
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-3.5">
+        {/* Card 1: Total Volume (Desktop: span 3, Tablet: span 6, Mobile: full) */}
+        <div className="col-span-1 md:col-span-6 lg:col-span-3 surface-card p-4.5 flex flex-col justify-between border-t-2 border-t-slate-400">
           <div className="flex items-center justify-between text-slate-500 mb-2">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 font-mono">
+            <span className="metric-label text-slate-500">
               Total Volume
             </span>
             <div className="w-7 h-7 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center">
               <Layers className="w-3.5 h-3.5" />
             </div>
           </div>
-          <div className="text-2xl font-extrabold text-slate-900 tracking-tight metric-value">
-            {formatINR(evaluation?.totalGrossAmountPaise || 0)}
+          <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight metric-primary">
+            {formatINR(totalGrossAmount)}
           </div>
-          <div className="text-xs text-slate-500 mt-1.5 flex items-center gap-1.5 pt-2 border-t border-slate-100">
-            <span className="font-semibold text-slate-800 font-mono">{records.length}</span> records processed
+          <div className="text-xs text-slate-500 mt-2 flex items-center justify-between pt-2 border-t border-slate-100 font-sans">
+            <span><strong className="text-slate-800 font-mono">{records.length}</strong> records processed</span>
+            <span className="text-slate-400 text-[11px] font-mono">100% Captured</span>
           </div>
         </div>
 
-        {/* Auto-Reconciled */}
+        {/* Card 2: Auto-Reconciled (Desktop: span 3, Tablet: span 6, Mobile: full) */}
         <div
           onClick={() => onNavigateToTab('reconciliation')}
-          className="surface-card-interactive p-4.5 flex flex-col justify-between border-t-2 border-t-emerald-500 hover:border-emerald-400 group"
+          className="col-span-1 md:col-span-6 lg:col-span-3 surface-card-interactive p-4.5 flex flex-col justify-between border-t-2 border-t-[#098f74] hover:border-[#098f74] group"
           role="button"
           tabIndex={0}
           aria-label="Filter auto-reconciled records"
         >
           <div className="flex items-center justify-between text-slate-500 mb-2">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 font-mono">
+            <span className="metric-label text-[#098f74]">
               Auto-Reconciled
             </span>
-            <div className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:bg-emerald-100 transition-colors">
+            <div className="w-7 h-7 rounded-lg bg-[#ecfdf5] text-[#098f74] flex items-center justify-center group-hover:bg-[#d1fae5] transition-colors">
               <CheckCircle2 className="w-3.5 h-3.5" />
             </div>
           </div>
-          <div className="text-2xl font-extrabold text-emerald-700 tracking-tight metric-value">
-            {formatINR(evaluation?.matchedAmountPaise || 0)}
+          <div className="text-2xl sm:text-3xl font-extrabold text-[#098f74] tracking-tight metric-primary">
+            {formatINR(matchedAmount)}
           </div>
-          <div className="text-xs text-slate-500 mt-1.5 flex items-center justify-between pt-2 border-t border-slate-100">
+          <div className="text-xs text-slate-500 mt-2 flex items-center justify-between pt-2 border-t border-slate-100 font-sans">
             <span className="font-semibold text-emerald-800 font-mono">{autoRecords.length} records</span>
-            <span className="text-slate-400 font-mono font-medium">
-              {(((autoRecords.length) / records.length) * 100).toFixed(1)}%
+            <span className="text-emerald-700 font-mono font-bold bg-[#ecfdf5] px-1.5 py-0.5 rounded text-[11px]">
+              {resolutionPercentage}%
             </span>
           </div>
         </div>
 
-        {/* Review Queue */}
+        {/* Card 3: Review Queue (Desktop: span 2, Tablet: span 4, Mobile: 2-col compact) */}
         <div
           onClick={() => onNavigateToTab('reconciliation')}
-          className="surface-card-interactive p-4.5 flex flex-col justify-between border-t-2 border-t-amber-500 hover:border-amber-400 group"
+          className="col-span-1 md:col-span-4 lg:col-span-2 surface-card-interactive p-4.5 flex flex-col justify-between border-t-2 border-t-[#b76e00] hover:border-[#b76e00] group"
           role="button"
           tabIndex={0}
           aria-label="Filter review queue cases"
         >
           <div className="flex items-center justify-between text-slate-500 mb-2">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700 font-mono">
+            <span className="metric-label text-[#b76e00]">
               Review Queue
             </span>
-            <div className="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center group-hover:bg-amber-100 transition-colors">
+            <div className="w-7 h-7 rounded-lg bg-[#fffbeb] text-[#b76e00] flex items-center justify-center group-hover:bg-[#fef3c7] transition-colors">
               <Clock className="w-3.5 h-3.5" />
             </div>
           </div>
-          <div className="text-2xl font-extrabold text-amber-800 tracking-tight metric-value">
+          <div className="text-2xl font-extrabold text-[#b76e00] tracking-tight metric-secondary">
             {reviewRecords.length} cases
           </div>
-          <div className="text-xs text-slate-500 mt-1.5 flex items-center justify-between pt-2 border-t border-slate-100">
+          <div className="text-xs text-slate-500 mt-2 flex items-center justify-between pt-2 border-t border-slate-100 font-sans">
             <span className="font-semibold text-amber-800 font-mono">
               {(((reviewRecords.length) / records.length) * 100).toFixed(1)}%
             </span>
-            <span className="text-slate-400 text-[11px]">needs triage</span>
+            <span className="text-slate-400 text-[11px]">triage</span>
           </div>
         </div>
 
-        {/* Financial Exposure */}
+        {/* Card 4: Financial Exposure (Desktop: span 2, Tablet: span 4, Mobile: 2-col compact) */}
         <div
           onClick={() => onNavigateToTab('exceptions')}
-          className="surface-card-interactive p-4.5 flex flex-col justify-between border-t-2 border-t-rose-500 hover:border-rose-400 group"
+          className="col-span-1 md:col-span-4 lg:col-span-2 surface-card-interactive p-4.5 flex flex-col justify-between border-t-2 border-t-[#d64550] hover:border-[#d64550] group"
           role="button"
           tabIndex={0}
           aria-label="Filter exception queue and financial exposure"
         >
           <div className="flex items-center justify-between text-slate-500 mb-2">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-rose-700 font-mono">
+            <span className="metric-label text-[#d64550]">
               Financial Exposure
             </span>
-            <div className="w-7 h-7 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center group-hover:bg-rose-100 transition-colors">
+            <div className="w-7 h-7 rounded-lg bg-[#fef2f2] text-[#d64550] flex items-center justify-center group-hover:bg-[#fee2e2] transition-colors">
               <AlertOctagon className="w-3.5 h-3.5" />
             </div>
           </div>
-          <div className="text-2xl font-extrabold text-rose-700 tracking-tight metric-value">
+          <div className="text-2xl font-extrabold text-[#d64550] tracking-tight metric-secondary">
             {formatINR(evaluation?.totalFinancialExposurePaise || 0)}
           </div>
-          <div className="text-xs text-slate-500 mt-1.5 flex items-center justify-between pt-2 border-t border-slate-100">
+          <div className="text-xs text-slate-500 mt-2 flex items-center justify-between pt-2 border-t border-slate-100 font-sans">
             <span className="font-semibold text-rose-800 font-mono">{exceptionRecords.length} exceptions</span>
             <span className="text-slate-400 text-[11px]">uncredited</span>
           </div>
         </div>
 
-        {/* Auto-Resolution Precision */}
+        {/* Card 5: Auto-Resolution Precision (Desktop: span 2, Tablet: span 4, Mobile: full) */}
         <div
           onClick={() => onNavigateToTab('evaluation')}
-          className="surface-card-interactive p-4.5 flex flex-col justify-between border-t-2 border-t-indigo-500 hover:border-indigo-400 group"
+          className="col-span-1 md:col-span-4 lg:col-span-2 surface-card-interactive p-4.5 flex flex-col justify-between border-t-2 border-t-[#635bff] hover:border-[#635bff] group"
           role="button"
           tabIndex={0}
           aria-label="Inspect honest evaluation precision metrics"
         >
           <div className="flex items-center justify-between text-slate-500 mb-2">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-700 font-mono">
+            <span className="metric-label text-[#635bff]">
               Auto-Precision
             </span>
-            <div className="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center group-hover:bg-indigo-100 transition-colors">
+            <div className="w-7 h-7 rounded-lg bg-[#f4f3ff] text-[#635bff] flex items-center justify-center group-hover:bg-[#ede9fe] transition-colors">
               <ShieldCheck className="w-3.5 h-3.5" />
             </div>
           </div>
-          <div className="text-2xl font-extrabold text-indigo-700 tracking-tight metric-value">
+          <div className="text-2xl font-extrabold text-[#635bff] tracking-tight metric-secondary">
             {evaluation ? (evaluation.autoResolutionPrecision * 100).toFixed(1) : '100.0'}%
           </div>
-          <div className="text-xs text-slate-500 mt-1.5 flex items-center justify-between pt-2 border-t border-slate-100">
+          <div className="text-xs text-slate-500 mt-2 flex items-center justify-between pt-2 border-t border-slate-100 font-sans">
             <span>Exposure:</span>
-            <strong className="text-emerald-700 font-mono font-bold">
+            <strong className="text-[#098f74] font-mono font-bold">
               {formatINR(evaluation?.falsePositiveExposurePaise || 0)}
             </strong>
           </div>
         </div>
       </div>
 
-      {/* 3-Way Transaction Processing Funnel */}
-      <div className="surface-card p-5">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 mb-4 border-b border-slate-100 gap-2">
+      {/* SECTION E: Three-Way Reconciliation Story Flow */}
+      <div className="surface-card p-5 sm:p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 mb-5 border-b border-slate-100 gap-2">
           <div>
-            <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-              <Building className="w-4 h-4 text-indigo-600" />
-              <span>3-Way Transaction Reconciliation Funnel</span>
+            <h3 className="text-base font-extrabold text-slate-900 flex items-center gap-2 font-mono">
+              <Building className="w-4 h-4 text-[#635bff]" />
+              <span>3-Way Transaction Reconciliation Lifecycle</span>
             </h3>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Trace transaction progression through all three sources to isolate clearing lags and missing credits.
+            <p className="text-xs text-slate-500 mt-0.5 font-sans">
+              Trace transaction progression across merchant orders, gateway batch settlements, and merchant statement credits.
             </p>
           </div>
-          <span className="text-[11px] font-mono text-slate-500 bg-slate-50 px-2.5 py-1 rounded-md border border-slate-200 self-start sm:self-auto">
+          <span className="text-[11px] font-mono text-slate-600 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200 self-start sm:self-auto font-semibold">
             Payments ➔ Settlements ➔ Bank Credits
           </span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+        {/* Directional Flow Stages */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 relative text-xs">
           {/* Leg 1: Captured Payments */}
-          <div className="bg-indigo-50/40 border border-indigo-200/80 rounded-xl p-4 relative overflow-hidden flex flex-col justify-between">
-            <div className="flex items-center justify-between font-bold text-indigo-950 mb-1">
-              <span>Leg 1: Captured Payments</span>
-              <span className="font-mono bg-indigo-100 text-indigo-800 px-1.5 py-0.5 rounded text-[10px]">100%</span>
+          <div className="bg-[#f4f3ff]/70 border border-[#d9d6fe] rounded-xl p-4.5 flex flex-col justify-between relative overflow-hidden shadow-xs">
+            <div className="flex items-center justify-between font-bold text-slate-900 mb-2">
+              <span className="flex items-center gap-1.5 font-mono text-xs text-indigo-950">
+                <CreditCard className="w-4 h-4 text-[#635bff]" />
+                Leg 1: Captured Payments
+              </span>
+              <span className="font-mono bg-[#635bff]/15 text-[#4338ca] px-2 py-0.5 rounded text-[10px] font-bold">
+                100% INGEST
+              </span>
             </div>
-            <div className="text-xl font-extrabold text-indigo-950 mt-1 metric-value">{totalPayments} Records</div>
+            <div className="text-xl font-extrabold text-slate-900 mt-1 metric-primary">
+              {totalPayments} Records
+            </div>
             <div className="text-slate-600 font-mono mt-0.5 font-semibold">
-              {formatINR(evaluation?.totalGrossAmountPaise || 0)} Gross
+              {formatINR(totalGrossAmount)} Gross
             </div>
-            <p className="text-[11px] text-slate-500 mt-2.5 pt-2 border-t border-indigo-200/60">
-              Captured merchant orders awaiting gateway batch payout.
+            <p className="text-[11px] text-slate-500 mt-3 pt-2 border-t border-[#d9d6fe]/60 leading-relaxed font-sans">
+              Merchant orders captured via Razorpay checkout awaiting batch payout.
             </p>
           </div>
 
           {/* Leg 2: Nodal Settlements */}
-          <div className="bg-amber-50/40 border border-amber-200/80 rounded-xl p-4 relative overflow-hidden flex flex-col justify-between">
-            <div className="flex items-center justify-between font-bold text-amber-950 mb-1">
-              <span>Leg 2: Gateway Settlements</span>
-              <span className="font-mono bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded text-[10px]">
+          <div className="bg-[#fffbeb]/70 border border-[#fde68a] rounded-xl p-4.5 flex flex-col justify-between relative overflow-hidden shadow-xs">
+            <div className="flex items-center justify-between font-bold text-slate-900 mb-2">
+              <span className="flex items-center gap-1.5 font-mono text-xs text-amber-950">
+                <FileCheck className="w-4 h-4 text-[#b76e00]" />
+                Leg 2: Gateway Settlements
+              </span>
+              <span className="font-mono bg-[#b76e00]/15 text-[#92400e] px-2 py-0.5 rounded text-[10px] font-bold">
                 {((totalSettlementsProcessed / totalPayments) * 100).toFixed(1)}%
               </span>
             </div>
-            <div className="text-xl font-extrabold text-amber-950 mt-1 metric-value">{totalSettlementsProcessed} Processed</div>
+            <div className="text-xl font-extrabold text-slate-900 mt-1 metric-primary">
+              {totalSettlementsProcessed} Processed
+            </div>
             <div className="text-slate-600 font-mono mt-0.5 font-semibold">
               {totalPayments - totalSettlementsProcessed} Missing Advices
             </div>
-            <p className="text-[11px] text-slate-500 mt-2.5 pt-2 border-t border-amber-200/60">
-              Nodal payout batches deducted 2.0% - 3.5% fee + 18% GST.
+            <p className="text-[11px] text-slate-500 mt-3 pt-2 border-t border-[#fde68a]/60 leading-relaxed font-sans">
+              Nodal payout batches deducting 2.0% - 3.5% fee + 18% GST.
             </p>
           </div>
 
           {/* Leg 3: Bank Statement Credits */}
-          <div className="bg-emerald-50/40 border border-emerald-200/80 rounded-xl p-4 relative overflow-hidden flex flex-col justify-between">
-            <div className="flex items-center justify-between font-bold text-emerald-950 mb-1">
-              <span>Leg 3: Bank Account Credits</span>
-              <span className="font-mono bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded text-[10px]">
+          <div className="bg-[#ecfdf5]/70 border border-[#a7f3d0] rounded-xl p-4.5 flex flex-col justify-between relative overflow-hidden shadow-xs">
+            <div className="flex items-center justify-between font-bold text-slate-900 mb-2">
+              <span className="flex items-center gap-1.5 font-mono text-xs text-emerald-950">
+                <Landmark className="w-4 h-4 text-[#098f74]" />
+                Leg 3: Bank Account Credits
+              </span>
+              <span className="font-mono bg-[#098f74]/15 text-[#065f46] px-2 py-0.5 rounded text-[10px] font-bold">
                 {((totalBankCreditsReceived / totalPayments) * 100).toFixed(1)}%
               </span>
             </div>
-            <div className="text-xl font-extrabold text-emerald-950 mt-1 metric-value">{totalBankCreditsReceived} Credited</div>
+            <div className="text-xl font-extrabold text-slate-900 mt-1 metric-primary">
+              {totalBankCreditsReceived} Credited
+            </div>
             <div className="text-slate-600 font-mono mt-0.5 font-semibold">
               {totalPayments - totalBankCreditsReceived} Uncredited Items
             </div>
-            <p className="text-[11px] text-slate-500 mt-2.5 pt-2 border-t border-emerald-200/60">
+            <p className="text-[11px] text-slate-500 mt-3 pt-2 border-t border-[#a7f3d0]/60 leading-relaxed font-sans">
               Verified statement credits confirmed with matching UTR.
             </p>
           </div>
         </div>
       </div>
 
-      {/* Visual Analytics & Breakdown */}
+      {/* SECTION F: Operational Insight Grid (Two-Column) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Outcome Distribution Card */}
-        <div className="surface-card p-5 flex flex-col justify-between" data-testid="outcome-distribution-card">
+        <div className="surface-card p-5 sm:p-6 flex flex-col justify-between" data-testid="outcome-distribution-card">
           <div>
             <div className="flex items-center justify-between mb-1">
-              <h3 className="text-sm font-bold text-slate-900">Outcome Distribution</h3>
+              <h3 className="text-sm font-extrabold text-slate-900 font-mono">Outcome Distribution</h3>
               <span className="text-xs font-semibold text-slate-500 font-mono tabular-nums">{records.length} Total</span>
             </div>
-            <p className="text-xs text-slate-500 mb-3">
+            <p className="text-xs text-slate-500 mb-3 font-sans">
               Automated high-confidence routing vs human controller triage.
             </p>
 
@@ -364,13 +455,13 @@ export const ControlCenterTab: React.FC<ControlCenterTabProps> = ({
                   />
                   {records.length > 0 && (
                     <>
-                      {/* Auto-Reconciled Arc (Emerald) */}
+                      {/* Auto-Reconciled Arc (Teal) */}
                       <circle
                         cx="70"
                         cy="70"
                         r="54"
                         fill="transparent"
-                        stroke="#059669"
+                        stroke="#098f74"
                         strokeWidth="14"
                         strokeDasharray={`${(autoRecords.length / records.length) * 339.292} 339.292`}
                         strokeDashoffset="0"
@@ -383,20 +474,20 @@ export const ControlCenterTab: React.FC<ControlCenterTabProps> = ({
                         cy="70"
                         r="54"
                         fill="transparent"
-                        stroke="#d97706"
+                        stroke="#b76e00"
                         strokeWidth="14"
                         strokeDasharray={`${(reviewRecords.length / records.length) * 339.292} 339.292`}
                         strokeDashoffset={`-${(autoRecords.length / records.length) * 339.292}`}
                         strokeLinecap="round"
                         className="transition-all duration-500"
                       />
-                      {/* Unmatched Exceptions Arc (Rose) */}
+                      {/* Unmatched Exceptions Arc (Coral) */}
                       <circle
                         cx="70"
                         cy="70"
                         r="54"
                         fill="transparent"
-                        stroke="#e11d48"
+                        stroke="#d64550"
                         strokeWidth="14"
                         strokeDasharray={`${(exceptionRecords.length / records.length) * 339.292} 339.292`}
                         strokeDashoffset={`-${((autoRecords.length + reviewRecords.length) / records.length) * 339.292}`}
@@ -412,7 +503,7 @@ export const ControlCenterTab: React.FC<ControlCenterTabProps> = ({
                   <span className="text-xl font-extrabold text-slate-900 font-mono tabular-nums leading-tight">
                     {records.length}
                   </span>
-                  <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
+                  <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider font-mono">
                     Records
                   </span>
                 </div>
@@ -425,17 +516,17 @@ export const ControlCenterTab: React.FC<ControlCenterTabProps> = ({
                 <>
                   <div
                     style={{ width: `${(autoRecords.length / records.length) * 100}%` }}
-                    className="bg-emerald-600 h-full transition-all duration-300"
+                    className="bg-[#098f74] h-full transition-all duration-300"
                     title={`Auto-Reconciled: ${autoRecords.length}`}
                   />
                   <div
                     style={{ width: `${(reviewRecords.length / records.length) * 100}%` }}
-                    className="bg-amber-500 h-full transition-all duration-300"
+                    className="bg-[#b76e00] h-full transition-all duration-300"
                     title={`Pending Review: ${reviewRecords.length}`}
                   />
                   <div
                     style={{ width: `${(exceptionRecords.length / records.length) * 100}%` }}
-                    className="bg-rose-600 h-full transition-all duration-300"
+                    className="bg-[#d64550] h-full transition-all duration-300"
                     title={`Unmatched Exceptions: ${exceptionRecords.length}`}
                   />
                 </>
@@ -446,26 +537,26 @@ export const ControlCenterTab: React.FC<ControlCenterTabProps> = ({
           </div>
 
           {/* Outcome Breakdown Legend & Counts */}
-          <div className="space-y-2 pt-3 border-t border-slate-100 text-xs">
+          <div className="space-y-2 pt-3 border-t border-slate-100 text-xs font-sans">
             <div className="flex items-center justify-between">
-              <span className="flex items-center gap-2 text-slate-600">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-600 shrink-0"></span> Auto-Reconciled
+              <span className="flex items-center gap-2 text-slate-700 font-medium">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#098f74] shrink-0"></span> Auto-Reconciled
               </span>
               <strong className="text-slate-900 font-mono tabular-nums">
                 {autoRecords.length} <span className="text-slate-500 font-normal">({records.length > 0 ? ((autoRecords.length / records.length) * 100).toFixed(1) : 0}%)</span>
               </strong>
             </div>
             <div className="flex items-center justify-between">
-              <span className="flex items-center gap-2 text-slate-600">
-                <span className="w-2.5 h-2.5 rounded-full bg-amber-500 shrink-0"></span> Pending Review
+              <span className="flex items-center gap-2 text-slate-700 font-medium">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#b76e00] shrink-0"></span> Pending Review
               </span>
               <strong className="text-slate-900 font-mono tabular-nums">
                 {reviewRecords.length} <span className="text-slate-500 font-normal">({records.length > 0 ? ((reviewRecords.length / records.length) * 100).toFixed(1) : 0}%)</span>
               </strong>
             </div>
             <div className="flex items-center justify-between">
-              <span className="flex items-center gap-2 text-slate-600">
-                <span className="w-2.5 h-2.5 rounded-full bg-rose-600 shrink-0"></span> Unmatched Exceptions
+              <span className="flex items-center gap-2 text-slate-700 font-medium">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#d64550] shrink-0"></span> Unmatched Exceptions
               </span>
               <strong className="text-slate-900 font-mono tabular-nums">
                 {exceptionRecords.length} <span className="text-slate-500 font-normal">({records.length > 0 ? ((exceptionRecords.length / records.length) * 100).toFixed(1) : 0}%)</span>
@@ -474,19 +565,19 @@ export const ControlCenterTab: React.FC<ControlCenterTabProps> = ({
           </div>
         </div>
 
-        {/* Anomaly Category Breakdown */}
-        <div className="surface-card p-5 lg:col-span-2 flex flex-col justify-between">
+        {/* Anomaly Category Breakdown (Right: 2 cols on lg) */}
+        <div className="surface-card p-5 sm:p-6 lg:col-span-2 flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-1">
-              <h3 className="text-sm font-bold text-slate-800">Exception Category Frequencies</h3>
+              <h3 className="text-sm font-extrabold text-slate-900 font-mono">Exception Category Frequencies</h3>
               <button
                 onClick={() => onNavigateToTab('exceptions')}
-                className="text-xs text-indigo-600 font-semibold hover:underline flex items-center gap-1 cursor-pointer"
+                className="text-xs text-[#635bff] font-semibold hover:underline flex items-center gap-1 cursor-pointer"
               >
                 View Exception Queue <ArrowUpRight className="w-3.5 h-3.5" />
               </button>
             </div>
-            <p className="text-xs text-slate-500 mb-3">
+            <p className="text-xs text-slate-500 mb-3 font-sans">
               Distribution of financial discrepancies detected across statement inputs.
             </p>
 
@@ -496,38 +587,38 @@ export const ControlCenterTab: React.FC<ControlCenterTabProps> = ({
                   <XAxis type="number" allowDecimals={false} tick={{ fontSize: 10 }} stroke="#94a3b8" />
                   <YAxis type="category" dataKey="name" width={140} tick={{ fontSize: 10 }} stroke="#94a3b8" />
                   <Tooltip formatter={(val) => [`${val ?? 0} records`, 'Occurrences']} />
-                  <Bar dataKey="count" fill="#4338ca" radius={[0, 4, 4, 0]} />
+                  <Bar dataKey="count" fill="#635bff" radius={[0, 4, 4, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
           </div>
 
-          <div className="flex items-center justify-between text-xs text-slate-500 pt-3 border-t border-slate-100">
+          <div className="flex items-center justify-between text-xs text-slate-500 pt-3 border-t border-slate-100 font-sans">
             <span>
-              Total Discrepancies: <strong className="text-slate-700">{records.length - autoRecords.length}</strong>
+              Total Discrepancies: <strong className="text-slate-800 font-mono">{records.length - autoRecords.length}</strong>
             </span>
             <span>
-              Financial Exposure: <strong className="text-rose-700">{formatINR(evaluation?.totalFinancialExposurePaise || 0)}</strong>
+              Financial Exposure: <strong className="text-[#d64550] font-mono font-bold">{formatINR(evaluation?.totalFinancialExposurePaise || 0)}</strong>
             </span>
           </div>
         </div>
       </div>
 
-      {/* "Needs Attention" Triage Table */}
-      <div className="surface-card p-5">
+      {/* SECTION G: High-Exposure Action Queue ("Needs Attention") */}
+      <div className="surface-card p-5 sm:p-6">
         <div className="flex items-center justify-between mb-2">
           <div>
-            <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4 text-amber-500" />
+            <h3 className="text-sm font-extrabold text-slate-900 flex items-center gap-2 font-mono">
+              <AlertTriangle className="w-4 h-4 text-[#b76e00]" />
               <span>Needs Attention — High-Exposure Queue</span>
             </h3>
-            <p className="text-xs text-slate-500 mt-0.5">
+            <p className="text-xs text-slate-500 mt-0.5 font-sans">
               Prioritized by potential monetary exposure to optimize human triage efficiency.
             </p>
           </div>
           <button
             onClick={() => onNavigateToTab('exceptions')}
-            className="text-xs font-semibold text-indigo-600 hover:text-indigo-700 flex items-center gap-1 cursor-pointer"
+            className="text-xs font-semibold text-[#635bff] hover:text-[#5147e8] flex items-center gap-1 cursor-pointer font-sans"
           >
             Full Queue ({highExposureCases.length}) <ArrowRight className="w-3.5 h-3.5" />
           </button>
@@ -535,14 +626,14 @@ export const ControlCenterTab: React.FC<ControlCenterTabProps> = ({
 
         <div className="overflow-x-auto mt-3 border border-slate-200 rounded-xl">
           <table className="min-w-full text-xs text-left divide-y divide-slate-200">
-            <thead className="bg-slate-50/80 text-slate-600 font-semibold uppercase text-[10px]">
+            <thead className="bg-slate-50/80 text-slate-600 font-semibold uppercase text-[10px] font-mono">
               <tr>
                 <th className="py-2.5 px-3">Payment ID</th>
                 <th className="py-2.5 px-3">Order Ref</th>
-                <th className="py-2.5 px-3">Gross Amount</th>
-                <th className="py-2.5 px-3">Exposure</th>
+                <th className="py-2.5 px-3 text-right">Gross Amount</th>
+                <th className="py-2.5 px-3 text-right">Exposure</th>
                 <th className="py-2.5 px-3">Anomaly Category</th>
-                <th className="py-2.5 px-3">Confidence</th>
+                <th className="py-2.5 px-3 text-center">Confidence</th>
                 <th className="py-2.5 px-3 text-right">Action</th>
               </tr>
             </thead>
@@ -551,24 +642,24 @@ export const ControlCenterTab: React.FC<ControlCenterTabProps> = ({
                 <tr key={rec.recordId} className="hover:bg-slate-50/80 transition-colors">
                   <td className="py-2.5 px-3 font-semibold text-slate-900">{rec.payment.paymentId}</td>
                   <td className="py-2.5 px-3 text-slate-600">{rec.payment.orderId}</td>
-                  <td className="py-2.5 px-3 font-semibold text-slate-800">
+                  <td className="py-2.5 px-3 text-right font-semibold text-slate-800 tabular-nums">
                     {formatINR(rec.payment.grossAmount)}
                   </td>
-                  <td className="py-2.5 px-3 font-bold text-rose-600">
+                  <td className="py-2.5 px-3 text-right font-bold text-[#d64550] tabular-nums">
                     {formatINR(rec.financialExposurePaise)}
                   </td>
                   <td className="py-2.5 px-3 font-sans">
-                    <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-[#fffbeb] text-[#b76e00] border border-[#fde68a]">
                       {rec.exceptionType.replace(/_/g, ' ')}
                     </span>
                   </td>
-                  <td className="py-2.5 px-3">
+                  <td className="py-2.5 px-3 text-center">
                     <span className="font-bold text-slate-700">{rec.confidence}%</span>
                   </td>
                   <td className="py-2.5 px-3 text-right font-sans">
                     <button
                       onClick={() => onSelectRecord(rec)}
-                      className="px-2.5 py-1 rounded-lg text-xs font-semibold text-indigo-700 hover:bg-indigo-50 border border-indigo-200 transition-colors cursor-pointer"
+                      className="px-2.5 py-1 rounded-lg text-xs font-semibold text-[#635bff] hover:bg-[#f4f3ff] border border-[#d9d6fe] transition-colors cursor-pointer"
                     >
                       Inspect Evidence
                     </button>
@@ -585,23 +676,23 @@ export const ControlCenterTab: React.FC<ControlCenterTabProps> = ({
 
       {/* Live Reconciliation Runner Trigger Card */}
       {onOpenLiveRunner && (
-        <div className="surface-card bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 border border-slate-800 text-white p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="surface-card bg-gradient-to-r from-[#0b1220] via-[#121c31] to-[#0b1220] border border-slate-800 text-white p-6 sm:p-7 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xl">
           <div className="space-y-1">
-            <div className="flex items-center gap-2 text-indigo-400 text-xs font-bold uppercase tracking-wider font-mono">
-              <Zap className="w-4 h-4" />
+            <div className="flex items-center gap-2 text-[#a5b4fc] text-xs font-bold uppercase tracking-wider font-mono">
+              <Zap className="w-4 h-4 text-[#818cf8]" />
               <span>Deterministic Execution Inspector</span>
             </div>
-            <h3 className="text-base font-bold text-white">
+            <h3 className="text-base font-bold text-white font-mono">
               Launch Live 8-Stage Reconciliation Runner
             </h3>
-            <p className="text-xs text-slate-300 max-w-xl leading-relaxed">
+            <p className="text-xs text-slate-300 max-w-xl leading-relaxed font-sans">
               Observe every step of the real engine calculation in slow motion: file schema validation, integer-paise normalization, 4-factor scoring graph, collision prevention solver, and audit trail emission.
             </p>
           </div>
 
           <button
             onClick={onOpenLiveRunner}
-            className="px-4.5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold flex items-center gap-2 transition-colors shrink-0 shadow-md cursor-pointer"
+            className="px-5 py-2.5 rounded-xl bg-[#635bff] hover:bg-[#5147e8] text-white text-xs font-semibold flex items-center gap-2 transition-colors shrink-0 shadow-md cursor-pointer min-h-[40px]"
           >
             <Zap className="w-4 h-4" />
             <span>Launch Live Runner</span>
