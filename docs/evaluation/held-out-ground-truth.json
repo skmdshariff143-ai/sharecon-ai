@@ -1,0 +1,650 @@
+{
+  "metadata": {
+    "title": "ShaRecon AI — Held-Out Ground Truth Labels",
+    "totalGroundTruthRecords": 80,
+    "generatedAt": "2026-08-24T14:51:11.755Z",
+    "disclaimer": "Ground truth labels stored independently. Never accessed by the matching engine."
+  },
+  "groundTruth": [
+    {
+      "paymentId": "ho_pay_001",
+      "expectedSettlementId": "ho_set_001",
+      "expectedBankTransactionId": "ho_bank_001",
+      "expectedExceptionType": "CLEAN_MATCH",
+      "expectedOutcome": "auto_reconciled",
+      "scenarioDescription": "Clean 3-way exact match"
+    },
+    {
+      "paymentId": "ho_pay_002",
+      "expectedSettlementId": "ho_set_002",
+      "expectedBankTransactionId": "ho_bank_002",
+      "expectedExceptionType": "CLEAN_MATCH",
+      "expectedOutcome": "auto_reconciled",
+      "scenarioDescription": "Clean 3-way exact match"
+    },
+    {
+      "paymentId": "ho_pay_003",
+      "expectedSettlementId": "ho_set_003",
+      "expectedBankTransactionId": "ho_bank_003",
+      "expectedExceptionType": "CLEAN_MATCH",
+      "expectedOutcome": "auto_reconciled",
+      "scenarioDescription": "Clean 3-way exact match"
+    },
+    {
+      "paymentId": "ho_pay_004",
+      "expectedSettlementId": "ho_set_004",
+      "expectedBankTransactionId": "ho_bank_004",
+      "expectedExceptionType": "CLEAN_MATCH",
+      "expectedOutcome": "auto_reconciled",
+      "scenarioDescription": "Clean 3-way exact match"
+    },
+    {
+      "paymentId": "ho_pay_005",
+      "expectedSettlementId": "ho_set_005",
+      "expectedBankTransactionId": "ho_bank_005",
+      "expectedExceptionType": "CLEAN_MATCH",
+      "expectedOutcome": "auto_reconciled",
+      "scenarioDescription": "Clean 3-way exact match"
+    },
+    {
+      "paymentId": "ho_pay_006",
+      "expectedSettlementId": "ho_set_006",
+      "expectedBankTransactionId": "ho_bank_006",
+      "expectedExceptionType": "CLEAN_MATCH",
+      "expectedOutcome": "auto_reconciled",
+      "scenarioDescription": "Clean 3-way exact match"
+    },
+    {
+      "paymentId": "ho_pay_007",
+      "expectedSettlementId": "ho_set_007",
+      "expectedBankTransactionId": "ho_bank_007",
+      "expectedExceptionType": "CLEAN_MATCH",
+      "expectedOutcome": "auto_reconciled",
+      "scenarioDescription": "Clean 3-way exact match"
+    },
+    {
+      "paymentId": "ho_pay_008",
+      "expectedSettlementId": "ho_set_008",
+      "expectedBankTransactionId": "ho_bank_008",
+      "expectedExceptionType": "CLEAN_MATCH",
+      "expectedOutcome": "auto_reconciled",
+      "scenarioDescription": "Clean 3-way exact match"
+    },
+    {
+      "paymentId": "ho_pay_009",
+      "expectedSettlementId": "ho_set_009",
+      "expectedBankTransactionId": "ho_bank_009",
+      "expectedExceptionType": "CLEAN_MATCH",
+      "expectedOutcome": "auto_reconciled",
+      "scenarioDescription": "Clean 3-way exact match"
+    },
+    {
+      "paymentId": "ho_pay_010",
+      "expectedSettlementId": "ho_set_010",
+      "expectedBankTransactionId": "ho_bank_010",
+      "expectedExceptionType": "CLEAN_MATCH",
+      "expectedOutcome": "auto_reconciled",
+      "scenarioDescription": "Clean 3-way exact match"
+    },
+    {
+      "paymentId": "ho_pay_011",
+      "expectedSettlementId": "ho_set_011",
+      "expectedBankTransactionId": "ho_bank_011",
+      "expectedExceptionType": "CLEAN_MATCH",
+      "expectedOutcome": "auto_reconciled",
+      "scenarioDescription": "Clean 3-way exact match"
+    },
+    {
+      "paymentId": "ho_pay_012",
+      "expectedSettlementId": "ho_set_012",
+      "expectedBankTransactionId": "ho_bank_012",
+      "expectedExceptionType": "CLEAN_MATCH",
+      "expectedOutcome": "auto_reconciled",
+      "scenarioDescription": "Clean 3-way exact match"
+    },
+    {
+      "paymentId": "ho_pay_013",
+      "expectedSettlementId": "ho_set_013",
+      "expectedBankTransactionId": "ho_bank_013",
+      "expectedExceptionType": "CLEAN_MATCH",
+      "expectedOutcome": "auto_reconciled",
+      "scenarioDescription": "Clean 3-way exact match"
+    },
+    {
+      "paymentId": "ho_pay_014",
+      "expectedSettlementId": "ho_set_014",
+      "expectedBankTransactionId": "ho_bank_014",
+      "expectedExceptionType": "CLEAN_MATCH",
+      "expectedOutcome": "auto_reconciled",
+      "scenarioDescription": "Clean 3-way exact match"
+    },
+    {
+      "paymentId": "ho_pay_015",
+      "expectedSettlementId": "ho_set_015",
+      "expectedBankTransactionId": "ho_bank_015",
+      "expectedExceptionType": "CLEAN_MATCH",
+      "expectedOutcome": "auto_reconciled",
+      "scenarioDescription": "Clean 3-way exact match"
+    },
+    {
+      "paymentId": "ho_pay_016",
+      "expectedSettlementId": "ho_set_016",
+      "expectedBankTransactionId": "ho_bank_016",
+      "expectedExceptionType": "CLEAN_MATCH",
+      "expectedOutcome": "auto_reconciled",
+      "scenarioDescription": "Clean 3-way exact match"
+    },
+    {
+      "paymentId": "ho_pay_017",
+      "expectedSettlementId": "ho_set_017",
+      "expectedBankTransactionId": "ho_bank_017",
+      "expectedExceptionType": "CLEAN_MATCH",
+      "expectedOutcome": "auto_reconciled",
+      "scenarioDescription": "Clean 3-way exact match"
+    },
+    {
+      "paymentId": "ho_pay_018",
+      "expectedSettlementId": "ho_set_018",
+      "expectedBankTransactionId": "ho_bank_018",
+      "expectedExceptionType": "CLEAN_MATCH",
+      "expectedOutcome": "auto_reconciled",
+      "scenarioDescription": "Clean 3-way exact match"
+    },
+    {
+      "paymentId": "ho_pay_019",
+      "expectedSettlementId": "ho_set_019",
+      "expectedBankTransactionId": "ho_bank_019",
+      "expectedExceptionType": "CLEAN_MATCH",
+      "expectedOutcome": "auto_reconciled",
+      "scenarioDescription": "Clean 3-way exact match"
+    },
+    {
+      "paymentId": "ho_pay_020",
+      "expectedSettlementId": "ho_set_020",
+      "expectedBankTransactionId": "ho_bank_020",
+      "expectedExceptionType": "CLEAN_MATCH",
+      "expectedOutcome": "auto_reconciled",
+      "scenarioDescription": "Clean 3-way exact match"
+    },
+    {
+      "paymentId": "ho_pay_021",
+      "expectedSettlementId": "ho_set_021",
+      "expectedBankTransactionId": "ho_bank_021",
+      "expectedExceptionType": "CLEAN_MATCH",
+      "expectedOutcome": "auto_reconciled",
+      "scenarioDescription": "Clean 3-way exact match"
+    },
+    {
+      "paymentId": "ho_pay_022",
+      "expectedSettlementId": "ho_set_022",
+      "expectedBankTransactionId": "ho_bank_022",
+      "expectedExceptionType": "CLEAN_MATCH",
+      "expectedOutcome": "auto_reconciled",
+      "scenarioDescription": "Clean 3-way exact match"
+    },
+    {
+      "paymentId": "ho_pay_023",
+      "expectedSettlementId": "ho_set_023",
+      "expectedBankTransactionId": "ho_bank_023",
+      "expectedExceptionType": "CLEAN_MATCH",
+      "expectedOutcome": "auto_reconciled",
+      "scenarioDescription": "Clean 3-way exact match"
+    },
+    {
+      "paymentId": "ho_pay_024",
+      "expectedSettlementId": "ho_set_024",
+      "expectedBankTransactionId": "ho_bank_024",
+      "expectedExceptionType": "CLEAN_MATCH",
+      "expectedOutcome": "auto_reconciled",
+      "scenarioDescription": "Clean 3-way exact match"
+    },
+    {
+      "paymentId": "ho_pay_025",
+      "expectedSettlementId": "ho_set_025",
+      "expectedBankTransactionId": "ho_bank_025",
+      "expectedExceptionType": "CLEAN_MATCH",
+      "expectedOutcome": "auto_reconciled",
+      "scenarioDescription": "Clean 3-way exact match"
+    },
+    {
+      "paymentId": "ho_pay_026",
+      "expectedSettlementId": "ho_set_026",
+      "expectedBankTransactionId": "ho_bank_026",
+      "expectedExceptionType": "CLEAN_MATCH",
+      "expectedOutcome": "auto_reconciled",
+      "scenarioDescription": "Clean 3-way exact match"
+    },
+    {
+      "paymentId": "ho_pay_027",
+      "expectedSettlementId": "ho_set_027",
+      "expectedBankTransactionId": "ho_bank_027",
+      "expectedExceptionType": "CLEAN_MATCH",
+      "expectedOutcome": "auto_reconciled",
+      "scenarioDescription": "Clean 3-way exact match"
+    },
+    {
+      "paymentId": "ho_pay_028",
+      "expectedSettlementId": "ho_set_028",
+      "expectedBankTransactionId": "ho_bank_028",
+      "expectedExceptionType": "CLEAN_MATCH",
+      "expectedOutcome": "auto_reconciled",
+      "scenarioDescription": "Clean 3-way exact match"
+    },
+    {
+      "paymentId": "ho_pay_029",
+      "expectedSettlementId": "ho_set_029",
+      "expectedBankTransactionId": "ho_bank_029",
+      "expectedExceptionType": "CLEAN_MATCH",
+      "expectedOutcome": "auto_reconciled",
+      "scenarioDescription": "Clean 3-way exact match"
+    },
+    {
+      "paymentId": "ho_pay_030",
+      "expectedSettlementId": "ho_set_030",
+      "expectedBankTransactionId": "ho_bank_030",
+      "expectedExceptionType": "CLEAN_MATCH",
+      "expectedOutcome": "auto_reconciled",
+      "scenarioDescription": "Clean 3-way exact match"
+    },
+    {
+      "paymentId": "ho_pay_trunc_031",
+      "expectedSettlementId": "ho_set_031",
+      "expectedBankTransactionId": "ho_bank_031",
+      "expectedExceptionType": "PARTIALLY_MISSING_REF",
+      "expectedOutcome": "manual_review",
+      "scenarioDescription": "Order ID reference instead of Payment ID"
+    },
+    {
+      "paymentId": "ho_pay_trunc_032",
+      "expectedSettlementId": "ho_set_032",
+      "expectedBankTransactionId": "ho_bank_032",
+      "expectedExceptionType": "PARTIALLY_MISSING_REF",
+      "expectedOutcome": "manual_review",
+      "scenarioDescription": "Truncated reference suffix"
+    },
+    {
+      "paymentId": "ho_pay_trunc_033",
+      "expectedSettlementId": "ho_set_033",
+      "expectedBankTransactionId": "ho_bank_033",
+      "expectedExceptionType": "PARTIALLY_MISSING_REF",
+      "expectedOutcome": "manual_review",
+      "scenarioDescription": "Order ID reference instead of Payment ID"
+    },
+    {
+      "paymentId": "ho_pay_trunc_034",
+      "expectedSettlementId": "ho_set_034",
+      "expectedBankTransactionId": "ho_bank_034",
+      "expectedExceptionType": "PARTIALLY_MISSING_REF",
+      "expectedOutcome": "manual_review",
+      "scenarioDescription": "Truncated reference suffix"
+    },
+    {
+      "paymentId": "ho_pay_trunc_035",
+      "expectedSettlementId": "ho_set_035",
+      "expectedBankTransactionId": "ho_bank_035",
+      "expectedExceptionType": "PARTIALLY_MISSING_REF",
+      "expectedOutcome": "manual_review",
+      "scenarioDescription": "Order ID reference instead of Payment ID"
+    },
+    {
+      "paymentId": "ho_pay_col_036",
+      "expectedSettlementId": "ho_set_036",
+      "expectedBankTransactionId": "ho_bank_036",
+      "expectedExceptionType": "CLEAN_MATCH",
+      "expectedOutcome": "auto_reconciled",
+      "scenarioDescription": "Amount collision correctly resolved by exact ref"
+    },
+    {
+      "paymentId": "ho_pay_col_037",
+      "expectedSettlementId": "ho_set_037",
+      "expectedBankTransactionId": "ho_bank_037",
+      "expectedExceptionType": "CLEAN_MATCH",
+      "expectedOutcome": "auto_reconciled",
+      "scenarioDescription": "Amount collision correctly resolved by exact ref"
+    },
+    {
+      "paymentId": "ho_pay_col_038",
+      "expectedSettlementId": "ho_set_038",
+      "expectedBankTransactionId": "ho_bank_038",
+      "expectedExceptionType": "CLEAN_MATCH",
+      "expectedOutcome": "auto_reconciled",
+      "scenarioDescription": "Amount collision correctly resolved by exact ref"
+    },
+    {
+      "paymentId": "ho_pay_col_039",
+      "expectedSettlementId": "ho_set_039",
+      "expectedBankTransactionId": "ho_bank_039",
+      "expectedExceptionType": "CLEAN_MATCH",
+      "expectedOutcome": "auto_reconciled",
+      "scenarioDescription": "Amount collision correctly resolved by exact ref"
+    },
+    {
+      "paymentId": "ho_pay_col_040",
+      "expectedSettlementId": "ho_set_040",
+      "expectedBankTransactionId": "ho_bank_040",
+      "expectedExceptionType": "CLEAN_MATCH",
+      "expectedOutcome": "auto_reconciled",
+      "scenarioDescription": "Amount collision correctly resolved by exact ref"
+    },
+    {
+      "paymentId": "ho_pay_duputr_041",
+      "expectedSettlementId": "ho_set_041",
+      "expectedBankTransactionId": "ho_bank_041",
+      "expectedExceptionType": "DUPLICATE_BANK_CREDIT",
+      "expectedOutcome": "manual_review",
+      "scenarioDescription": "Duplicate UTR collision on bank statement"
+    },
+    {
+      "paymentId": "ho_pay_duputr_042",
+      "expectedSettlementId": "ho_set_042",
+      "expectedBankTransactionId": "ho_bank_042",
+      "expectedExceptionType": "DUPLICATE_BANK_CREDIT",
+      "expectedOutcome": "manual_review",
+      "scenarioDescription": "Duplicate UTR collision on bank statement"
+    },
+    {
+      "paymentId": "ho_pay_duputr_043",
+      "expectedSettlementId": "ho_set_043",
+      "expectedBankTransactionId": "ho_bank_043",
+      "expectedExceptionType": "DUPLICATE_BANK_CREDIT",
+      "expectedOutcome": "manual_review",
+      "scenarioDescription": "Duplicate UTR collision on bank statement"
+    },
+    {
+      "paymentId": "ho_pay_duputr_044",
+      "expectedSettlementId": "ho_set_044",
+      "expectedBankTransactionId": "ho_bank_044",
+      "expectedExceptionType": "DUPLICATE_BANK_CREDIT",
+      "expectedOutcome": "manual_review",
+      "scenarioDescription": "Duplicate UTR collision on bank statement"
+    },
+    {
+      "paymentId": "ho_pay_wrongnar_045",
+      "expectedSettlementId": "ho_set_045",
+      "expectedBankTransactionId": "ho_bank_045",
+      "expectedExceptionType": "INCONSISTENT_DESCRIPTION",
+      "expectedOutcome": "manual_review",
+      "scenarioDescription": "Bank narration references wrong payment ID"
+    },
+    {
+      "paymentId": "ho_pay_wrongnar_046",
+      "expectedSettlementId": "ho_set_046",
+      "expectedBankTransactionId": "ho_bank_046",
+      "expectedExceptionType": "INCONSISTENT_DESCRIPTION",
+      "expectedOutcome": "manual_review",
+      "scenarioDescription": "Bank narration references wrong payment ID"
+    },
+    {
+      "paymentId": "ho_pay_wrongnar_047",
+      "expectedSettlementId": "ho_set_047",
+      "expectedBankTransactionId": "ho_bank_047",
+      "expectedExceptionType": "INCONSISTENT_DESCRIPTION",
+      "expectedOutcome": "manual_review",
+      "scenarioDescription": "Bank narration references wrong payment ID"
+    },
+    {
+      "paymentId": "ho_pay_wrongnar_048",
+      "expectedSettlementId": "ho_set_048",
+      "expectedBankTransactionId": "ho_bank_048",
+      "expectedExceptionType": "INCONSISTENT_DESCRIPTION",
+      "expectedOutcome": "manual_review",
+      "scenarioDescription": "Bank narration references wrong payment ID"
+    },
+    {
+      "paymentId": "ho_pay_feeanom_049",
+      "expectedSettlementId": "ho_set_049",
+      "expectedBankTransactionId": "ho_bank_049",
+      "expectedExceptionType": "FEE_TAX_ANOMALY",
+      "expectedOutcome": "manual_review",
+      "scenarioDescription": "Unexpected 3.5% fee deduction variance"
+    },
+    {
+      "paymentId": "ho_pay_feeanom_050",
+      "expectedSettlementId": "ho_set_050",
+      "expectedBankTransactionId": "ho_bank_050",
+      "expectedExceptionType": "FEE_TAX_ANOMALY",
+      "expectedOutcome": "manual_review",
+      "scenarioDescription": "Unexpected 3.5% fee deduction variance"
+    },
+    {
+      "paymentId": "ho_pay_feeanom_051",
+      "expectedSettlementId": "ho_set_051",
+      "expectedBankTransactionId": "ho_bank_051",
+      "expectedExceptionType": "FEE_TAX_ANOMALY",
+      "expectedOutcome": "manual_review",
+      "scenarioDescription": "Unexpected 3.5% fee deduction variance"
+    },
+    {
+      "paymentId": "ho_pay_feeanom_052",
+      "expectedSettlementId": "ho_set_052",
+      "expectedBankTransactionId": "ho_bank_052",
+      "expectedExceptionType": "FEE_TAX_ANOMALY",
+      "expectedOutcome": "manual_review",
+      "scenarioDescription": "Unexpected 3.5% fee deduction variance"
+    },
+    {
+      "paymentId": "ho_pay_date_053",
+      "expectedSettlementId": "ho_set_053",
+      "expectedBankTransactionId": "ho_bank_053",
+      "expectedExceptionType": "DELAYED_SETTLEMENT",
+      "expectedOutcome": "manual_review",
+      "scenarioDescription": "Settlement delayed 7 days due to bank holiday"
+    },
+    {
+      "paymentId": "ho_pay_date_054",
+      "expectedSettlementId": "ho_set_054",
+      "expectedBankTransactionId": "ho_bank_054",
+      "expectedExceptionType": "DELAYED_SETTLEMENT",
+      "expectedOutcome": "manual_review",
+      "scenarioDescription": "Settlement delayed 9 days due to bank holiday"
+    },
+    {
+      "paymentId": "ho_pay_date_055",
+      "expectedSettlementId": "ho_set_055",
+      "expectedBankTransactionId": "ho_bank_055",
+      "expectedExceptionType": "DELAYED_SETTLEMENT",
+      "expectedOutcome": "manual_review",
+      "scenarioDescription": "Settlement delayed 10 days due to bank holiday"
+    },
+    {
+      "paymentId": "ho_pay_date_056",
+      "expectedSettlementId": "ho_set_056",
+      "expectedBankTransactionId": "ho_bank_056",
+      "expectedExceptionType": "DELAYED_SETTLEMENT",
+      "expectedOutcome": "manual_review",
+      "scenarioDescription": "Settlement delayed 11 days due to bank holiday"
+    },
+    {
+      "paymentId": "ho_pay_noset_057",
+      "expectedSettlementId": null,
+      "expectedBankTransactionId": null,
+      "expectedExceptionType": "MISSING_SETTLEMENT",
+      "expectedOutcome": "unmatched_exception",
+      "scenarioDescription": "No settlement record generated by gateway"
+    },
+    {
+      "paymentId": "ho_pay_noset_058",
+      "expectedSettlementId": null,
+      "expectedBankTransactionId": null,
+      "expectedExceptionType": "MISSING_SETTLEMENT",
+      "expectedOutcome": "unmatched_exception",
+      "scenarioDescription": "No settlement record generated by gateway"
+    },
+    {
+      "paymentId": "ho_pay_noset_059",
+      "expectedSettlementId": null,
+      "expectedBankTransactionId": null,
+      "expectedExceptionType": "MISSING_SETTLEMENT",
+      "expectedOutcome": "unmatched_exception",
+      "scenarioDescription": "No settlement record generated by gateway"
+    },
+    {
+      "paymentId": "ho_pay_noset_060",
+      "expectedSettlementId": null,
+      "expectedBankTransactionId": null,
+      "expectedExceptionType": "MISSING_SETTLEMENT",
+      "expectedOutcome": "unmatched_exception",
+      "scenarioDescription": "No settlement record generated by gateway"
+    },
+    {
+      "paymentId": "ho_pay_nobank_061",
+      "expectedSettlementId": "ho_set_061",
+      "expectedBankTransactionId": null,
+      "expectedExceptionType": "MISSING_BANK_CREDIT",
+      "expectedOutcome": "unmatched_exception",
+      "scenarioDescription": "Settlement processed but bank credit missing"
+    },
+    {
+      "paymentId": "ho_pay_nobank_062",
+      "expectedSettlementId": "ho_set_062",
+      "expectedBankTransactionId": null,
+      "expectedExceptionType": "MISSING_BANK_CREDIT",
+      "expectedOutcome": "unmatched_exception",
+      "scenarioDescription": "Settlement processed but bank credit missing"
+    },
+    {
+      "paymentId": "ho_pay_nobank_063",
+      "expectedSettlementId": "ho_set_063",
+      "expectedBankTransactionId": null,
+      "expectedExceptionType": "MISSING_BANK_CREDIT",
+      "expectedOutcome": "unmatched_exception",
+      "scenarioDescription": "Settlement processed but bank credit missing"
+    },
+    {
+      "paymentId": "ho_pay_nobank_064",
+      "expectedSettlementId": "ho_set_064",
+      "expectedBankTransactionId": null,
+      "expectedExceptionType": "MISSING_BANK_CREDIT",
+      "expectedOutcome": "unmatched_exception",
+      "scenarioDescription": "Settlement processed but bank credit missing"
+    },
+    {
+      "paymentId": "ho_pay_dupset_065",
+      "expectedSettlementId": "ho_set_065_A",
+      "expectedBankTransactionId": "ho_bank_065",
+      "expectedExceptionType": "DUPLICATE_SETTLEMENT",
+      "expectedOutcome": "manual_review",
+      "scenarioDescription": "Duplicate settlement records for single payment"
+    },
+    {
+      "paymentId": "ho_pay_dupset_066",
+      "expectedSettlementId": "ho_set_066_A",
+      "expectedBankTransactionId": "ho_bank_066",
+      "expectedExceptionType": "DUPLICATE_SETTLEMENT",
+      "expectedOutcome": "manual_review",
+      "scenarioDescription": "Duplicate settlement records for single payment"
+    },
+    {
+      "paymentId": "ho_pay_dupset_067",
+      "expectedSettlementId": "ho_set_067_A",
+      "expectedBankTransactionId": "ho_bank_067",
+      "expectedExceptionType": "DUPLICATE_SETTLEMENT",
+      "expectedOutcome": "manual_review",
+      "scenarioDescription": "Duplicate settlement records for single payment"
+    },
+    {
+      "paymentId": "ho_pay_dupset_068",
+      "expectedSettlementId": "ho_set_068_A",
+      "expectedBankTransactionId": "ho_bank_068",
+      "expectedExceptionType": "DUPLICATE_SETTLEMENT",
+      "expectedOutcome": "manual_review",
+      "scenarioDescription": "Duplicate settlement records for single payment"
+    },
+    {
+      "paymentId": "ho_pay_dupbank_069",
+      "expectedSettlementId": "ho_set_069",
+      "expectedBankTransactionId": "ho_bank_069_1",
+      "expectedExceptionType": "DUPLICATE_BANK_CREDIT",
+      "expectedOutcome": "manual_review",
+      "scenarioDescription": "Duplicate bank credits with identical UTR"
+    },
+    {
+      "paymentId": "ho_pay_dupbank_070",
+      "expectedSettlementId": "ho_set_070",
+      "expectedBankTransactionId": "ho_bank_070_1",
+      "expectedExceptionType": "DUPLICATE_BANK_CREDIT",
+      "expectedOutcome": "manual_review",
+      "scenarioDescription": "Duplicate bank credits with identical UTR"
+    },
+    {
+      "paymentId": "ho_pay_dupbank_071",
+      "expectedSettlementId": "ho_set_071",
+      "expectedBankTransactionId": "ho_bank_071_1",
+      "expectedExceptionType": "DUPLICATE_BANK_CREDIT",
+      "expectedOutcome": "manual_review",
+      "scenarioDescription": "Duplicate bank credits with identical UTR"
+    },
+    {
+      "paymentId": "ho_pay_dupbank_072",
+      "expectedSettlementId": "ho_set_072",
+      "expectedBankTransactionId": "ho_bank_072_1",
+      "expectedExceptionType": "DUPLICATE_BANK_CREDIT",
+      "expectedOutcome": "manual_review",
+      "scenarioDescription": "Duplicate bank credits with identical UTR"
+    },
+    {
+      "paymentId": "ho_pay_unrel_073",
+      "expectedSettlementId": "ho_set_073",
+      "expectedBankTransactionId": null,
+      "expectedExceptionType": "MISSING_BANK_CREDIT",
+      "expectedOutcome": "unmatched_exception",
+      "scenarioDescription": "Similar amount credit is an unrelated vendor payout"
+    },
+    {
+      "paymentId": "ho_pay_unrel_074",
+      "expectedSettlementId": "ho_set_074",
+      "expectedBankTransactionId": null,
+      "expectedExceptionType": "MISSING_BANK_CREDIT",
+      "expectedOutcome": "unmatched_exception",
+      "scenarioDescription": "Similar amount credit is an unrelated vendor payout"
+    },
+    {
+      "paymentId": "ho_pay_unrel_075",
+      "expectedSettlementId": "ho_set_075",
+      "expectedBankTransactionId": null,
+      "expectedExceptionType": "MISSING_BANK_CREDIT",
+      "expectedOutcome": "unmatched_exception",
+      "scenarioDescription": "Similar amount credit is an unrelated vendor payout"
+    },
+    {
+      "paymentId": "ho_pay_unrel_076",
+      "expectedSettlementId": "ho_set_076",
+      "expectedBankTransactionId": null,
+      "expectedExceptionType": "MISSING_BANK_CREDIT",
+      "expectedOutcome": "unmatched_exception",
+      "scenarioDescription": "Similar amount credit is an unrelated vendor payout"
+    },
+    {
+      "paymentId": "ho_pay_curr_077",
+      "expectedSettlementId": "ho_set_077",
+      "expectedBankTransactionId": "ho_bank_077",
+      "expectedExceptionType": "UNSUPPORTED_CURRENCY",
+      "expectedOutcome": "unmatched_exception",
+      "scenarioDescription": "USD transaction rejected by INR circuit breaker"
+    },
+    {
+      "paymentId": "ho_pay_curr_078",
+      "expectedSettlementId": "ho_set_078",
+      "expectedBankTransactionId": "ho_bank_078",
+      "expectedExceptionType": "UNSUPPORTED_CURRENCY",
+      "expectedOutcome": "unmatched_exception",
+      "scenarioDescription": "EUR transaction rejected by INR circuit breaker"
+    },
+    {
+      "paymentId": "ho_pay_curr_079",
+      "expectedSettlementId": "ho_set_079",
+      "expectedBankTransactionId": "ho_bank_079",
+      "expectedExceptionType": "UNSUPPORTED_CURRENCY",
+      "expectedOutcome": "unmatched_exception",
+      "scenarioDescription": "GBP transaction rejected by INR circuit breaker"
+    },
+    {
+      "paymentId": "ho_pay_curr_080",
+      "expectedSettlementId": "ho_set_080",
+      "expectedBankTransactionId": "ho_bank_080",
+      "expectedExceptionType": "UNSUPPORTED_CURRENCY",
+      "expectedOutcome": "unmatched_exception",
+      "scenarioDescription": "USD transaction rejected by INR circuit breaker"
+    }
+  ]
+}

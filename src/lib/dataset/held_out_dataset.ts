@@ -1,0 +1,475 @@
+/**
+ * Manually Curated Held-Out Adversarial Dataset for ShaRecon AI
+ * 
+ * Strict Evaluation Rules:
+ * 1. Manually crafted independent test cases - NO generator helper functions.
+ * 2. Ground-truth labels stored independently.
+ * 3. Immutable: Deep frozen at module initialization.
+ * 4. Engine matches ONLY using (payments, settlements, bankTransactions) - never sees ground truth.
+ */
+
+import {
+  Payment,
+  Settlement,
+  BankTransaction,
+  GroundTruth,
+} from '@/types/reconciliation';
+
+export interface HeldOutDataset {
+  payments: readonly Payment[];
+  settlements: readonly Settlement[];
+  bankTransactions: readonly BankTransaction[];
+  groundTruth: readonly GroundTruth[];
+}
+
+function deepFreeze<T>(obj: T): Readonly<T> {
+  if (obj === null || typeof obj !== 'object') {
+    return obj;
+  }
+  Object.freeze(obj);
+  Object.getOwnPropertyNames(obj).forEach((prop) => {
+    const val = (obj as Record<string, unknown>)[prop];
+    if (val !== null && typeof val === 'object' && !Object.isFrozen(val)) {
+      deepFreeze(val);
+    }
+  });
+  return obj as Readonly<T>;
+}
+
+// 80 Manually specified payments
+const rawPayments: Payment[] = [
+  // 1-30: Clean & Standard Merchant Transactions (Diverse amounts, tiers, dates)
+  { paymentId: 'ho_pay_001', orderId: 'ho_ord_001', grossAmount: 149900, fee: 2998, tax: 540, expectedNetAmount: 146362, currency: 'INR', status: 'captured', createdAt: '2026-04-01T09:15:00Z' },
+  { paymentId: 'ho_pay_002', orderId: 'ho_ord_002', grossAmount: 299900, fee: 5998, tax: 1080, expectedNetAmount: 292822, currency: 'INR', status: 'captured', createdAt: '2026-04-01T09:30:00Z' },
+  { paymentId: 'ho_pay_003', orderId: 'ho_ord_003', grossAmount: 49900, fee: 998, tax: 180, expectedNetAmount: 48722, currency: 'INR', status: 'captured', createdAt: '2026-04-01T10:00:00Z' },
+  { paymentId: 'ho_pay_004', orderId: 'ho_ord_004', grossAmount: 850000, fee: 17000, tax: 3060, expectedNetAmount: 829940, currency: 'INR', status: 'captured', createdAt: '2026-04-01T10:45:00Z' },
+  { paymentId: 'ho_pay_005', orderId: 'ho_ord_005', grossAmount: 120000, fee: 2400, tax: 432, expectedNetAmount: 117168, currency: 'INR', status: 'captured', createdAt: '2026-04-01T11:20:00Z' },
+  { paymentId: 'ho_pay_006', orderId: 'ho_ord_006', grossAmount: 349900, fee: 6998, tax: 1260, expectedNetAmount: 341642, currency: 'INR', status: 'captured', createdAt: '2026-04-01T12:00:00Z' },
+  { paymentId: 'ho_pay_007', orderId: 'ho_ord_007', grossAmount: 99900, fee: 1998, tax: 360, expectedNetAmount: 97542, currency: 'INR', status: 'captured', createdAt: '2026-04-01T12:30:00Z' },
+  { paymentId: 'ho_pay_008', orderId: 'ho_ord_008', grossAmount: 550000, fee: 11000, tax: 1980, expectedNetAmount: 537020, currency: 'INR', status: 'captured', createdAt: '2026-04-01T13:10:00Z' },
+  { paymentId: 'ho_pay_009', orderId: 'ho_ord_009', grossAmount: 189900, fee: 3798, tax: 684, expectedNetAmount: 185418, currency: 'INR', status: 'captured', createdAt: '2026-04-01T14:00:00Z' },
+  { paymentId: 'ho_pay_010', orderId: 'ho_ord_010', grossAmount: 750000, fee: 15000, tax: 2700, expectedNetAmount: 732300, currency: 'INR', status: 'captured', createdAt: '2026-04-01T14:45:00Z' },
+  { paymentId: 'ho_pay_011', orderId: 'ho_ord_011', grossAmount: 225000, fee: 4500, tax: 810, expectedNetAmount: 219690, currency: 'INR', status: 'captured', createdAt: '2026-04-01T15:20:00Z' },
+  { paymentId: 'ho_pay_012', orderId: 'ho_ord_012', grossAmount: 64900, fee: 1298, tax: 234, expectedNetAmount: 63368, currency: 'INR', status: 'captured', createdAt: '2026-04-01T16:00:00Z' },
+  { paymentId: 'ho_pay_013', orderId: 'ho_ord_013', grossAmount: 420000, fee: 8400, tax: 1512, expectedNetAmount: 410088, currency: 'INR', status: 'captured', createdAt: '2026-04-01T16:30:00Z' },
+  { paymentId: 'ho_pay_014', orderId: 'ho_ord_014', grossAmount: 159900, fee: 3198, tax: 576, expectedNetAmount: 156126, currency: 'INR', status: 'captured', createdAt: '2026-04-01T17:15:00Z' },
+  { paymentId: 'ho_pay_015', orderId: 'ho_ord_015', grossAmount: 980000, fee: 19600, tax: 3528, expectedNetAmount: 956872, currency: 'INR', status: 'captured', createdAt: '2026-04-01T18:00:00Z' },
+  { paymentId: 'ho_pay_016', orderId: 'ho_ord_016', grossAmount: 89900, fee: 1798, tax: 324, expectedNetAmount: 87778, currency: 'INR', status: 'captured', createdAt: '2026-04-02T09:00:00Z' },
+  { paymentId: 'ho_pay_017', orderId: 'ho_ord_017', grossAmount: 310000, fee: 6200, tax: 1116, expectedNetAmount: 302684, currency: 'INR', status: 'captured', createdAt: '2026-04-02T09:40:00Z' },
+  { paymentId: 'ho_pay_018', orderId: 'ho_ord_018', grossAmount: 175000, fee: 3500, tax: 630, expectedNetAmount: 170870, currency: 'INR', status: 'captured', createdAt: '2026-04-02T10:15:00Z' },
+  { paymentId: 'ho_pay_019', orderId: 'ho_ord_019', grossAmount: 520000, fee: 10400, tax: 1872, expectedNetAmount: 507728, currency: 'INR', status: 'captured', createdAt: '2026-04-02T11:00:00Z' },
+  { paymentId: 'ho_pay_020', orderId: 'ho_ord_020', grossAmount: 249900, fee: 4998, tax: 900, expectedNetAmount: 244002, currency: 'INR', status: 'captured', createdAt: '2026-04-02T11:45:00Z' },
+  { paymentId: 'ho_pay_021', orderId: 'ho_ord_021', grossAmount: 115000, fee: 2300, tax: 414, expectedNetAmount: 112286, currency: 'INR', status: 'captured', createdAt: '2026-04-02T12:30:00Z' },
+  { paymentId: 'ho_pay_022', orderId: 'ho_ord_022', grossAmount: 670000, fee: 13400, tax: 2412, expectedNetAmount: 654188, currency: 'INR', status: 'captured', createdAt: '2026-04-02T13:15:00Z' },
+  { paymentId: 'ho_pay_023', orderId: 'ho_ord_023', grossAmount: 199900, fee: 3998, tax: 720, expectedNetAmount: 195182, currency: 'INR', status: 'captured', createdAt: '2026-04-02T14:00:00Z' },
+  { paymentId: 'ho_pay_024', orderId: 'ho_ord_024', grossAmount: 430000, fee: 8600, tax: 1548, expectedNetAmount: 419852, currency: 'INR', status: 'captured', createdAt: '2026-04-02T14:40:00Z' },
+  { paymentId: 'ho_pay_025', orderId: 'ho_ord_025', grossAmount: 82000, fee: 1640, tax: 295, expectedNetAmount: 80065, currency: 'INR', status: 'captured', createdAt: '2026-04-02T15:20:00Z' },
+  { paymentId: 'ho_pay_026', orderId: 'ho_ord_026', grossAmount: 380000, fee: 7600, tax: 1368, expectedNetAmount: 371032, currency: 'INR', status: 'captured', createdAt: '2026-04-02T16:00:00Z' },
+  { paymentId: 'ho_pay_027', orderId: 'ho_ord_027', grossAmount: 135000, fee: 2700, tax: 486, expectedNetAmount: 131814, currency: 'INR', status: 'captured', createdAt: '2026-04-02T16:45:00Z' },
+  { paymentId: 'ho_pay_028', orderId: 'ho_ord_028', grossAmount: 920000, fee: 18400, tax: 3312, expectedNetAmount: 898288, currency: 'INR', status: 'captured', createdAt: '2026-04-02T17:30:00Z' },
+  { paymentId: 'ho_pay_029', orderId: 'ho_ord_029', grossAmount: 260000, fee: 5200, tax: 936, expectedNetAmount: 253864, currency: 'INR', status: 'captured', createdAt: '2026-04-02T18:00:00Z' },
+  { paymentId: 'ho_pay_030', orderId: 'ho_ord_030', grossAmount: 475000, fee: 9500, tax: 1710, expectedNetAmount: 463790, currency: 'INR', status: 'captured', createdAt: '2026-04-02T18:30:00Z' },
+
+  // 31-35: Reference Truncation (Settlement has truncated or order-only reference)
+  { paymentId: 'ho_pay_trunc_031', orderId: 'ho_ord_trunc_031', grossAmount: 150000, fee: 3000, tax: 540, expectedNetAmount: 146460, currency: 'INR', status: 'captured', createdAt: '2026-04-03T10:00:00Z' },
+  { paymentId: 'ho_pay_trunc_032', orderId: 'ho_ord_trunc_032', grossAmount: 280000, fee: 5600, tax: 1008, expectedNetAmount: 273392, currency: 'INR', status: 'captured', createdAt: '2026-04-03T10:30:00Z' },
+  { paymentId: 'ho_pay_trunc_033', orderId: 'ho_ord_trunc_033', grossAmount: 390000, fee: 7800, tax: 1404, expectedNetAmount: 380796, currency: 'INR', status: 'captured', createdAt: '2026-04-03T11:00:00Z' },
+  { paymentId: 'ho_pay_trunc_034', orderId: 'ho_ord_trunc_034', grossAmount: 510000, fee: 10200, tax: 1836, expectedNetAmount: 497964, currency: 'INR', status: 'captured', createdAt: '2026-04-03T11:30:00Z' },
+  { paymentId: 'ho_pay_trunc_035', orderId: 'ho_ord_trunc_035', grossAmount: 620000, fee: 12400, tax: 2232, expectedNetAmount: 605368, currency: 'INR', status: 'captured', createdAt: '2026-04-03T12:00:00Z' },
+
+  // 36-40: Amount Collisions (Multiple distinct payments sharing exact ₹1,00,000 gross)
+  { paymentId: 'ho_pay_col_036', orderId: 'ho_ord_col_036', grossAmount: 100000, fee: 2000, tax: 360, expectedNetAmount: 97640, currency: 'INR', status: 'captured', createdAt: '2026-04-03T12:30:00Z' },
+  { paymentId: 'ho_pay_col_037', orderId: 'ho_ord_col_037', grossAmount: 100000, fee: 2000, tax: 360, expectedNetAmount: 97640, currency: 'INR', status: 'captured', createdAt: '2026-04-03T12:35:00Z' },
+  { paymentId: 'ho_pay_col_038', orderId: 'ho_ord_col_038', grossAmount: 100000, fee: 2000, tax: 360, expectedNetAmount: 97640, currency: 'INR', status: 'captured', createdAt: '2026-04-03T12:40:00Z' },
+  { paymentId: 'ho_pay_col_039', orderId: 'ho_ord_col_039', grossAmount: 200000, fee: 4000, tax: 720, expectedNetAmount: 195280, currency: 'INR', status: 'captured', createdAt: '2026-04-03T13:00:00Z' },
+  { paymentId: 'ho_pay_col_040', orderId: 'ho_ord_col_040', grossAmount: 200000, fee: 4000, tax: 720, expectedNetAmount: 195280, currency: 'INR', status: 'captured', createdAt: '2026-04-03T13:05:00Z' },
+
+  // 41-44: Duplicate UTR on Bank Statements
+  { paymentId: 'ho_pay_duputr_041', orderId: 'ho_ord_duputr_041', grossAmount: 180000, fee: 3600, tax: 648, expectedNetAmount: 175752, currency: 'INR', status: 'captured', createdAt: '2026-04-04T09:00:00Z' },
+  { paymentId: 'ho_pay_duputr_042', orderId: 'ho_ord_duputr_042', grossAmount: 250000, fee: 5000, tax: 900, expectedNetAmount: 244100, currency: 'INR', status: 'captured', createdAt: '2026-04-04T09:30:00Z' },
+  { paymentId: 'ho_pay_duputr_043', orderId: 'ho_ord_duputr_043', grossAmount: 320000, fee: 6400, tax: 1152, expectedNetAmount: 312448, currency: 'INR', status: 'captured', createdAt: '2026-04-04T10:00:00Z' },
+  { paymentId: 'ho_pay_duputr_044', orderId: 'ho_ord_duputr_044', grossAmount: 410000, fee: 8200, tax: 1476, expectedNetAmount: 400324, currency: 'INR', status: 'captured', createdAt: '2026-04-04T10:30:00Z' },
+
+  // 45-48: Wrong Payment ID in Bank Narration
+  { paymentId: 'ho_pay_wrongnar_045', orderId: 'ho_ord_wrongnar_045', grossAmount: 165000, fee: 3300, tax: 594, expectedNetAmount: 161106, currency: 'INR', status: 'captured', createdAt: '2026-04-04T11:00:00Z' },
+  { paymentId: 'ho_pay_wrongnar_046', orderId: 'ho_ord_wrongnar_046', grossAmount: 295000, fee: 5900, tax: 1062, expectedNetAmount: 288038, currency: 'INR', status: 'captured', createdAt: '2026-04-04T11:30:00Z' },
+  { paymentId: 'ho_pay_wrongnar_047', orderId: 'ho_ord_wrongnar_047', grossAmount: 480000, fee: 9600, tax: 1728, expectedNetAmount: 468672, currency: 'INR', status: 'captured', createdAt: '2026-04-04T12:00:00Z' },
+  { paymentId: 'ho_pay_wrongnar_048', orderId: 'ho_ord_wrongnar_048', grossAmount: 710000, fee: 14200, tax: 2556, expectedNetAmount: 693244, currency: 'INR', status: 'captured', createdAt: '2026-04-04T12:30:00Z' },
+
+  // 49-52: Fee/GST Discrepancy & Net Calculation Anomaly
+  { paymentId: 'ho_pay_feeanom_049', orderId: 'ho_ord_feeanom_049', grossAmount: 200000, fee: 4000, tax: 720, expectedNetAmount: 195280, currency: 'INR', status: 'captured', createdAt: '2026-04-05T09:00:00Z' },
+  { paymentId: 'ho_pay_feeanom_050', orderId: 'ho_ord_feeanom_050', grossAmount: 350000, fee: 7000, tax: 1260, expectedNetAmount: 341740, currency: 'INR', status: 'captured', createdAt: '2026-04-05T09:30:00Z' },
+  { paymentId: 'ho_pay_feeanom_051', orderId: 'ho_ord_feeanom_051', grossAmount: 500000, fee: 10000, tax: 1800, expectedNetAmount: 488200, currency: 'INR', status: 'captured', createdAt: '2026-04-05T10:00:00Z' },
+  { paymentId: 'ho_pay_feeanom_052', orderId: 'ho_ord_feeanom_052', grossAmount: 850000, fee: 17000, tax: 3060, expectedNetAmount: 829940, currency: 'INR', status: 'captured', createdAt: '2026-04-05T10:30:00Z' },
+
+  // 53-56: Date-Boundary (T+3 Cutoff) & Bank Holiday Delay (T+7 to T+10)
+  { paymentId: 'ho_pay_date_053', orderId: 'ho_ord_date_053', grossAmount: 140000, fee: 2800, tax: 504, expectedNetAmount: 136696, currency: 'INR', status: 'captured', createdAt: '2026-04-05T11:00:00Z' },
+  { paymentId: 'ho_pay_date_054', orderId: 'ho_ord_date_054', grossAmount: 275000, fee: 5500, tax: 990, expectedNetAmount: 268510, currency: 'INR', status: 'captured', createdAt: '2026-04-05T11:30:00Z' },
+  { paymentId: 'ho_pay_date_055', orderId: 'ho_ord_date_055', grossAmount: 460000, fee: 9200, tax: 1656, expectedNetAmount: 449144, currency: 'INR', status: 'captured', createdAt: '2026-04-05T12:00:00Z' },
+  { paymentId: 'ho_pay_date_056', orderId: 'ho_ord_date_056', grossAmount: 690000, fee: 13800, tax: 2484, expectedNetAmount: 673716, currency: 'INR', status: 'captured', createdAt: '2026-04-05T12:30:00Z' },
+
+  // 57-60: Missing Settlement Advice (Captured payment has no gateway settlement record)
+  { paymentId: 'ho_pay_noset_057', orderId: 'ho_ord_noset_057', grossAmount: 125000, fee: 2500, tax: 450, expectedNetAmount: 122050, currency: 'INR', status: 'captured', createdAt: '2026-04-06T09:00:00Z' },
+  { paymentId: 'ho_pay_noset_058', orderId: 'ho_ord_noset_058', grossAmount: 315000, fee: 6300, tax: 1134, expectedNetAmount: 307566, currency: 'INR', status: 'captured', createdAt: '2026-04-06T09:30:00Z' },
+  { paymentId: 'ho_pay_noset_059', orderId: 'ho_ord_noset_059', grossAmount: 580000, fee: 11600, tax: 2088, expectedNetAmount: 566312, currency: 'INR', status: 'captured', createdAt: '2026-04-06T10:00:00Z' },
+  { paymentId: 'ho_pay_noset_060', orderId: 'ho_ord_noset_060', grossAmount: 950000, fee: 19000, tax: 3420, expectedNetAmount: 927580, currency: 'INR', status: 'captured', createdAt: '2026-04-06T10:30:00Z' },
+
+  // 61-64: Missing Bank Credit (Gateway settled, but uncredited in bank statement)
+  { paymentId: 'ho_pay_nobank_061', orderId: 'ho_ord_nobank_061', grossAmount: 170000, fee: 3400, tax: 612, expectedNetAmount: 165988, currency: 'INR', status: 'captured', createdAt: '2026-04-06T11:00:00Z' },
+  { paymentId: 'ho_pay_nobank_062', orderId: 'ho_ord_nobank_062', grossAmount: 360000, fee: 7200, tax: 1296, expectedNetAmount: 351504, currency: 'INR', status: 'captured', createdAt: '2026-04-06T11:30:00Z' },
+  { paymentId: 'ho_pay_nobank_063', orderId: 'ho_ord_nobank_063', grossAmount: 610000, fee: 12200, tax: 2196, expectedNetAmount: 595604, currency: 'INR', status: 'captured', createdAt: '2026-04-06T12:00:00Z' },
+  { paymentId: 'ho_pay_nobank_064', orderId: 'ho_ord_nobank_064', grossAmount: 880000, fee: 17600, tax: 3168, expectedNetAmount: 859232, currency: 'INR', status: 'captured', createdAt: '2026-04-06T12:30:00Z' },
+
+  // 65-68: Duplicate Settlement Records (2 Settlements for 1 Payment)
+  { paymentId: 'ho_pay_dupset_065', orderId: 'ho_ord_dupset_065', grossAmount: 195000, fee: 3900, tax: 702, expectedNetAmount: 190398, currency: 'INR', status: 'captured', createdAt: '2026-04-07T09:00:00Z' },
+  { paymentId: 'ho_pay_dupset_066', orderId: 'ho_ord_dupset_066', grossAmount: 340000, fee: 6800, tax: 1224, expectedNetAmount: 331976, currency: 'INR', status: 'captured', createdAt: '2026-04-07T09:30:00Z' },
+  { paymentId: 'ho_pay_dupset_067', orderId: 'ho_ord_dupset_067', grossAmount: 530000, fee: 10600, tax: 1908, expectedNetAmount: 517492, currency: 'INR', status: 'captured', createdAt: '2026-04-07T10:00:00Z' },
+  { paymentId: 'ho_pay_dupset_068', orderId: 'ho_ord_dupset_068', grossAmount: 790000, fee: 15800, tax: 2844, expectedNetAmount: 771356, currency: 'INR', status: 'captured', createdAt: '2026-04-07T10:30:00Z' },
+
+  // 69-72: Duplicate Bank Credit (2 Bank credits claiming 1 Settlement)
+  { paymentId: 'ho_pay_dupbank_069', orderId: 'ho_ord_dupbank_069', grossAmount: 210000, fee: 4200, tax: 756, expectedNetAmount: 205044, currency: 'INR', status: 'captured', createdAt: '2026-04-07T11:00:00Z' },
+  { paymentId: 'ho_pay_dupbank_070', orderId: 'ho_ord_dupbank_070', grossAmount: 440000, fee: 8800, tax: 1584, expectedNetAmount: 429616, currency: 'INR', status: 'captured', createdAt: '2026-04-07T11:30:00Z' },
+  { paymentId: 'ho_pay_dupbank_071', orderId: 'ho_ord_dupbank_071', grossAmount: 675000, fee: 13500, tax: 2430, expectedNetAmount: 659070, currency: 'INR', status: 'captured', createdAt: '2026-04-07T12:00:00Z' },
+  { paymentId: 'ho_pay_dupbank_072', orderId: 'ho_ord_dupbank_072', grossAmount: 930000, fee: 18600, tax: 3348, expectedNetAmount: 908052, currency: 'INR', status: 'captured', createdAt: '2026-04-07T12:30:00Z' },
+
+  // 73-76: Unrelated Credit with Similar Amount / Distractor Noise
+  { paymentId: 'ho_pay_unrel_073', orderId: 'ho_ord_unrel_073', grossAmount: 185000, fee: 3700, tax: 666, expectedNetAmount: 180634, currency: 'INR', status: 'captured', createdAt: '2026-04-08T09:00:00Z' },
+  { paymentId: 'ho_pay_unrel_074', orderId: 'ho_ord_unrel_074', grossAmount: 375000, fee: 7500, tax: 1350, expectedNetAmount: 366150, currency: 'INR', status: 'captured', createdAt: '2026-04-08T09:30:00Z' },
+  { paymentId: 'ho_pay_unrel_075', orderId: 'ho_ord_unrel_075', grossAmount: 595000, fee: 11900, tax: 2142, expectedNetAmount: 580958, currency: 'INR', status: 'captured', createdAt: '2026-04-08T10:00:00Z' },
+  { paymentId: 'ho_pay_unrel_076', orderId: 'ho_ord_unrel_076', grossAmount: 810000, fee: 16200, tax: 2916, expectedNetAmount: 790884, currency: 'INR', status: 'captured', createdAt: '2026-04-08T10:30:00Z' },
+
+  // 77-80: Unsupported Currencies / Malformed International Records
+  { paymentId: 'ho_pay_curr_077', orderId: 'ho_ord_curr_077', grossAmount: 10000, fee: 200, tax: 36, expectedNetAmount: 9764, currency: 'USD', status: 'captured', createdAt: '2026-04-08T11:00:00Z' },
+  { paymentId: 'ho_pay_curr_078', orderId: 'ho_ord_curr_078', grossAmount: 25000, fee: 500, tax: 90, expectedNetAmount: 24410, currency: 'EUR', status: 'captured', createdAt: '2026-04-08T11:30:00Z' },
+  { paymentId: 'ho_pay_curr_079', orderId: 'ho_ord_curr_079', grossAmount: 15000, fee: 300, tax: 54, expectedNetAmount: 14646, currency: 'GBP', status: 'captured', createdAt: '2026-04-08T12:00:00Z' },
+  { paymentId: 'ho_pay_curr_080', orderId: 'ho_ord_curr_080', grossAmount: 50000, fee: 1000, tax: 180, expectedNetAmount: 48820, currency: 'USD', status: 'captured', createdAt: '2026-04-08T12:30:00Z' },
+];
+
+// Manually specified settlements
+const rawSettlements: Settlement[] = [
+  // 1-30: Clean Matches
+  { settlementId: 'ho_set_001', paymentReference: 'ho_pay_001', settledAmount: 146362, utr: 'HOUTR1000001', settledAt: '2026-04-02T10:00:00Z', status: 'processed' },
+  { settlementId: 'ho_set_002', paymentReference: 'ho_pay_002', settledAmount: 292822, utr: 'HOUTR1000002', settledAt: '2026-04-02T10:00:00Z', status: 'processed' },
+  { settlementId: 'ho_set_003', paymentReference: 'ho_pay_003', settledAmount: 48722, utr: 'HOUTR1000003', settledAt: '2026-04-02T10:00:00Z', status: 'processed' },
+  { settlementId: 'ho_set_004', paymentReference: 'ho_pay_004', settledAmount: 829940, utr: 'HOUTR1000004', settledAt: '2026-04-02T10:00:00Z', status: 'processed' },
+  { settlementId: 'ho_set_005', paymentReference: 'ho_pay_005', settledAmount: 117168, utr: 'HOUTR1000005', settledAt: '2026-04-02T10:00:00Z', status: 'processed' },
+  { settlementId: 'ho_set_006', paymentReference: 'ho_pay_006', settledAmount: 341642, utr: 'HOUTR1000006', settledAt: '2026-04-02T10:00:00Z', status: 'processed' },
+  { settlementId: 'ho_set_007', paymentReference: 'ho_pay_007', settledAmount: 97542, utr: 'HOUTR1000007', settledAt: '2026-04-02T10:00:00Z', status: 'processed' },
+  { settlementId: 'ho_set_008', paymentReference: 'ho_pay_008', settledAmount: 537020, utr: 'HOUTR1000008', settledAt: '2026-04-02T10:00:00Z', status: 'processed' },
+  { settlementId: 'ho_set_009', paymentReference: 'ho_pay_009', settledAmount: 185418, utr: 'HOUTR1000009', settledAt: '2026-04-02T10:00:00Z', status: 'processed' },
+  { settlementId: 'ho_set_010', paymentReference: 'ho_pay_010', settledAmount: 732300, utr: 'HOUTR1000010', settledAt: '2026-04-02T10:00:00Z', status: 'processed' },
+  { settlementId: 'ho_set_011', paymentReference: 'ho_pay_011', settledAmount: 219690, utr: 'HOUTR1000011', settledAt: '2026-04-02T10:00:00Z', status: 'processed' },
+  { settlementId: 'ho_set_012', paymentReference: 'ho_pay_012', settledAmount: 63368, utr: 'HOUTR1000012', settledAt: '2026-04-02T10:00:00Z', status: 'processed' },
+  { settlementId: 'ho_set_013', paymentReference: 'ho_pay_013', settledAmount: 410088, utr: 'HOUTR1000013', settledAt: '2026-04-02T10:00:00Z', status: 'processed' },
+  { settlementId: 'ho_set_014', paymentReference: 'ho_pay_014', settledAmount: 156126, utr: 'HOUTR1000014', settledAt: '2026-04-02T10:00:00Z', status: 'processed' },
+  { settlementId: 'ho_set_015', paymentReference: 'ho_pay_015', settledAmount: 956872, utr: 'HOUTR1000015', settledAt: '2026-04-02T10:00:00Z', status: 'processed' },
+  { settlementId: 'ho_set_016', paymentReference: 'ho_pay_016', settledAmount: 87778, utr: 'HOUTR1000016', settledAt: '2026-04-03T10:00:00Z', status: 'processed' },
+  { settlementId: 'ho_set_017', paymentReference: 'ho_pay_017', settledAmount: 302684, utr: 'HOUTR1000017', settledAt: '2026-04-03T10:00:00Z', status: 'processed' },
+  { settlementId: 'ho_set_018', paymentReference: 'ho_pay_018', settledAmount: 170870, utr: 'HOUTR1000018', settledAt: '2026-04-03T10:00:00Z', status: 'processed' },
+  { settlementId: 'ho_set_019', paymentReference: 'ho_pay_019', settledAmount: 507728, utr: 'HOUTR1000019', settledAt: '2026-04-03T10:00:00Z', status: 'processed' },
+  { settlementId: 'ho_set_020', paymentReference: 'ho_pay_020', settledAmount: 244002, utr: 'HOUTR1000020', settledAt: '2026-04-03T10:00:00Z', status: 'processed' },
+  { settlementId: 'ho_set_021', paymentReference: 'ho_pay_021', settledAmount: 112286, utr: 'HOUTR1000021', settledAt: '2026-04-03T10:00:00Z', status: 'processed' },
+  { settlementId: 'ho_set_022', paymentReference: 'ho_pay_022', settledAmount: 654188, utr: 'HOUTR1000022', settledAt: '2026-04-03T10:00:00Z', status: 'processed' },
+  { settlementId: 'ho_set_023', paymentReference: 'ho_pay_023', settledAmount: 195182, utr: 'HOUTR1000023', settledAt: '2026-04-03T10:00:00Z', status: 'processed' },
+  { settlementId: 'ho_set_024', paymentReference: 'ho_pay_024', settledAmount: 419852, utr: 'HOUTR1000024', settledAt: '2026-04-03T10:00:00Z', status: 'processed' },
+  { settlementId: 'ho_set_025', paymentReference: 'ho_pay_025', settledAmount: 80065, utr: 'HOUTR1000025', settledAt: '2026-04-03T10:00:00Z', status: 'processed' },
+  { settlementId: 'ho_set_026', paymentReference: 'ho_pay_026', settledAmount: 371032, utr: 'HOUTR1000026', settledAt: '2026-04-03T10:00:00Z', status: 'processed' },
+  { settlementId: 'ho_set_027', paymentReference: 'ho_pay_027', settledAmount: 131814, utr: 'HOUTR1000027', settledAt: '2026-04-03T10:00:00Z', status: 'processed' },
+  { settlementId: 'ho_set_028', paymentReference: 'ho_pay_028', settledAmount: 898288, utr: 'HOUTR1000028', settledAt: '2026-04-03T10:00:00Z', status: 'processed' },
+  { settlementId: 'ho_set_029', paymentReference: 'ho_pay_029', settledAmount: 253864, utr: 'HOUTR1000029', settledAt: '2026-04-03T10:00:00Z', status: 'processed' },
+  { settlementId: 'ho_set_030', paymentReference: 'ho_pay_030', settledAmount: 463790, utr: 'HOUTR1000030', settledAt: '2026-04-03T10:00:00Z', status: 'processed' },
+
+  // 31-35: Reference Truncation / Partial Refs (Settlement has partial order or prefix)
+  { settlementId: 'ho_set_031', paymentReference: 'ho_ord_trunc_031', settledAmount: 146460, utr: 'HOUTR1000031', settledAt: '2026-04-04T10:00:00Z', status: 'processed' },
+  { settlementId: 'ho_set_032', paymentReference: 'trunc_032', settledAmount: 273392, utr: 'HOUTR1000032', settledAt: '2026-04-04T10:00:00Z', status: 'processed' },
+  { settlementId: 'ho_set_033', paymentReference: 'ho_ord_trunc_033', settledAmount: 380796, utr: 'HOUTR1000033', settledAt: '2026-04-04T10:00:00Z', status: 'processed' },
+  { settlementId: 'ho_set_034', paymentReference: 'trunc_034', settledAmount: 497964, utr: 'HOUTR1000034', settledAt: '2026-04-04T10:00:00Z', status: 'processed' },
+  { settlementId: 'ho_set_035', paymentReference: 'ho_ord_trunc_035', settledAmount: 605368, utr: 'HOUTR1000035', settledAt: '2026-04-04T10:00:00Z', status: 'processed' },
+
+  // 36-40: Amount Collisions (Distinct references, matching settlement amounts)
+  { settlementId: 'ho_set_036', paymentReference: 'ho_pay_col_036', settledAmount: 97640, utr: 'HOUTR1000036', settledAt: '2026-04-04T10:00:00Z', status: 'processed' },
+  { settlementId: 'ho_set_037', paymentReference: 'ho_pay_col_037', settledAmount: 97640, utr: 'HOUTR1000037', settledAt: '2026-04-04T10:00:00Z', status: 'processed' },
+  { settlementId: 'ho_set_038', paymentReference: 'ho_pay_col_038', settledAmount: 97640, utr: 'HOUTR1000038', settledAt: '2026-04-04T10:00:00Z', status: 'processed' },
+  { settlementId: 'ho_set_039', paymentReference: 'ho_pay_col_039', settledAmount: 195280, utr: 'HOUTR1000039', settledAt: '2026-04-04T10:00:00Z', status: 'processed' },
+  { settlementId: 'ho_set_040', paymentReference: 'ho_pay_col_040', settledAmount: 195280, utr: 'HOUTR1000040', settledAt: '2026-04-04T10:00:00Z', status: 'processed' },
+
+  // 41-44: Duplicate UTR on Bank Statements
+  { settlementId: 'ho_set_041', paymentReference: 'ho_pay_duputr_041', settledAmount: 175752, utr: 'HOUTR_SHARED_DUPLICATE_999', settledAt: '2026-04-05T10:00:00Z', status: 'processed' },
+  { settlementId: 'ho_set_042', paymentReference: 'ho_pay_duputr_042', settledAmount: 244100, utr: 'HOUTR_SHARED_DUPLICATE_999', settledAt: '2026-04-05T10:00:00Z', status: 'processed' },
+  { settlementId: 'ho_set_043', paymentReference: 'ho_pay_duputr_043', settledAmount: 312448, utr: 'HOUTR_SHARED_DUPLICATE_888', settledAt: '2026-04-05T10:00:00Z', status: 'processed' },
+  { settlementId: 'ho_set_044', paymentReference: 'ho_pay_duputr_044', settledAmount: 400324, utr: 'HOUTR_SHARED_DUPLICATE_888', settledAt: '2026-04-05T10:00:00Z', status: 'processed' },
+
+  // 45-48: Wrong Payment ID in Bank Narration
+  { settlementId: 'ho_set_045', paymentReference: 'ho_pay_wrongnar_045', settledAmount: 161106, utr: 'HOUTR1000045', settledAt: '2026-04-05T10:00:00Z', status: 'processed' },
+  { settlementId: 'ho_set_046', paymentReference: 'ho_pay_wrongnar_046', settledAmount: 288038, utr: 'HOUTR1000046', settledAt: '2026-04-05T10:00:00Z', status: 'processed' },
+  { settlementId: 'ho_set_047', paymentReference: 'ho_pay_wrongnar_047', settledAmount: 468672, utr: 'HOUTR1000047', settledAt: '2026-04-05T10:00:00Z', status: 'processed' },
+  { settlementId: 'ho_set_048', paymentReference: 'ho_pay_wrongnar_048', settledAmount: 693244, utr: 'HOUTR1000048', settledAt: '2026-04-05T10:00:00Z', status: 'processed' },
+
+  // 49-52: Fee/GST Discrepancy & Net Calculation Anomaly (Settled differs by ~3% fee variance)
+  { settlementId: 'ho_set_049', paymentReference: 'ho_pay_feeanom_049', settledAmount: 190000, utr: 'HOUTR1000049', settledAt: '2026-04-06T10:00:00Z', status: 'processed' },
+  { settlementId: 'ho_set_050', paymentReference: 'ho_pay_feeanom_050', settledAmount: 332000, utr: 'HOUTR1000050', settledAt: '2026-04-06T10:00:00Z', status: 'processed' },
+  { settlementId: 'ho_set_051', paymentReference: 'ho_pay_feeanom_051', settledAmount: 475000, utr: 'HOUTR1000051', settledAt: '2026-04-06T10:00:00Z', status: 'processed' },
+  { settlementId: 'ho_set_052', paymentReference: 'ho_pay_feeanom_052', settledAmount: 810000, utr: 'HOUTR1000052', settledAt: '2026-04-06T10:00:00Z', status: 'processed' },
+
+  // 53-56: Date-Boundary & Bank Holiday Delayed Settlement (Settled at T+7 or T+10)
+  { settlementId: 'ho_set_053', paymentReference: 'ho_pay_date_053', settledAmount: 136696, utr: 'HOUTR1000053', settledAt: '2026-04-12T10:00:00Z', status: 'processed' },
+  { settlementId: 'ho_set_054', paymentReference: 'ho_pay_date_054', settledAmount: 268510, utr: 'HOUTR1000054', settledAt: '2026-04-14T10:00:00Z', status: 'processed' },
+  { settlementId: 'ho_set_055', paymentReference: 'ho_pay_date_055', settledAmount: 449144, utr: 'HOUTR1000055', settledAt: '2026-04-15T10:00:00Z', status: 'processed' },
+  { settlementId: 'ho_set_056', paymentReference: 'ho_pay_date_056', settledAmount: 673716, utr: 'HOUTR1000056', settledAt: '2026-04-16T10:00:00Z', status: 'processed' },
+
+  // 57-60: Missing Settlement Advice (NO settlements for 057-060)
+
+  // 61-64: Missing Bank Credit (Settlement exists, but bank credit is missing)
+  { settlementId: 'ho_set_061', paymentReference: 'ho_pay_nobank_061', settledAmount: 165988, utr: 'HOUTR_UNCREDITED_061', settledAt: '2026-04-07T10:00:00Z', status: 'processed' },
+  { settlementId: 'ho_set_062', paymentReference: 'ho_pay_nobank_062', settledAmount: 351504, utr: 'HOUTR_UNCREDITED_062', settledAt: '2026-04-07T10:00:00Z', status: 'processed' },
+  { settlementId: 'ho_set_063', paymentReference: 'ho_pay_nobank_063', settledAmount: 595604, utr: 'HOUTR_UNCREDITED_063', settledAt: '2026-04-07T10:00:00Z', status: 'processed' },
+  { settlementId: 'ho_set_064', paymentReference: 'ho_pay_nobank_064', settledAmount: 859232, utr: 'HOUTR_UNCREDITED_064', settledAt: '2026-04-07T10:00:00Z', status: 'processed' },
+
+  // 65-68: Duplicate Settlement Records (2 Settlements for 1 Payment: A and B)
+  { settlementId: 'ho_set_065_A', paymentReference: 'ho_pay_dupset_065', settledAmount: 190398, utr: 'HOUTR1000065_A', settledAt: '2026-04-08T10:00:00Z', status: 'processed' },
+  { settlementId: 'ho_set_065_B', paymentReference: 'ho_pay_dupset_065', settledAmount: 190398, utr: 'HOUTR1000065_B', settledAt: '2026-04-08T10:00:00Z', status: 'processed' },
+  { settlementId: 'ho_set_066_A', paymentReference: 'ho_pay_dupset_066', settledAmount: 331976, utr: 'HOUTR1000066_A', settledAt: '2026-04-08T10:00:00Z', status: 'processed' },
+  { settlementId: 'ho_set_066_B', paymentReference: 'ho_pay_dupset_066', settledAmount: 331976, utr: 'HOUTR1000066_B', settledAt: '2026-04-08T10:00:00Z', status: 'processed' },
+  { settlementId: 'ho_set_067_A', paymentReference: 'ho_pay_dupset_067', settledAmount: 517492, utr: 'HOUTR1000067_A', settledAt: '2026-04-08T10:00:00Z', status: 'processed' },
+  { settlementId: 'ho_set_067_B', paymentReference: 'ho_pay_dupset_067', settledAmount: 517492, utr: 'HOUTR1000067_B', settledAt: '2026-04-08T10:00:00Z', status: 'processed' },
+  { settlementId: 'ho_set_068_A', paymentReference: 'ho_pay_dupset_068', settledAmount: 771356, utr: 'HOUTR1000068_A', settledAt: '2026-04-08T10:00:00Z', status: 'processed' },
+  { settlementId: 'ho_set_068_B', paymentReference: 'ho_pay_dupset_068', settledAmount: 771356, utr: 'HOUTR1000068_B', settledAt: '2026-04-08T10:00:00Z', status: 'processed' },
+
+  // 69-72: Duplicate Bank Credit settlements
+  { settlementId: 'ho_set_069', paymentReference: 'ho_pay_dupbank_069', settledAmount: 205044, utr: 'HOUTR_DUPBANK_069', settledAt: '2026-04-08T10:00:00Z', status: 'processed' },
+  { settlementId: 'ho_set_070', paymentReference: 'ho_pay_dupbank_070', settledAmount: 429616, utr: 'HOUTR_DUPBANK_070', settledAt: '2026-04-08T10:00:00Z', status: 'processed' },
+  { settlementId: 'ho_set_071', paymentReference: 'ho_pay_dupbank_071', settledAmount: 659070, utr: 'HOUTR_DUPBANK_071', settledAt: '2026-04-08T10:00:00Z', status: 'processed' },
+  { settlementId: 'ho_set_072', paymentReference: 'ho_pay_dupbank_072', settledAmount: 908052, utr: 'HOUTR_DUPBANK_072', settledAt: '2026-04-08T10:00:00Z', status: 'processed' },
+
+  // 73-76: Unrelated Credit with Similar Amount
+  { settlementId: 'ho_set_073', paymentReference: 'ho_pay_unrel_073', settledAmount: 180634, utr: 'HOUTR1000073', settledAt: '2026-04-09T10:00:00Z', status: 'processed' },
+  { settlementId: 'ho_set_074', paymentReference: 'ho_pay_unrel_074', settledAmount: 366150, utr: 'HOUTR1000074', settledAt: '2026-04-09T10:00:00Z', status: 'processed' },
+  { settlementId: 'ho_set_075', paymentReference: 'ho_pay_unrel_075', settledAmount: 580958, utr: 'HOUTR1000075', settledAt: '2026-04-09T10:00:00Z', status: 'processed' },
+  { settlementId: 'ho_set_076', paymentReference: 'ho_pay_unrel_076', settledAmount: 790884, utr: 'HOUTR1000076', settledAt: '2026-04-09T10:00:00Z', status: 'processed' },
+
+  // 77-80: Unsupported Currencies
+  { settlementId: 'ho_set_077', paymentReference: 'ho_pay_curr_077', settledAmount: 9764, utr: 'HOUTR1000077', settledAt: '2026-04-09T10:00:00Z', status: 'processed' },
+  { settlementId: 'ho_set_078', paymentReference: 'ho_pay_curr_078', settledAmount: 24410, utr: 'HOUTR1000078', settledAt: '2026-04-09T10:00:00Z', status: 'processed' },
+  { settlementId: 'ho_set_079', paymentReference: 'ho_pay_curr_079', settledAmount: 14646, utr: 'HOUTR1000079', settledAt: '2026-04-09T10:00:00Z', status: 'processed' },
+  { settlementId: 'ho_set_080', paymentReference: 'ho_pay_curr_080', settledAmount: 48820, utr: 'HOUTR1000080', settledAt: '2026-04-09T10:00:00Z', status: 'processed' },
+];
+
+// Manually specified bank statement credits
+const rawBankTransactions: BankTransaction[] = [
+  // 1-30: Clean Bank Credits
+  { bankTransactionId: 'ho_bank_001', utr: 'HOUTR1000001', creditAmount: 146362, description: 'CMS/RAZORPAY/HOUTR1000001/ho_pay_001', creditedAt: '2026-04-02T14:00:00Z' },
+  { bankTransactionId: 'ho_bank_002', utr: 'HOUTR1000002', creditAmount: 292822, description: 'CMS/RAZORPAY/HOUTR1000002/ho_pay_002', creditedAt: '2026-04-02T14:00:00Z' },
+  { bankTransactionId: 'ho_bank_003', utr: 'HOUTR1000003', creditAmount: 48722, description: 'CMS/RAZORPAY/HOUTR1000003/ho_pay_003', creditedAt: '2026-04-02T14:00:00Z' },
+  { bankTransactionId: 'ho_bank_004', utr: 'HOUTR1000004', creditAmount: 829940, description: 'CMS/RAZORPAY/HOUTR1000004/ho_pay_004', creditedAt: '2026-04-02T14:00:00Z' },
+  { bankTransactionId: 'ho_bank_005', utr: 'HOUTR1000005', creditAmount: 117168, description: 'CMS/RAZORPAY/HOUTR1000005/ho_pay_005', creditedAt: '2026-04-02T14:00:00Z' },
+  { bankTransactionId: 'ho_bank_006', utr: 'HOUTR1000006', creditAmount: 341642, description: 'CMS/RAZORPAY/HOUTR1000006/ho_pay_006', creditedAt: '2026-04-02T14:00:00Z' },
+  { bankTransactionId: 'ho_bank_007', utr: 'HOUTR1000007', creditAmount: 97542, description: 'CMS/RAZORPAY/HOUTR1000007/ho_pay_007', creditedAt: '2026-04-02T14:00:00Z' },
+  { bankTransactionId: 'ho_bank_008', utr: 'HOUTR1000008', creditAmount: 537020, description: 'CMS/RAZORPAY/HOUTR1000008/ho_pay_008', creditedAt: '2026-04-02T14:00:00Z' },
+  { bankTransactionId: 'ho_bank_009', utr: 'HOUTR1000009', creditAmount: 185418, description: 'CMS/RAZORPAY/HOUTR1000009/ho_pay_009', creditedAt: '2026-04-02T14:00:00Z' },
+  { bankTransactionId: 'ho_bank_010', utr: 'HOUTR1000010', creditAmount: 732300, description: 'CMS/RAZORPAY/HOUTR1000010/ho_pay_010', creditedAt: '2026-04-02T14:00:00Z' },
+  { bankTransactionId: 'ho_bank_011', utr: 'HOUTR1000011', creditAmount: 219690, description: 'CMS/RAZORPAY/HOUTR1000011/ho_pay_011', creditedAt: '2026-04-02T14:00:00Z' },
+  { bankTransactionId: 'ho_bank_012', utr: 'HOUTR1000012', creditAmount: 63368, description: 'CMS/RAZORPAY/HOUTR1000012/ho_pay_012', creditedAt: '2026-04-02T14:00:00Z' },
+  { bankTransactionId: 'ho_bank_013', utr: 'HOUTR1000013', creditAmount: 410088, description: 'CMS/RAZORPAY/HOUTR1000013/ho_pay_013', creditedAt: '2026-04-02T14:00:00Z' },
+  { bankTransactionId: 'ho_bank_014', utr: 'HOUTR1000014', creditAmount: 156126, description: 'CMS/RAZORPAY/HOUTR1000014/ho_pay_014', creditedAt: '2026-04-02T14:00:00Z' },
+  { bankTransactionId: 'ho_bank_015', utr: 'HOUTR1000015', creditAmount: 956872, description: 'CMS/RAZORPAY/HOUTR1000015/ho_pay_015', creditedAt: '2026-04-02T14:00:00Z' },
+  { bankTransactionId: 'ho_bank_016', utr: 'HOUTR1000016', creditAmount: 87778, description: 'CMS/RAZORPAY/HOUTR1000016/ho_pay_016', creditedAt: '2026-04-03T14:00:00Z' },
+  { bankTransactionId: 'ho_bank_017', utr: 'HOUTR1000017', creditAmount: 302684, description: 'CMS/RAZORPAY/HOUTR1000017/ho_pay_017', creditedAt: '2026-04-03T14:00:00Z' },
+  { bankTransactionId: 'ho_bank_018', utr: 'HOUTR1000018', creditAmount: 170870, description: 'CMS/RAZORPAY/HOUTR1000018/ho_pay_018', creditedAt: '2026-04-03T14:00:00Z' },
+  { bankTransactionId: 'ho_bank_019', utr: 'HOUTR1000019', creditAmount: 507728, description: 'CMS/RAZORPAY/HOUTR1000019/ho_pay_019', creditedAt: '2026-04-03T14:00:00Z' },
+  { bankTransactionId: 'ho_bank_020', utr: 'HOUTR1000020', creditAmount: 244002, description: 'CMS/RAZORPAY/HOUTR1000020/ho_pay_020', creditedAt: '2026-04-03T14:00:00Z' },
+  { bankTransactionId: 'ho_bank_021', utr: 'HOUTR1000021', creditAmount: 112286, description: 'CMS/RAZORPAY/HOUTR1000021/ho_pay_021', creditedAt: '2026-04-03T14:00:00Z' },
+  { bankTransactionId: 'ho_bank_022', utr: 'HOUTR1000022', creditAmount: 654188, description: 'CMS/RAZORPAY/HOUTR1000022/ho_pay_022', creditedAt: '2026-04-03T14:00:00Z' },
+  { bankTransactionId: 'ho_bank_023', utr: 'HOUTR1000023', creditAmount: 195182, description: 'CMS/RAZORPAY/HOUTR1000023/ho_pay_023', creditedAt: '2026-04-03T14:00:00Z' },
+  { bankTransactionId: 'ho_bank_024', utr: 'HOUTR1000024', creditAmount: 419852, description: 'CMS/RAZORPAY/HOUTR1000024/ho_pay_024', creditedAt: '2026-04-03T14:00:00Z' },
+  { bankTransactionId: 'ho_bank_025', utr: 'HOUTR1000025', creditAmount: 80065, description: 'CMS/RAZORPAY/HOUTR1000025/ho_pay_025', creditedAt: '2026-04-03T14:00:00Z' },
+  { bankTransactionId: 'ho_bank_026', utr: 'HOUTR1000026', creditAmount: 371032, description: 'CMS/RAZORPAY/HOUTR1000026/ho_pay_026', creditedAt: '2026-04-03T14:00:00Z' },
+  { bankTransactionId: 'ho_bank_027', utr: 'HOUTR1000027', creditAmount: 131814, description: 'CMS/RAZORPAY/HOUTR1000027/ho_pay_027', creditedAt: '2026-04-03T14:00:00Z' },
+  { bankTransactionId: 'ho_bank_028', utr: 'HOUTR1000028', creditAmount: 898288, description: 'CMS/RAZORPAY/HOUTR1000028/ho_pay_028', creditedAt: '2026-04-03T14:00:00Z' },
+  { bankTransactionId: 'ho_bank_029', utr: 'HOUTR1000029', creditAmount: 253864, description: 'CMS/RAZORPAY/HOUTR1000029/ho_pay_029', creditedAt: '2026-04-03T14:00:00Z' },
+  { bankTransactionId: 'ho_bank_030', utr: 'HOUTR1000030', creditAmount: 463790, description: 'CMS/RAZORPAY/HOUTR1000030/ho_pay_030', creditedAt: '2026-04-03T14:00:00Z' },
+
+  // 31-35: Reference Truncation / Partial Refs
+  { bankTransactionId: 'ho_bank_031', utr: 'HOUTR1000031', creditAmount: 146460, description: 'CMS/RAZORPAY/HOUTR1000031/ho_ord_trunc_031', creditedAt: '2026-04-04T14:00:00Z' },
+  { bankTransactionId: 'ho_bank_032', utr: 'HOUTR1000032', creditAmount: 273392, description: 'CMS/RAZORPAY/HOUTR1000032/trunc_032', creditedAt: '2026-04-04T14:00:00Z' },
+  { bankTransactionId: 'ho_bank_033', utr: 'HOUTR1000033', creditAmount: 380796, description: 'CMS/RAZORPAY/HOUTR1000033/ho_ord_trunc_033', creditedAt: '2026-04-04T14:00:00Z' },
+  { bankTransactionId: 'ho_bank_034', utr: 'HOUTR1000034', creditAmount: 497964, description: 'CMS/RAZORPAY/HOUTR1000034/trunc_034', creditedAt: '2026-04-04T14:00:00Z' },
+  { bankTransactionId: 'ho_bank_035', utr: 'HOUTR1000035', creditAmount: 605368, description: 'CMS/RAZORPAY/HOUTR1000035/ho_ord_trunc_035', creditedAt: '2026-04-04T14:00:00Z' },
+
+  // 36-40: Amount Collisions (Identical amounts, distinct UTRs)
+  { bankTransactionId: 'ho_bank_036', utr: 'HOUTR1000036', creditAmount: 97640, description: 'CMS/RAZORPAY/HOUTR1000036/ho_pay_col_036', creditedAt: '2026-04-04T14:00:00Z' },
+  { bankTransactionId: 'ho_bank_037', utr: 'HOUTR1000037', creditAmount: 97640, description: 'CMS/RAZORPAY/HOUTR1000037/ho_pay_col_037', creditedAt: '2026-04-04T14:00:00Z' },
+  { bankTransactionId: 'ho_bank_038', utr: 'HOUTR1000038', creditAmount: 97640, description: 'CMS/RAZORPAY/HOUTR1000038/ho_pay_col_038', creditedAt: '2026-04-04T14:00:00Z' },
+  { bankTransactionId: 'ho_bank_039', utr: 'HOUTR1000039', creditAmount: 195280, description: 'CMS/RAZORPAY/HOUTR1000039/ho_pay_col_039', creditedAt: '2026-04-04T14:00:00Z' },
+  { bankTransactionId: 'ho_bank_040', utr: 'HOUTR1000040', creditAmount: 195280, description: 'CMS/RAZORPAY/HOUTR1000040/ho_pay_col_040', creditedAt: '2026-04-04T14:00:00Z' },
+
+  // 41-44: Duplicate UTR on Bank Statements (2 bank credits sharing HOUTR_SHARED_DUPLICATE_999)
+  { bankTransactionId: 'ho_bank_041', utr: 'HOUTR_SHARED_DUPLICATE_999', creditAmount: 175752, description: 'CMS/RAZORPAY/HOUTR_SHARED_DUPLICATE_999/ho_pay_duputr_041', creditedAt: '2026-04-05T14:00:00Z' },
+  { bankTransactionId: 'ho_bank_042', utr: 'HOUTR_SHARED_DUPLICATE_999', creditAmount: 244100, description: 'CMS/RAZORPAY/HOUTR_SHARED_DUPLICATE_999/ho_pay_duputr_042', creditedAt: '2026-04-05T14:00:00Z' },
+  { bankTransactionId: 'ho_bank_043', utr: 'HOUTR_SHARED_DUPLICATE_888', creditAmount: 312448, description: 'CMS/RAZORPAY/HOUTR_SHARED_DUPLICATE_888/ho_pay_duputr_043', creditedAt: '2026-04-05T14:00:00Z' },
+  { bankTransactionId: 'ho_bank_044', utr: 'HOUTR_SHARED_DUPLICATE_888', creditAmount: 400324, description: 'CMS/RAZORPAY/HOUTR_SHARED_DUPLICATE_888/ho_pay_duputr_044', creditedAt: '2026-04-05T14:00:00Z' },
+
+  // 45-48: Wrong Payment ID in Bank Narration (Bank narration cites completely wrong payment ref)
+  { bankTransactionId: 'ho_bank_045', utr: 'HOUTR1000045', creditAmount: 161106, description: 'CMS/RAZORPAY/HOUTR1000045/pay_completely_unrelated_9999', creditedAt: '2026-04-05T14:00:00Z' },
+  { bankTransactionId: 'ho_bank_046', utr: 'HOUTR1000046', creditAmount: 288038, description: 'CMS/RAZORPAY/HOUTR1000046/pay_completely_unrelated_8888', creditedAt: '2026-04-05T14:00:00Z' },
+  { bankTransactionId: 'ho_bank_047', utr: 'HOUTR1000047', creditAmount: 468672, description: 'CMS/RAZORPAY/HOUTR1000047/pay_completely_unrelated_7777', creditedAt: '2026-04-05T14:00:00Z' },
+  { bankTransactionId: 'ho_bank_048', utr: 'HOUTR1000048', creditAmount: 693244, description: 'CMS/RAZORPAY/HOUTR1000048/pay_completely_unrelated_6666', creditedAt: '2026-04-05T14:00:00Z' },
+
+  // 49-52: Fee/GST Discrepancy & Net Calculation Anomaly
+  { bankTransactionId: 'ho_bank_049', utr: 'HOUTR1000049', creditAmount: 190000, description: 'CMS/RAZORPAY/HOUTR1000049/ho_pay_feeanom_049', creditedAt: '2026-04-06T14:00:00Z' },
+  { bankTransactionId: 'ho_bank_050', utr: 'HOUTR1000050', creditAmount: 332000, description: 'CMS/RAZORPAY/HOUTR1000050/ho_pay_feeanom_050', creditedAt: '2026-04-06T14:00:00Z' },
+  { bankTransactionId: 'ho_bank_051', utr: 'HOUTR1000051', creditAmount: 475000, description: 'CMS/RAZORPAY/HOUTR1000051/ho_pay_feeanom_051', creditedAt: '2026-04-06T14:00:00Z' },
+  { bankTransactionId: 'ho_bank_052', utr: 'HOUTR1000052', creditAmount: 810000, description: 'CMS/RAZORPAY/HOUTR1000052/ho_pay_feeanom_052', creditedAt: '2026-04-06T14:00:00Z' },
+
+  // 53-56: Date-Boundary & Bank Holiday Delayed Settlement (Credited at T+8 to T+11)
+  { bankTransactionId: 'ho_bank_053', utr: 'HOUTR1000053', creditAmount: 136696, description: 'CMS/RAZORPAY/HOUTR1000053/ho_pay_date_053', creditedAt: '2026-04-13T14:00:00Z' },
+  { bankTransactionId: 'ho_bank_054', utr: 'HOUTR1000054', creditAmount: 268510, description: 'CMS/RAZORPAY/HOUTR1000054/ho_pay_date_054', creditedAt: '2026-04-15T14:00:00Z' },
+  { bankTransactionId: 'ho_bank_055', utr: 'HOUTR1000055', creditAmount: 449144, description: 'CMS/RAZORPAY/HOUTR1000055/ho_pay_date_055', creditedAt: '2026-04-16T14:00:00Z' },
+  { bankTransactionId: 'ho_bank_056', utr: 'HOUTR1000056', creditAmount: 673716, description: 'CMS/RAZORPAY/HOUTR1000056/ho_pay_date_056', creditedAt: '2026-04-17T14:00:00Z' },
+
+  // 57-60: Missing Settlement Advice (NO settlement existed)
+  // 61-64: Missing Bank Credit (NO bank transactions exist for 061-064)
+
+  // 65-68: Duplicate Settlement Records (Bank received single payout matching settlement A)
+  { bankTransactionId: 'ho_bank_065', utr: 'HOUTR1000065_A', creditAmount: 190398, description: 'CMS/RAZORPAY/HOUTR1000065_A/ho_pay_dupset_065', creditedAt: '2026-04-08T14:00:00Z' },
+  { bankTransactionId: 'ho_bank_066', utr: 'HOUTR1000066_A', creditAmount: 331976, description: 'CMS/RAZORPAY/HOUTR1000066_A/ho_pay_dupset_066', creditedAt: '2026-04-08T14:00:00Z' },
+  { bankTransactionId: 'ho_bank_067', utr: 'HOUTR1000067_A', creditAmount: 517492, description: 'CMS/RAZORPAY/HOUTR1000067_A/ho_pay_dupset_067', creditedAt: '2026-04-08T14:00:00Z' },
+  { bankTransactionId: 'ho_bank_068', utr: 'HOUTR1000068_A', creditAmount: 771356, description: 'CMS/RAZORPAY/HOUTR1000068_A/ho_pay_dupset_068', creditedAt: '2026-04-08T14:00:00Z' },
+
+  // 69-72: Duplicate Bank Credits (2 Bank Credits for single settlement)
+  { bankTransactionId: 'ho_bank_069_1', utr: 'HOUTR_DUPBANK_069', creditAmount: 205044, description: 'CMS/RAZORPAY/HOUTR_DUPBANK_069/ho_pay_dupbank_069', creditedAt: '2026-04-08T14:00:00Z' },
+  { bankTransactionId: 'ho_bank_069_2', utr: 'HOUTR_DUPBANK_069', creditAmount: 205044, description: 'CMS/RAZORPAY/HOUTR_DUPBANK_069/ho_pay_dupbank_069', creditedAt: '2026-04-08T14:00:00Z' },
+  { bankTransactionId: 'ho_bank_070_1', utr: 'HOUTR_DUPBANK_070', creditAmount: 429616, description: 'CMS/RAZORPAY/HOUTR_DUPBANK_070/ho_pay_dupbank_070', creditedAt: '2026-04-08T14:00:00Z' },
+  { bankTransactionId: 'ho_bank_070_2', utr: 'HOUTR_DUPBANK_070', creditAmount: 429616, description: 'CMS/RAZORPAY/HOUTR_DUPBANK_070/ho_pay_dupbank_070', creditedAt: '2026-04-08T14:00:00Z' },
+  { bankTransactionId: 'ho_bank_071_1', utr: 'HOUTR_DUPBANK_071', creditAmount: 659070, description: 'CMS/RAZORPAY/HOUTR_DUPBANK_071/ho_pay_dupbank_071', creditedAt: '2026-04-08T14:00:00Z' },
+  { bankTransactionId: 'ho_bank_071_2', utr: 'HOUTR_DUPBANK_071', creditAmount: 659070, description: 'CMS/RAZORPAY/HOUTR_DUPBANK_071/ho_pay_dupbank_071', creditedAt: '2026-04-08T14:00:00Z' },
+  { bankTransactionId: 'ho_bank_072_1', utr: 'HOUTR_DUPBANK_072', creditAmount: 908052, description: 'CMS/RAZORPAY/HOUTR_DUPBANK_072/ho_pay_dupbank_072', creditedAt: '2026-04-08T14:00:00Z' },
+  { bankTransactionId: 'ho_bank_072_2', utr: 'HOUTR_DUPBANK_072', creditAmount: 908052, description: 'CMS/RAZORPAY/HOUTR_DUPBANK_072/ho_pay_dupbank_072', creditedAt: '2026-04-08T14:00:00Z' },
+
+  // 73-76: Distractor Unrelated Bank Credits (Wrong UTR and vendor payment description)
+  { bankTransactionId: 'ho_bank_distractor_073', utr: 'NEFT_VENDOR_PAY_073', creditAmount: 180634, description: 'NEFT CR FROM ACME SUPPLIERS VENDOR REF 100073', creditedAt: '2026-04-09T14:00:00Z' },
+  { bankTransactionId: 'ho_bank_distractor_074', utr: 'NEFT_VENDOR_PAY_074', creditAmount: 366150, description: 'NEFT CR FROM ACME SUPPLIERS VENDOR REF 100074', creditedAt: '2026-04-09T14:00:00Z' },
+  { bankTransactionId: 'ho_bank_distractor_075', utr: 'NEFT_VENDOR_PAY_075', creditAmount: 580958, description: 'NEFT CR FROM ACME SUPPLIERS VENDOR REF 100075', creditedAt: '2026-04-09T14:00:00Z' },
+  { bankTransactionId: 'ho_bank_distractor_076', utr: 'NEFT_VENDOR_PAY_076', creditAmount: 790884, description: 'NEFT CR FROM ACME SUPPLIERS VENDOR REF 100076', creditedAt: '2026-04-09T14:00:00Z' },
+
+  // 77-80: Unsupported Currencies
+  { bankTransactionId: 'ho_bank_077', utr: 'HOUTR1000077', creditAmount: 9764, description: 'CMS/RAZORPAY/HOUTR1000077/USD_PAYMENT', creditedAt: '2026-04-09T14:00:00Z' },
+  { bankTransactionId: 'ho_bank_078', utr: 'HOUTR1000078', creditAmount: 24410, description: 'CMS/RAZORPAY/HOUTR1000078/EUR_PAYMENT', creditedAt: '2026-04-09T14:00:00Z' },
+  { bankTransactionId: 'ho_bank_079', utr: 'HOUTR1000079', creditAmount: 14646, description: 'CMS/RAZORPAY/HOUTR1000079/GBP_PAYMENT', creditedAt: '2026-04-09T14:00:00Z' },
+  { bankTransactionId: 'ho_bank_080', utr: 'HOUTR1000080', creditAmount: 48820, description: 'CMS/RAZORPAY/HOUTR1000080/USD_PAYMENT', creditedAt: '2026-04-09T14:00:00Z' },
+];
+
+// Manually specified Ground Truth labels
+const rawGroundTruth: GroundTruth[] = [
+  // 1-30: Clean Matches -> Expected auto_reconciled
+  { paymentId: 'ho_pay_001', expectedSettlementId: 'ho_set_001', expectedBankTransactionId: 'ho_bank_001', expectedExceptionType: 'CLEAN_MATCH', expectedOutcome: 'auto_reconciled', scenarioDescription: 'Clean 3-way exact match' },
+  { paymentId: 'ho_pay_002', expectedSettlementId: 'ho_set_002', expectedBankTransactionId: 'ho_bank_002', expectedExceptionType: 'CLEAN_MATCH', expectedOutcome: 'auto_reconciled', scenarioDescription: 'Clean 3-way exact match' },
+  { paymentId: 'ho_pay_003', expectedSettlementId: 'ho_set_003', expectedBankTransactionId: 'ho_bank_003', expectedExceptionType: 'CLEAN_MATCH', expectedOutcome: 'auto_reconciled', scenarioDescription: 'Clean 3-way exact match' },
+  { paymentId: 'ho_pay_004', expectedSettlementId: 'ho_set_004', expectedBankTransactionId: 'ho_bank_004', expectedExceptionType: 'CLEAN_MATCH', expectedOutcome: 'auto_reconciled', scenarioDescription: 'Clean 3-way exact match' },
+  { paymentId: 'ho_pay_005', expectedSettlementId: 'ho_set_005', expectedBankTransactionId: 'ho_bank_005', expectedExceptionType: 'CLEAN_MATCH', expectedOutcome: 'auto_reconciled', scenarioDescription: 'Clean 3-way exact match' },
+  { paymentId: 'ho_pay_006', expectedSettlementId: 'ho_set_006', expectedBankTransactionId: 'ho_bank_006', expectedExceptionType: 'CLEAN_MATCH', expectedOutcome: 'auto_reconciled', scenarioDescription: 'Clean 3-way exact match' },
+  { paymentId: 'ho_pay_007', expectedSettlementId: 'ho_set_007', expectedBankTransactionId: 'ho_bank_007', expectedExceptionType: 'CLEAN_MATCH', expectedOutcome: 'auto_reconciled', scenarioDescription: 'Clean 3-way exact match' },
+  { paymentId: 'ho_pay_008', expectedSettlementId: 'ho_set_008', expectedBankTransactionId: 'ho_bank_008', expectedExceptionType: 'CLEAN_MATCH', expectedOutcome: 'auto_reconciled', scenarioDescription: 'Clean 3-way exact match' },
+  { paymentId: 'ho_pay_009', expectedSettlementId: 'ho_set_009', expectedBankTransactionId: 'ho_bank_009', expectedExceptionType: 'CLEAN_MATCH', expectedOutcome: 'auto_reconciled', scenarioDescription: 'Clean 3-way exact match' },
+  { paymentId: 'ho_pay_010', expectedSettlementId: 'ho_set_010', expectedBankTransactionId: 'ho_bank_010', expectedExceptionType: 'CLEAN_MATCH', expectedOutcome: 'auto_reconciled', scenarioDescription: 'Clean 3-way exact match' },
+  { paymentId: 'ho_pay_011', expectedSettlementId: 'ho_set_011', expectedBankTransactionId: 'ho_bank_011', expectedExceptionType: 'CLEAN_MATCH', expectedOutcome: 'auto_reconciled', scenarioDescription: 'Clean 3-way exact match' },
+  { paymentId: 'ho_pay_012', expectedSettlementId: 'ho_set_012', expectedBankTransactionId: 'ho_bank_012', expectedExceptionType: 'CLEAN_MATCH', expectedOutcome: 'auto_reconciled', scenarioDescription: 'Clean 3-way exact match' },
+  { paymentId: 'ho_pay_013', expectedSettlementId: 'ho_set_013', expectedBankTransactionId: 'ho_bank_013', expectedExceptionType: 'CLEAN_MATCH', expectedOutcome: 'auto_reconciled', scenarioDescription: 'Clean 3-way exact match' },
+  { paymentId: 'ho_pay_014', expectedSettlementId: 'ho_set_014', expectedBankTransactionId: 'ho_bank_014', expectedExceptionType: 'CLEAN_MATCH', expectedOutcome: 'auto_reconciled', scenarioDescription: 'Clean 3-way exact match' },
+  { paymentId: 'ho_pay_015', expectedSettlementId: 'ho_set_015', expectedBankTransactionId: 'ho_bank_015', expectedExceptionType: 'CLEAN_MATCH', expectedOutcome: 'auto_reconciled', scenarioDescription: 'Clean 3-way exact match' },
+  { paymentId: 'ho_pay_016', expectedSettlementId: 'ho_set_016', expectedBankTransactionId: 'ho_bank_016', expectedExceptionType: 'CLEAN_MATCH', expectedOutcome: 'auto_reconciled', scenarioDescription: 'Clean 3-way exact match' },
+  { paymentId: 'ho_pay_017', expectedSettlementId: 'ho_set_017', expectedBankTransactionId: 'ho_bank_017', expectedExceptionType: 'CLEAN_MATCH', expectedOutcome: 'auto_reconciled', scenarioDescription: 'Clean 3-way exact match' },
+  { paymentId: 'ho_pay_018', expectedSettlementId: 'ho_set_018', expectedBankTransactionId: 'ho_bank_018', expectedExceptionType: 'CLEAN_MATCH', expectedOutcome: 'auto_reconciled', scenarioDescription: 'Clean 3-way exact match' },
+  { paymentId: 'ho_pay_019', expectedSettlementId: 'ho_set_019', expectedBankTransactionId: 'ho_bank_019', expectedExceptionType: 'CLEAN_MATCH', expectedOutcome: 'auto_reconciled', scenarioDescription: 'Clean 3-way exact match' },
+  { paymentId: 'ho_pay_020', expectedSettlementId: 'ho_set_020', expectedBankTransactionId: 'ho_bank_020', expectedExceptionType: 'CLEAN_MATCH', expectedOutcome: 'auto_reconciled', scenarioDescription: 'Clean 3-way exact match' },
+  { paymentId: 'ho_pay_021', expectedSettlementId: 'ho_set_021', expectedBankTransactionId: 'ho_bank_021', expectedExceptionType: 'CLEAN_MATCH', expectedOutcome: 'auto_reconciled', scenarioDescription: 'Clean 3-way exact match' },
+  { paymentId: 'ho_pay_022', expectedSettlementId: 'ho_set_022', expectedBankTransactionId: 'ho_bank_022', expectedExceptionType: 'CLEAN_MATCH', expectedOutcome: 'auto_reconciled', scenarioDescription: 'Clean 3-way exact match' },
+  { paymentId: 'ho_pay_023', expectedSettlementId: 'ho_set_023', expectedBankTransactionId: 'ho_bank_023', expectedExceptionType: 'CLEAN_MATCH', expectedOutcome: 'auto_reconciled', scenarioDescription: 'Clean 3-way exact match' },
+  { paymentId: 'ho_pay_024', expectedSettlementId: 'ho_set_024', expectedBankTransactionId: 'ho_bank_024', expectedExceptionType: 'CLEAN_MATCH', expectedOutcome: 'auto_reconciled', scenarioDescription: 'Clean 3-way exact match' },
+  { paymentId: 'ho_pay_025', expectedSettlementId: 'ho_set_025', expectedBankTransactionId: 'ho_bank_025', expectedExceptionType: 'CLEAN_MATCH', expectedOutcome: 'auto_reconciled', scenarioDescription: 'Clean 3-way exact match' },
+  { paymentId: 'ho_pay_026', expectedSettlementId: 'ho_set_026', expectedBankTransactionId: 'ho_bank_026', expectedExceptionType: 'CLEAN_MATCH', expectedOutcome: 'auto_reconciled', scenarioDescription: 'Clean 3-way exact match' },
+  { paymentId: 'ho_pay_027', expectedSettlementId: 'ho_set_027', expectedBankTransactionId: 'ho_bank_027', expectedExceptionType: 'CLEAN_MATCH', expectedOutcome: 'auto_reconciled', scenarioDescription: 'Clean 3-way exact match' },
+  { paymentId: 'ho_pay_028', expectedSettlementId: 'ho_set_028', expectedBankTransactionId: 'ho_bank_028', expectedExceptionType: 'CLEAN_MATCH', expectedOutcome: 'auto_reconciled', scenarioDescription: 'Clean 3-way exact match' },
+  { paymentId: 'ho_pay_029', expectedSettlementId: 'ho_set_029', expectedBankTransactionId: 'ho_bank_029', expectedExceptionType: 'CLEAN_MATCH', expectedOutcome: 'auto_reconciled', scenarioDescription: 'Clean 3-way exact match' },
+  { paymentId: 'ho_pay_030', expectedSettlementId: 'ho_set_030', expectedBankTransactionId: 'ho_bank_030', expectedExceptionType: 'CLEAN_MATCH', expectedOutcome: 'auto_reconciled', scenarioDescription: 'Clean 3-way exact match' },
+
+  // 31-35: Reference Truncation / Partial Refs -> Expected manual_review or auto_reconciled
+  { paymentId: 'ho_pay_trunc_031', expectedSettlementId: 'ho_set_031', expectedBankTransactionId: 'ho_bank_031', expectedExceptionType: 'PARTIALLY_MISSING_REF', expectedOutcome: 'manual_review', scenarioDescription: 'Order ID reference instead of Payment ID' },
+  { paymentId: 'ho_pay_trunc_032', expectedSettlementId: 'ho_set_032', expectedBankTransactionId: 'ho_bank_032', expectedExceptionType: 'PARTIALLY_MISSING_REF', expectedOutcome: 'manual_review', scenarioDescription: 'Truncated reference suffix' },
+  { paymentId: 'ho_pay_trunc_033', expectedSettlementId: 'ho_set_033', expectedBankTransactionId: 'ho_bank_033', expectedExceptionType: 'PARTIALLY_MISSING_REF', expectedOutcome: 'manual_review', scenarioDescription: 'Order ID reference instead of Payment ID' },
+  { paymentId: 'ho_pay_trunc_034', expectedSettlementId: 'ho_set_034', expectedBankTransactionId: 'ho_bank_034', expectedExceptionType: 'PARTIALLY_MISSING_REF', expectedOutcome: 'manual_review', scenarioDescription: 'Truncated reference suffix' },
+  { paymentId: 'ho_pay_trunc_035', expectedSettlementId: 'ho_set_035', expectedBankTransactionId: 'ho_bank_035', expectedExceptionType: 'PARTIALLY_MISSING_REF', expectedOutcome: 'manual_review', scenarioDescription: 'Order ID reference instead of Payment ID' },
+
+  // 36-40: Amount Collisions (Multiple payments with exact same gross & net) -> Expected auto_reconciled or manual_review
+  { paymentId: 'ho_pay_col_036', expectedSettlementId: 'ho_set_036', expectedBankTransactionId: 'ho_bank_036', expectedExceptionType: 'CLEAN_MATCH', expectedOutcome: 'auto_reconciled', scenarioDescription: 'Amount collision correctly resolved by exact ref' },
+  { paymentId: 'ho_pay_col_037', expectedSettlementId: 'ho_set_037', expectedBankTransactionId: 'ho_bank_037', expectedExceptionType: 'CLEAN_MATCH', expectedOutcome: 'auto_reconciled', scenarioDescription: 'Amount collision correctly resolved by exact ref' },
+  { paymentId: 'ho_pay_col_038', expectedSettlementId: 'ho_set_038', expectedBankTransactionId: 'ho_bank_038', expectedExceptionType: 'CLEAN_MATCH', expectedOutcome: 'auto_reconciled', scenarioDescription: 'Amount collision correctly resolved by exact ref' },
+  { paymentId: 'ho_pay_col_039', expectedSettlementId: 'ho_set_039', expectedBankTransactionId: 'ho_bank_039', expectedExceptionType: 'CLEAN_MATCH', expectedOutcome: 'auto_reconciled', scenarioDescription: 'Amount collision correctly resolved by exact ref' },
+  { paymentId: 'ho_pay_col_040', expectedSettlementId: 'ho_set_040', expectedBankTransactionId: 'ho_bank_040', expectedExceptionType: 'CLEAN_MATCH', expectedOutcome: 'auto_reconciled', scenarioDescription: 'Amount collision correctly resolved by exact ref' },
+
+  // 41-44: Duplicate UTR on Bank Statements -> Expected manual_review
+  { paymentId: 'ho_pay_duputr_041', expectedSettlementId: 'ho_set_041', expectedBankTransactionId: 'ho_bank_041', expectedExceptionType: 'DUPLICATE_BANK_CREDIT', expectedOutcome: 'manual_review', scenarioDescription: 'Duplicate UTR collision on bank statement' },
+  { paymentId: 'ho_pay_duputr_042', expectedSettlementId: 'ho_set_042', expectedBankTransactionId: 'ho_bank_042', expectedExceptionType: 'DUPLICATE_BANK_CREDIT', expectedOutcome: 'manual_review', scenarioDescription: 'Duplicate UTR collision on bank statement' },
+  { paymentId: 'ho_pay_duputr_043', expectedSettlementId: 'ho_set_043', expectedBankTransactionId: 'ho_bank_043', expectedExceptionType: 'DUPLICATE_BANK_CREDIT', expectedOutcome: 'manual_review', scenarioDescription: 'Duplicate UTR collision on bank statement' },
+  { paymentId: 'ho_pay_duputr_044', expectedSettlementId: 'ho_set_044', expectedBankTransactionId: 'ho_bank_044', expectedExceptionType: 'DUPLICATE_BANK_CREDIT', expectedOutcome: 'manual_review', scenarioDescription: 'Duplicate UTR collision on bank statement' },
+
+  // 45-48: Wrong Payment ID in Bank Narration -> Expected manual_review
+  { paymentId: 'ho_pay_wrongnar_045', expectedSettlementId: 'ho_set_045', expectedBankTransactionId: 'ho_bank_045', expectedExceptionType: 'INCONSISTENT_DESCRIPTION', expectedOutcome: 'manual_review', scenarioDescription: 'Bank narration references wrong payment ID' },
+  { paymentId: 'ho_pay_wrongnar_046', expectedSettlementId: 'ho_set_046', expectedBankTransactionId: 'ho_bank_046', expectedExceptionType: 'INCONSISTENT_DESCRIPTION', expectedOutcome: 'manual_review', scenarioDescription: 'Bank narration references wrong payment ID' },
+  { paymentId: 'ho_pay_wrongnar_047', expectedSettlementId: 'ho_set_047', expectedBankTransactionId: 'ho_bank_047', expectedExceptionType: 'INCONSISTENT_DESCRIPTION', expectedOutcome: 'manual_review', scenarioDescription: 'Bank narration references wrong payment ID' },
+  { paymentId: 'ho_pay_wrongnar_048', expectedSettlementId: 'ho_set_048', expectedBankTransactionId: 'ho_bank_048', expectedExceptionType: 'INCONSISTENT_DESCRIPTION', expectedOutcome: 'manual_review', scenarioDescription: 'Bank narration references wrong payment ID' },
+
+  // 49-52: Fee/GST Discrepancy & Net Calculation Anomaly -> Expected manual_review
+  { paymentId: 'ho_pay_feeanom_049', expectedSettlementId: 'ho_set_049', expectedBankTransactionId: 'ho_bank_049', expectedExceptionType: 'FEE_TAX_ANOMALY', expectedOutcome: 'manual_review', scenarioDescription: 'Unexpected 3.5% fee deduction variance' },
+  { paymentId: 'ho_pay_feeanom_050', expectedSettlementId: 'ho_set_050', expectedBankTransactionId: 'ho_bank_050', expectedExceptionType: 'FEE_TAX_ANOMALY', expectedOutcome: 'manual_review', scenarioDescription: 'Unexpected 3.5% fee deduction variance' },
+  { paymentId: 'ho_pay_feeanom_051', expectedSettlementId: 'ho_set_051', expectedBankTransactionId: 'ho_bank_051', expectedExceptionType: 'FEE_TAX_ANOMALY', expectedOutcome: 'manual_review', scenarioDescription: 'Unexpected 3.5% fee deduction variance' },
+  { paymentId: 'ho_pay_feeanom_052', expectedSettlementId: 'ho_set_052', expectedBankTransactionId: 'ho_bank_052', expectedExceptionType: 'FEE_TAX_ANOMALY', expectedOutcome: 'manual_review', scenarioDescription: 'Unexpected 3.5% fee deduction variance' },
+
+  // 53-56: Date-Boundary & Bank Holiday Delayed Settlement -> Expected manual_review
+  { paymentId: 'ho_pay_date_053', expectedSettlementId: 'ho_set_053', expectedBankTransactionId: 'ho_bank_053', expectedExceptionType: 'DELAYED_SETTLEMENT', expectedOutcome: 'manual_review', scenarioDescription: 'Settlement delayed 7 days due to bank holiday' },
+  { paymentId: 'ho_pay_date_054', expectedSettlementId: 'ho_set_054', expectedBankTransactionId: 'ho_bank_054', expectedExceptionType: 'DELAYED_SETTLEMENT', expectedOutcome: 'manual_review', scenarioDescription: 'Settlement delayed 9 days due to bank holiday' },
+  { paymentId: 'ho_pay_date_055', expectedSettlementId: 'ho_set_055', expectedBankTransactionId: 'ho_bank_055', expectedExceptionType: 'DELAYED_SETTLEMENT', expectedOutcome: 'manual_review', scenarioDescription: 'Settlement delayed 10 days due to bank holiday' },
+  { paymentId: 'ho_pay_date_056', expectedSettlementId: 'ho_set_056', expectedBankTransactionId: 'ho_bank_056', expectedExceptionType: 'DELAYED_SETTLEMENT', expectedOutcome: 'manual_review', scenarioDescription: 'Settlement delayed 11 days due to bank holiday' },
+
+  // 57-60: Missing Settlement Advice -> Expected unmatched_exception
+  { paymentId: 'ho_pay_noset_057', expectedSettlementId: null, expectedBankTransactionId: null, expectedExceptionType: 'MISSING_SETTLEMENT', expectedOutcome: 'unmatched_exception', scenarioDescription: 'No settlement record generated by gateway' },
+  { paymentId: 'ho_pay_noset_058', expectedSettlementId: null, expectedBankTransactionId: null, expectedExceptionType: 'MISSING_SETTLEMENT', expectedOutcome: 'unmatched_exception', scenarioDescription: 'No settlement record generated by gateway' },
+  { paymentId: 'ho_pay_noset_059', expectedSettlementId: null, expectedBankTransactionId: null, expectedExceptionType: 'MISSING_SETTLEMENT', expectedOutcome: 'unmatched_exception', scenarioDescription: 'No settlement record generated by gateway' },
+  { paymentId: 'ho_pay_noset_060', expectedSettlementId: null, expectedBankTransactionId: null, expectedExceptionType: 'MISSING_SETTLEMENT', expectedOutcome: 'unmatched_exception', scenarioDescription: 'No settlement record generated by gateway' },
+
+  // 61-64: Missing Bank Credit -> Expected unmatched_exception
+  { paymentId: 'ho_pay_nobank_061', expectedSettlementId: 'ho_set_061', expectedBankTransactionId: null, expectedExceptionType: 'MISSING_BANK_CREDIT', expectedOutcome: 'unmatched_exception', scenarioDescription: 'Settlement processed but bank credit missing' },
+  { paymentId: 'ho_pay_nobank_062', expectedSettlementId: 'ho_set_062', expectedBankTransactionId: null, expectedExceptionType: 'MISSING_BANK_CREDIT', expectedOutcome: 'unmatched_exception', scenarioDescription: 'Settlement processed but bank credit missing' },
+  { paymentId: 'ho_pay_nobank_063', expectedSettlementId: 'ho_set_063', expectedBankTransactionId: null, expectedExceptionType: 'MISSING_BANK_CREDIT', expectedOutcome: 'unmatched_exception', scenarioDescription: 'Settlement processed but bank credit missing' },
+  { paymentId: 'ho_pay_nobank_064', expectedSettlementId: 'ho_set_064', expectedBankTransactionId: null, expectedExceptionType: 'MISSING_BANK_CREDIT', expectedOutcome: 'unmatched_exception', scenarioDescription: 'Settlement processed but bank credit missing' },
+
+  // 65-68: Duplicate Settlement Records -> Expected manual_review
+  { paymentId: 'ho_pay_dupset_065', expectedSettlementId: 'ho_set_065_A', expectedBankTransactionId: 'ho_bank_065', expectedExceptionType: 'DUPLICATE_SETTLEMENT', expectedOutcome: 'manual_review', scenarioDescription: 'Duplicate settlement records for single payment' },
+  { paymentId: 'ho_pay_dupset_066', expectedSettlementId: 'ho_set_066_A', expectedBankTransactionId: 'ho_bank_066', expectedExceptionType: 'DUPLICATE_SETTLEMENT', expectedOutcome: 'manual_review', scenarioDescription: 'Duplicate settlement records for single payment' },
+  { paymentId: 'ho_pay_dupset_067', expectedSettlementId: 'ho_set_067_A', expectedBankTransactionId: 'ho_bank_067', expectedExceptionType: 'DUPLICATE_SETTLEMENT', expectedOutcome: 'manual_review', scenarioDescription: 'Duplicate settlement records for single payment' },
+  { paymentId: 'ho_pay_dupset_068', expectedSettlementId: 'ho_set_068_A', expectedBankTransactionId: 'ho_bank_068', expectedExceptionType: 'DUPLICATE_SETTLEMENT', expectedOutcome: 'manual_review', scenarioDescription: 'Duplicate settlement records for single payment' },
+
+  // 69-72: Duplicate Bank Credits -> Expected manual_review
+  { paymentId: 'ho_pay_dupbank_069', expectedSettlementId: 'ho_set_069', expectedBankTransactionId: 'ho_bank_069_1', expectedExceptionType: 'DUPLICATE_BANK_CREDIT', expectedOutcome: 'manual_review', scenarioDescription: 'Duplicate bank credits with identical UTR' },
+  { paymentId: 'ho_pay_dupbank_070', expectedSettlementId: 'ho_set_070', expectedBankTransactionId: 'ho_bank_070_1', expectedExceptionType: 'DUPLICATE_BANK_CREDIT', expectedOutcome: 'manual_review', scenarioDescription: 'Duplicate bank credits with identical UTR' },
+  { paymentId: 'ho_pay_dupbank_071', expectedSettlementId: 'ho_set_071', expectedBankTransactionId: 'ho_bank_071_1', expectedExceptionType: 'DUPLICATE_BANK_CREDIT', expectedOutcome: 'manual_review', scenarioDescription: 'Duplicate bank credits with identical UTR' },
+  { paymentId: 'ho_pay_dupbank_072', expectedSettlementId: 'ho_set_072', expectedBankTransactionId: 'ho_bank_072_1', expectedExceptionType: 'DUPLICATE_BANK_CREDIT', expectedOutcome: 'manual_review', scenarioDescription: 'Duplicate bank credits with identical UTR' },
+
+  // 73-76: Unrelated Distractor Bank Credits -> Expected unmatched_exception
+  { paymentId: 'ho_pay_unrel_073', expectedSettlementId: 'ho_set_073', expectedBankTransactionId: null, expectedExceptionType: 'MISSING_BANK_CREDIT', expectedOutcome: 'unmatched_exception', scenarioDescription: 'Similar amount credit is an unrelated vendor payout' },
+  { paymentId: 'ho_pay_unrel_074', expectedSettlementId: 'ho_set_074', expectedBankTransactionId: null, expectedExceptionType: 'MISSING_BANK_CREDIT', expectedOutcome: 'unmatched_exception', scenarioDescription: 'Similar amount credit is an unrelated vendor payout' },
+  { paymentId: 'ho_pay_unrel_075', expectedSettlementId: 'ho_set_075', expectedBankTransactionId: null, expectedExceptionType: 'MISSING_BANK_CREDIT', expectedOutcome: 'unmatched_exception', scenarioDescription: 'Similar amount credit is an unrelated vendor payout' },
+  { paymentId: 'ho_pay_unrel_076', expectedSettlementId: 'ho_set_076', expectedBankTransactionId: null, expectedExceptionType: 'MISSING_BANK_CREDIT', expectedOutcome: 'unmatched_exception', scenarioDescription: 'Similar amount credit is an unrelated vendor payout' },
+
+  // 77-80: Unsupported Currencies -> Expected unmatched_exception
+  { paymentId: 'ho_pay_curr_077', expectedSettlementId: 'ho_set_077', expectedBankTransactionId: 'ho_bank_077', expectedExceptionType: 'UNSUPPORTED_CURRENCY', expectedOutcome: 'unmatched_exception', scenarioDescription: 'USD transaction rejected by INR circuit breaker' },
+  { paymentId: 'ho_pay_curr_078', expectedSettlementId: 'ho_set_078', expectedBankTransactionId: 'ho_bank_078', expectedExceptionType: 'UNSUPPORTED_CURRENCY', expectedOutcome: 'unmatched_exception', scenarioDescription: 'EUR transaction rejected by INR circuit breaker' },
+  { paymentId: 'ho_pay_curr_079', expectedSettlementId: 'ho_set_079', expectedBankTransactionId: 'ho_bank_079', expectedExceptionType: 'UNSUPPORTED_CURRENCY', expectedOutcome: 'unmatched_exception', scenarioDescription: 'GBP transaction rejected by INR circuit breaker' },
+  { paymentId: 'ho_pay_curr_080', expectedSettlementId: 'ho_set_080', expectedBankTransactionId: 'ho_bank_080', expectedExceptionType: 'UNSUPPORTED_CURRENCY', expectedOutcome: 'unmatched_exception', scenarioDescription: 'USD transaction rejected by INR circuit breaker' },
+];
+
+export const HELD_OUT_DATASET: HeldOutDataset = deepFreeze({
+  payments: rawPayments,
+  settlements: rawSettlements,
+  bankTransactions: rawBankTransactions,
+  groundTruth: rawGroundTruth,
+});

@@ -58,4 +58,25 @@ test.describe('Evaluation Lab & Policy Simulator Suite', () => {
     // Simulated Auto Rate should update
     await expect(page.locator('text=Simulated Auto Rate').first()).toBeVisible();
   });
+
+  test('17. Held-Out Adversarial Benchmark renders 80 cases, category breakdown, and exports error report', async ({ page }) => {
+    const heldOutBtn = page.locator('button:has-text("Held-Out Adversarial")').first();
+    await expect(heldOutBtn).toBeVisible();
+    await heldOutBtn.click();
+
+    // Verify Held-Out Scorecard
+    await expect(page.locator('text=Held-Out Adversarial Evaluation Benchmark (80 Cases)').first()).toBeVisible();
+    await expect(page.locator('text=14 Adversarial Test Categories & Containment Behaviors').first()).toBeVisible();
+    await expect(page.locator('text=Held-Out Error Inspector & Failure Diagnostics').first()).toBeVisible();
+
+    // Verify Export Errors CSV
+    const exportErrorsBtn = page.locator('button:has-text("Export Errors CSV")').first();
+    await exportErrorsBtn.scrollIntoViewIfNeeded();
+
+    const [download] = await Promise.all([
+      page.waitForEvent('download'),
+      exportErrorsBtn.click(),
+    ]);
+    expect(download.suggestedFilename()).toContain('.csv');
+  });
 });

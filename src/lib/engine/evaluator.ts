@@ -21,6 +21,7 @@ import {
   BankTransaction,
 } from '@/types/reconciliation';
 import { generateSyntheticDataset } from '@/lib/dataset/generator';
+import { HELD_OUT_DATASET } from '@/lib/dataset/held_out_dataset';
 import { reconcileBatch, DEFAULT_ENGINE_CONFIG } from '@/lib/engine/matcher';
 
 export function evaluateReconciliation(
@@ -213,6 +214,8 @@ export function evaluateReconciliation(
         (autoResolutionPrecision + autoResolutionRecall)
       : 0;
 
+  const falsePositiveCount = errors.filter((e) => e.errorClassification === 'FALSE_POSITIVE').length;
+
   return {
     totalRecordsProcessed: totalRecords,
 
@@ -236,6 +239,7 @@ export function evaluateReconciliation(
     exceptionDetectionAccuracy,
     correctExceptionCount,
 
+    falsePositiveCount,
     falsePositiveExposurePaise,
     totalGrossAmountPaise,
     matchedAmountPaise,
@@ -382,6 +386,40 @@ export function simulatePolicyThresholds(
     falsePositiveExposurePaise: simEval.falsePositiveExposurePaise,
     evaluation: simEval,
     isValid: true,
+  };
+}
+
+export interface HeldOutBenchmarkResult {
+  evaluation: EvaluationMetrics;
+  records: ReconciliationRecord[];
+  groundTruth: GroundTruth[];
+  processingDurationMs: number;
+}
+
+/**
+ * Evaluates the reconciliation engine against the manually curated, immutable held-out adversarial dataset.
+ * The engine operates purely on (payments, settlements, bankTransactions) without seeing ground truth.
+ */
+export function evaluateHeldOutBenchmark(
+  config: EngineConfig = DEFAULT_ENGINE_CONFIG
+): HeldOutBenchmarkResult {
+  const dataset = HELD_OUT_DATASET;
+  const start = performance.now();
+  const result = reconcileBatch(
+    [...dataset.payments],
+    [...dataset.settlements],
+    [...dataset.bankTransactions],
+    config
+  );
+  const duration = performance.now() - start;
+  const evalMetrics = evaluateReconciliation(result.records, [...dataset.groundTruth], duration);
+  result.evaluation = evalMetrics;
+
+  return {
+    evaluation: evalMetrics,
+    records: result.records,
+    groundTruth: [...dataset.groundTruth],
+    processingDurationMs: duration,
   };
 }
 

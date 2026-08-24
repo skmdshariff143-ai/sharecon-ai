@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "generatedAt": "2026-08-24T14:20:02.082Z",
+    "generatedAt": "2026-08-24T14:51:03.563Z",
     "engineVersion": "0.1.0",
     "totalBenchmarkSeeds": 5,
     "defaultSeed": 42,
@@ -24,7 +24,7 @@
     "reviewRoutingAccuracy": 0.8297872340425532,
     "exceptionDetectionAccuracy": 0.9055555555555556,
     "falsePositiveExposurePaise": 0,
-    "processingDurationMs": 52.3,
+    "processingDurationMs": 39.05,
     "errorCount": 8
   },
   "policySimulationMatrix": [
@@ -118,7 +118,7 @@
       "exceptionAccuracy": 0.9055555555555556,
       "autoReconciliationRate": 0.6166666666666667,
       "falsePositiveExposurePaise": 0,
-      "processingDurationMs": 15.826300000000003
+      "processingDurationMs": 12.79950000000008
     },
     {
       "seed": 101,
@@ -132,7 +132,7 @@
       "exceptionAccuracy": 0.9055555555555556,
       "autoReconciliationRate": 0.6166666666666667,
       "falsePositiveExposurePaise": 0,
-      "processingDurationMs": 17.75369999999998
+      "processingDurationMs": 16.460000000000036
     },
     {
       "seed": 777,
@@ -146,7 +146,7 @@
       "exceptionAccuracy": 0.9055555555555556,
       "autoReconciliationRate": 0.6166666666666667,
       "falsePositiveExposurePaise": 0,
-      "processingDurationMs": 17.693600000000004
+      "processingDurationMs": 12.182399999999916
     },
     {
       "seed": 2024,
@@ -160,7 +160,7 @@
       "exceptionAccuracy": 0.9055555555555556,
       "autoReconciliationRate": 0.6166666666666667,
       "falsePositiveExposurePaise": 0,
-      "processingDurationMs": 13.1755
+      "processingDurationMs": 10.517499999999927
     },
     {
       "seed": 9999,
@@ -174,7 +174,7 @@
       "exceptionAccuracy": 0.9055555555555556,
       "autoReconciliationRate": 0.6166666666666667,
       "falsePositiveExposurePaise": 0,
-      "processingDurationMs": 15.085200000000043
+      "processingDurationMs": 9.501500000000078
     }
   ]
 }

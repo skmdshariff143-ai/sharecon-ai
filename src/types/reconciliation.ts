@@ -204,6 +204,7 @@ export interface EvaluationMetrics {
   correctExceptionCount: number;
 
   // 5. Financial & Safety Impact
+  falsePositiveCount: number;
   falsePositiveExposurePaise: number; // Total rupee value of unsafe auto-matches
   totalGrossAmountPaise: number;
   matchedAmountPaise: number;

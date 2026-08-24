@@ -4,8 +4,8 @@
 > *Built for the Razorpay AI Buildathon (Track: AI Finance Controller)*
 
 [![Quality Gates](https://img.shields.io/badge/Quality%20Gates-Passing-emerald)](https://github.com/skmdshariff143-ai/sharecon-ai)
-[![Vitest Unit Tests](https://img.shields.io/badge/Unit%20Tests-43%2F43%20Passed-blue)](https://github.com/skmdshariff143-ai/sharecon-ai)
-[![Playwright E2E](https://img.shields.io/badge/Playwright%20E2E-35%2F35%20Passed-violet)](https://github.com/skmdshariff143-ai/sharecon-ai)
+[![Vitest Unit Tests](https://img.shields.io/badge/Unit%20Tests-48%2F48%20Passed-blue)](https://github.com/skmdshariff143-ai/sharecon-ai)
+[![Playwright E2E](https://img.shields.io/badge/Playwright%20E2E-36%2F36%20Passed-violet)](https://github.com/skmdshariff143-ai/sharecon-ai)
 [![Zero Horizontal Overflow](https://img.shields.io/badge/Responsive-1440%20%7C%201024%20%7C%20390-success)](https://sharecon-ai.vercel.app)
 [![Zero Live Money Movement](https://img.shields.io/badge/Safety-Zero%20Live%20Money%20Movement-amber)](https://sharecon-ai.vercel.app)
 
@@ -96,18 +96,16 @@ graph TD
 
 ---
 
-## 📊 Honest Evaluation Benchmark & Multi-Seed Robustness
+## 📊 Dual-Track Honest Evaluation Benchmark
 
-Metrics are separated into distinct mathematical categories rather than grouped into a single ambiguous aggregate:
+ShaRecon AI maintains two strictly separated benchmarks to prevent circular generator-matcher coupling:
 
-- **Proposed-Pair Precision**: Fraction of engine-proposed (Settlement + Bank) pairs where both IDs match ground truth.
-- **Proposed-Pair Recall**: Fraction of ground-truth pairs correctly identified by the engine.
-- **Auto-Resolution Precision**: Fraction of auto-reconciled records that are both ID-correct and safe to auto-resolve.
-- **Auto-Resolution Recall**: Fraction of total safe ground-truth records successfully auto-resolved.
-- **Review-Routing Accuracy**: Fraction of anomalies correctly routed to human triage.
-- **False-Positive Exposure**: Unsafe auto-resolution financial risk quantified in INR and integer paise.
+1. **Synthetic Multi-Seed Benchmark**: Evaluated dynamically across Seeds 42, 101, 777, 2024, and 9999 (180 records each).
+2. **Manually Curated Held-Out Adversarial Benchmark**: 80 hand-constructed failure scenarios testing reference truncation, amount collisions, duplicate UTRs, wrong narration references, and bank holiday delays, with independent ground-truth labels.
 
-### Multi-Seed Benchmark Results (Canonical Output)
+*Notice: Neither benchmark represents live production financial volume. Both evaluate algorithmic safety, false-positive resistance, and explainability on controlled datasets.*
+
+### Track 1: Multi-Seed Benchmark Results (Synthetic PRNG)
 *Committed artifact available at [`docs/generated/benchmark.md`](docs/generated/benchmark.md) and [`docs/METRIC_INTEGRITY_AUDIT.md`](docs/METRIC_INTEGRITY_AUDIT.md).*
 
 | Seed | Records | Proposed-Pair Precision | Proposed-Pair Recall | Auto-Resolution Precision | Auto-Resolution Recall | Review-Routing Acc | Latency |
@@ -117,6 +115,19 @@ Metrics are separated into distinct mathematical categories rather than grouped 
 | **777** | 180 | 90.1% | 91.8% | 100.0% | 100.0% | 87.2% | ~4.9ms |
 | **2024** | 180 | 91.7% | 90.5% | 100.0% | 100.0% | 78.7% | ~4.7ms |
 | **9999** | 180 | 91.4% | 94.3% | 100.0% | 100.0% | 80.9% | ~4.8ms |
+
+### Track 2: Held-Out Adversarial Benchmark Results (80 Curated Cases)
+*Committed report: [`docs/evaluation/HELD_OUT_REPORT.md`](docs/evaluation/HELD_OUT_REPORT.md) | Records: [`docs/evaluation/held-out-records.json`](docs/evaluation/held-out-records.json) | Ground Truth: [`docs/evaluation/held-out-ground-truth.json`](docs/evaluation/held-out-ground-truth.json)*
+
+| Metric Category | Result | Target | Description |
+| :--- | :---: | :---: | :--- |
+| **Proposed-Pair Precision** | **97.1%** | $\ge 85.0\%$ | 68 of 70 proposed settlement/bank links correct |
+| **Proposed-Pair Recall** | **97.1%** | $\ge 85.0\%$ | 68 of 70 true financial links identified |
+| **Auto-Resolution Precision** | **83.3%** | Un-Tuned Baseline | Reported honestly; 7 unsafe matches isolated in Error Inspector |
+| **Auto-Resolution Recall** | **100.0%** | $\ge 70.0\%$ | 35 of 35 clean ground-truth records safely auto-cleared |
+| **Review-Routing Accuracy** | **75.9%** | $\ge 70.0\%$ | 22 of 29 anomaly cases routed to manual review queue |
+| **Exception Accuracy** | **91.3%** | $\ge 85.0\%$ | 73 of 80 exception types matched ground truth |
+| **False-Positive Exposure** | **₹28,100.00** | Documented | 7 items documented in detail with factor scores |
 
 ---
 
@@ -131,16 +142,19 @@ npm run lint
 # 2. TypeScript Strict Type Check (0 errors)
 npm run type-check
 
-# 3. Vitest Unit & Adversarial Integrity Suite (43 unit tests)
+# 3. Vitest Unit, Adversarial & Held-Out Suite (48 unit tests)
 npm run test
 
 # 4. Canonical Benchmark Artifact Generator
 npm run generate:benchmark
 
-# 5. Production Turbopack Build
+# 5. Held-Out Adversarial Artifact Generator
+npm run generate:heldout
+
+# 6. Production Turbopack Build
 npm run build
 
-# 6. Playwright End-to-End Suite (35 E2E checks)
+# 7. Playwright End-to-End Suite (36 E2E checks)
 npm run test:e2e
 ```
 
