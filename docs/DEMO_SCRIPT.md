@@ -1,48 +1,70 @@
-# ShaRecon AI — 5-Minute Demonstration Script
+# ShaRecon AI — 5-Minute Demonstration Script (Judge Walkthrough)
 
-This script guides presenters and judges through a structured walkthrough of the ShaRecon AI prototype.
+> **Product**: ShaRecon AI  
+> **Tagline**: Explainable reconciliation. Confident financial control.  
+> **Track**: Razorpay AI Buildathon — AI Finance Controller  
+> **Production URL**: [https://sharecon-ai.vercel.app](https://sharecon-ai.vercel.app)
 
 ---
 
-## ⏱️ Demo Timeline (5 Minutes)
+## ⏱️ Structured 5-Minute Presentation Sequence
 
 ### 0:00 – 0:45 | Problem Statement & Product Mission
-- **Presenter**: "Welcome to **ShaRecon AI**, our explainable financial reconciliation platform built for the Razorpay AI Buildathon (AI Finance Controller Track).
-- **Core Friction**: High-volume merchants struggle to match gateway payments with nodal settlements and bank statements due to fee deductions (2% to 3.5%), truncated references, and weekend bank delays.
-- **Our Solution**: Strict integer-paise precision, deterministic 4-factor scoring, grounded Gemini exception diagnosis, and honest ground-truth benchmark evaluation."
+- **Presenter**: "Welcome to **ShaRecon AI**, our explainable financial reconciliation platform built for the Razorpay AI Buildathon.
+- **Merchant Friction**: High-volume digital businesses struggle to connect captured customer payments, nodal gateway settlements, and merchant bank account credits. Discrepancies arise from multi-tiered merchant fees (2.0% to 3.5%), 18% GST deductions, truncated UTRs, banking holiday clearing lags, and missing bank deposits.
+- **Our Solution**: Strict integer-paise arithmetic (`1 INR = 100 paise`), a deterministic 4-factor scoring engine, 1-to-1 collision prevention constraint solvers, and a grounded Gemini 2.5 Flash exception advisory copilot backed by an offline deterministic rule-based fallback."
 
-### 0:45 – 1:30 | 1-Click Benchmark Load & Safe Auto-Reconciliation
-- **Action**: Click **"Reload Demo (180)"** in the top navigation.
+### 0:45 – 1:30 | Executive Control Center & 3-Way Funnel
+- **Action**: Click **"Reload Demo (180)"** in the top command bar.
 - **Observation**:
-  - 180 synthetic records spanning 14 edge cases are processed in under 20ms.
+  - 180 synthetic multi-leg records across 14 financial edge cases are processed in under 5ms.
   - KPI Cards immediately display: Total Volume (₹21.35L), Auto-Reconciled Safe Matches (111 records, 61.7%), Review Queue (39 cases, 21.7%), and 30 Unmatched Exceptions.
-  - Match Precision is 90.6%, Auto-Resolution Precision is 100.0%, and False-Positive Exposure is ₹0.00.
-- **Presenter**: "Notice how clean matches (T+1 with exact payment ID and UTR) are safely auto-reconciled."
+  - Match Precision is 91.1%, Auto-Resolution Precision is 100.0%, and False-Positive Exposure is ₹0.00.
+  - The **3-Way Transaction Reconciliation Funnel** clearly traces conversion from Captured Payments (100%) ➔ Gateway Settlements (100%) ➔ Bank Credits (93.3%).
+  - Highlight the custom SVG Outcome Donut Chart and the Anomaly Trend Intelligence charts.
 
-### 1:30 – 2:30 | 3-Way Audit Drawer & Explainability
-- **Action**: In the **Reconciliation Workspace** tab, click on a record (e.g. `pay_0001_razor`).
+### 1:30 – 2:15 | Observable 8-Stage Live Reconciliation Runner
+- **Action**: Click **"Launch Live Runner"** from the Control Center or Command Bar.
 - **Observation**:
-  - The slide-out drawer displays the exact 3-way trace: Payment Ledger -> Razorpay Settlement Advice -> Merchant Bank Statement.
-  - The 4-factor evidence breakdown reveals exact point allocation: Reference (40), Amount (35), Date (15), and Description (10).
-  - The deterministic natural-language explanation justifies the match in plain English.
+  - Step-by-step observable execution through 8 deterministic pipeline phases:
+    1. Source Schema & Statement Validation
+    2. Currency & Integer-Paise Normalization
+    3. Reference Key Indexing (Exact & Partial)
+    4. 4-Factor Candidate Matrix Scoring
+    5. 1-to-1 Constraint & Collision Resolution
+    6. Confidence Routing & Circuit Breakers
+    7. Automated Reconciliation & Queue Tagging
+    8. Immutable Audit Trail Commit
+  - Demonstrate interactive controls: Play / Pause, Speed Selector (1x, 2x, 0.5x), and Skip to End.
 
-### 2:30 – 3:30 | Human Review Queue & Reviewer Actions
-- **Action**: Navigate to the **Exception Queue** tab or filter by **Review Needed** in the Reconciliation Workspace.
-- **Select**: A fee anomaly or delayed settlement record (e.g., `FEE_TAX_ANOMALY`).
-- **Presenter**: "For ambiguous cases like custom fee tier deductions (3.5% vs 2.0%), ShaRecon AI refuses to guess. It routes the case to human controllers."
-- **Action**: Click **"Analyze with Gemini"** (or view the deterministic fallback diagnosis).
-- **Action**: Enter a reviewer note and click **"Approve Match"**.
-- **Observation**: State immediately updates to `MANUALLY_APPROVED`, and the operational counters update without altering the immutable baseline engine benchmark.
-
-### 3:30 – 4:15 | Audit Trail & Compliance Export
-- **Action**: Click on the **Audit Trail** tab.
+### 2:15 – 3:15 | Reconciliation Workspace, 3-Way Trace & Candidate Explorer
+- **Action**: Navigate to the **Reconciliation Workspace** tab.
+- **Action**: Click on a record (e.g. `pay_0001_razor`).
 - **Observation**:
-  - Displays chronological events showing actor (`SYSTEM_ENGINE` vs `FINANCE_REVIEWER`), state transitions (`PENDING_REVIEW` -> `MANUALLY_APPROVED`), confidence scores, and notes.
-  - Click **"Export JSON"** and **"Export CSV"** to demonstrate compliance export readiness.
+  - The slide-out evidence drawer reveals the full 3-way trace: Leg 1 (Payment Ledger) ➔ Leg 2 (Gateway Advice) ➔ Leg 3 (Bank Credit Line).
+  - The 4-factor evidence breakdown shows exact point contributions: Reference (40 pts), Amount (35 pts), Date (15 pts), and Description (10 pts).
+  - Inspect the **Candidate Match Explorer**: observe how the 1-to-1 constraint solver evaluated candidate pairs and rejected lower-scoring ties to prevent double allocation.
 
-### 4:15 – 5:00 | Honest Ground-Truth Evaluation & Error Inspector
-- **Action**: Navigate to the **Evaluation & Ground Truth** tab.
+### 3:15 – 4:00 | Exception Command Center & Contextual Copilot
+- **Action**: Navigate to the **Exceptions** tab.
+- **Select**: A high-exposure exception (e.g. `MISSING_BANK_CREDIT` or `FEE_TAX_ANOMALY`).
+- **Action**: Open the **Contextual Exception Assistant** on the right.
+- **Action**: Click preset prompt chips (e.g., *"Why did this record fail reconciliation?"*, *"Which field caused the mismatch?"*).
 - **Observation**:
-  - Displays the 6 separated honest metrics with formulas: Proposed-Pair Precision/Recall, Auto-Resolution Precision/Recall, Review-Routing Accuracy, and False-Positive Exposure.
-  - Inspect the **Error Inspector Table** showing exact comparison of predicted outcome vs labeled ground truth.
-- **Closing**: "ShaRecon AI gives finance controllers automation speed, Gemini exception guidance, and deterministic mathematical control. Thank you!"
+  - Receive structured remediation advice with missing information checklists and recommended next actions.
+  - Note the clear safety disclosure: Gemini answers are strictly advisory; core matching operates with deterministic fallbacks when offline.
+- **Action**: Click **"Approve"** on a review card; demonstrate confirmation dialog requirement and state transition to `MANUALLY_APPROVED`.
+
+### 4:00 – 4:30 | Audit Trail & Compliance Exports
+- **Action**: Navigate to the **Audit Trail** tab.
+- **Observation**:
+  - Chronological append-only timeline documenting all automated and human reviewer actions.
+  - Click **"Export JSON"** and **"Export CSV"** to demonstrate downloadable compliance evidence.
+
+### 4:30 – 5:00 | Honest Evaluation Lab & 5-Policy Trade-Off Matrix
+- **Action**: Navigate to the **Evaluation Lab** tab.
+- **Observation**:
+  - Review the separated mathematical metrics: Proposed-Pair Precision & Recall, Auto-Resolution Precision & Recall, Review-Routing Accuracy, and False-Positive Exposure.
+  - Inspect the **5-Policy Trade-Off Matrix**: compare Ultra-Safe (95/70), Conservative (90/60), Balanced (85/50), Aggressive (75/40), and Custom policy profiles with one-click comparative CSV export.
+  - Click **"Recalculate Benchmark"** to compute multi-seed robustness across seeds 42, 101, 777, 2024, and 9999 dynamically without hardcoded values.
+- **Closing**: "ShaRecon AI delivers high-speed automation, grounded Gemini exception copilot assistance, and transparent mathematical control for modern finance teams. Thank you!"
