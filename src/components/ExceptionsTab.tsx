@@ -6,7 +6,6 @@ import {
   Ban,
   Loader2,
   ArrowUpDown,
-  TrendingDown,
 } from 'lucide-react';
 import { ReconciliationRecord, ExceptionType } from '@/types/reconciliation';
 import { formatINR } from '@/lib/money';

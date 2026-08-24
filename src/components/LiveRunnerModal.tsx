@@ -103,13 +103,7 @@ export const LiveRunnerModal: React.FC<LiveRunnerModalProps> = ({
   const exceptionCount = records.filter((r) => r.status === 'UNMATCHED_EXCEPTION').length;
 
   useEffect(() => {
-    if (!isOpen) {
-      setCurrentStageIdx(0);
-      setIsPlaying(true);
-      return;
-    }
-
-    if (!isPlaying) {
+    if (!isOpen || !isPlaying) {
       if (timerRef.current) clearInterval(timerRef.current);
       return;
     }
@@ -149,6 +143,8 @@ export const LiveRunnerModal: React.FC<LiveRunnerModalProps> = ({
 
   const handleClose = () => {
     if (timerRef.current) clearInterval(timerRef.current);
+    setCurrentStageIdx(0);
+    setIsPlaying(true);
     onClose();
   };
 
