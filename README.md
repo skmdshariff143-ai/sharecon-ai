@@ -131,6 +131,24 @@ ShaRecon AI maintains two strictly separated benchmarks to prevent circular gene
 
 ---
 
+## 🔥 What Broke, and How Did We Get Out?
+
+> *Full technical case study with 4 submission formats: [`docs/WHAT_BROKE.md`](docs/WHAT_BROKE.md) | Audit Report: [`docs/METRIC_INTEGRITY_AUDIT.md`](docs/METRIC_INTEGRITY_AUDIT.md)*
+
+### The Incident
+During evaluation testing, our immutable baseline on Seed 42 reported **111 auto-reconciled records** with **100.0% precision** and **₹0.00 false-positive exposure**. However, when running the interactive Policy Simulator at the exact same 85/50 thresholds, the simulator reported **118 auto-reconciled records**, **92.4% precision**, and **₹1,42,445.00 in false-positive risk**.
+
+### The Root Cause: A Blinded Collision Graph
+Tracing the data flow revealed that `page.tsx` was only passing matched output records to the evaluation tab. The simulator was reverse-engineering statement inputs using `records.map(r => r.matchedBankTransaction)`, inadvertently **stripping 9 uncredited bank transactions and distractor collision entries**. Without distractors in the input feed, the 1-to-1 collision-prevention graph had no competing records to detect ambiguity against, allowing 7 high-risk payments to falsely auto-clear.
+
+### The Remediation
+1. **Raw Triad State Preservation**: Preserved the complete `{ payments, settlements, bankTransactions }` triad in state and passed them directly to evaluation tools.
+2. **Canonical Pipeline Unification**: Enforced the single evaluation pipeline: $\text{Raw Statements} \rightarrow \text{reconcileBatch}() \rightarrow \text{evaluateReconciliation}()$.
+3. **Scorer Hardening**: Updated `scorer.ts` to strictly enforce bank amount differences (`bankDiff > feeTolerancePaise` caps confidence at $\le 75\%$ and routes to human review).
+4. **Adversarial Regression Suite**: Added 12 adversarial unit tests (`integrity.test.ts`) guaranteeing exact 111-record baseline-to-simulation parity.
+
+---
+
 ## 🛠️ Verification & Quality Gates
 
 Run all automated checks locally:
