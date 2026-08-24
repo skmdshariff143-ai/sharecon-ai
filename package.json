@@ -13,12 +13,13 @@
     "test:e2e": "playwright test",
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:report": "playwright show-report",
-    "generate:benchmark": "npx tsx scripts/generate-benchmark-artifacts.ts",
-    "generate:heldout": "npx tsx scripts/generate-held-out-artifacts.ts",
-    "verify": "npm run lint && npm run type-check && npm run test && npm run generate:benchmark && npm run generate:heldout && npm run build && npm run test:e2e"
+    "generate:benchmark": "tsx scripts/generate-benchmark-artifacts.ts",
+    "generate:heldout": "tsx scripts/generate-held-out-artifacts.ts",
+    "verify:artifacts": "git diff --exit-code -- docs/generated docs/evaluation",
+    "verify": "npm run lint && npm run type-check && npm run test && npm run generate:benchmark && npm run generate:heldout && npm run verify:artifacts && npm run build && npm run test:e2e"
   },
   "engines": {
-    "node": ">=20.0.0",
+    "node": "^20.18.3",
     "npm": ">=10.0.0"
   },
   "volta": {
@@ -52,6 +53,7 @@
     "jsdom": "^30.0.1",
     "playwright": "^1.62.1",
     "tailwindcss": "^4",
+    "tsx": "^4.23.12",
     "typescript": "^5",
     "vitest": "^4.1.11"
   }

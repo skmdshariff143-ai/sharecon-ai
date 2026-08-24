@@ -4,15 +4,16 @@
 
 ---
 
-## 🔗 Project Links
+### 🔗 Project Links
 
-- **Live Production Control Center**: [https://sharecon-ai.vercel.app](https://sharecon-ai.vercel.app)
-- **Five-Minute Walkthrough Video**: [https://sharecon-ai.vercel.app/#demo-video](https://sharecon-ai.vercel.app) *(Watch the 5-minute interactive guided walkthrough directly in-app via the **Guided Demo** button)*
+- **Active Verification Target (Vercel Preview)**: [https://sharecon-iy4yi0u8j-shaik-mahammad-shariff-s-projects.vercel.app](https://sharecon-iy4yi0u8j-shaik-mahammad-shariff-s-projects.vercel.app)
+- **Production Baseline (`main` — Pending Approval)**: [https://sharecon-ai.vercel.app](https://sharecon-ai.vercel.app)
+- **Five-Minute Walkthrough Video Script**: [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md) *(In-app interactive tour available via **Guided Demo**)*
 - **GitHub Repository**: [https://github.com/skmdshariff143-ai/sharecon-ai](https://github.com/skmdshariff143-ai/sharecon-ai)
 - **Track**: Razorpay AI Buildathon — *AI Finance Controller*
 
-[![Quality Gates](https://github.com/skmdshariff143-ai/sharecon-ai/actions/workflows/quality.yml/badge.svg)](https://github.com/skmdshariff143-ai/sharecon-ai)
-[![Node.js Runtime](https://img.shields.io/badge/Node.js-v20.18.3%20%7C%20v22%20%7C%20v24-brightgreen.svg)](https://nodejs.org)
+[![Quality Gates](https://github.com/skmdshariff143-ai/sharecon-ai/actions/workflows/quality.yml/badge.svg)](https://github.com/skmdshariff143-ai/sharecon-ai/actions/workflows/quality.yml)
+[![Node.js Runtime](https://img.shields.io/badge/Node.js-v20.18.3%20(Pinned)-brightgreen.svg)](https://nodejs.org)
 [![Vitest Unit Tests](https://img.shields.io/badge/Unit%20Tests-48%2F48%20Passed-blue)](https://github.com/skmdshariff143-ai/sharecon-ai)
 [![Playwright E2E](https://img.shields.io/badge/Playwright%20E2E-40%2F40%20Passed-violet)](https://github.com/skmdshariff143-ai/sharecon-ai)
 [![Zero Horizontal Overflow](https://img.shields.io/badge/Responsive-1440%20%7C%201366%20%7C%201280%20%7C%201024%20%7C%20390-success)](https://sharecon-ai.vercel.app)
@@ -126,10 +127,10 @@ ShaRecon AI enforces a strict boundary between deterministic algorithmic verific
 
 ---
 
-### Track 2: Held-Out Adversarial Benchmark (80 Hand-Curated Stress Cases)
+### Track 2: Manually Curated Held-Out Adversarial Fixture (80 Hand-Curated Stress Cases)
 *Committed artifact: [`docs/evaluation/HELD_OUT_REPORT.md`](docs/evaluation/HELD_OUT_REPORT.md) | Fixtures: [`docs/evaluation/held-out-records.json`](docs/evaluation/held-out-records.json) | Ground Truth: [`docs/evaluation/held-out-ground-truth.json`](docs/evaluation/held-out-ground-truth.json)*
 
-To avoid circular generator-matcher bias, the held-out benchmark evaluates 80 manually specified stress cases across 14 failure modes **without tuning engine weights post-evaluation**:
+To avoid circular generator-matcher bias, the held-out adversarial fixture evaluates 80 manually specified stress cases created within the project across 14 failure modes **without reusing generator helpers or tuning engine weights post-evaluation** (does not represent external third-party certification):
 
 | Evaluation Metric | Result | Evaluation Target | Exact Scope & Breakdown |
 | :--- | :---: | :---: | :--- |
@@ -140,7 +141,7 @@ To avoid circular generator-matcher bias, the held-out benchmark evaluates 80 ma
 | **Review-Routing Accuracy** | **75.9%** | $\ge 70.0\%$ | **22 anomaly cases of 29 routed to human review** |
 | **Exception Detection Accuracy** | **91.3%** | $\ge 85.0\%$ | **73 exact exception classifications of 80 records** |
 | **False-Positive Risk Exposure** | **₹28,100.00** | Reported Honestly | **7 edge-case records documented in Error Inspector** |
-| **Execution Latency** | **24.4 ms** | $< 50\text{ ms}$ | **Sub-30ms deterministic runtime for 80 records** |
+| **Engine Execution Latency** | **24.4 ms** | $< 50\text{ ms}$ | **Deterministic V8 matching runtime for 80 records (excluding disk I/O)** |
 
 ---
 
@@ -265,8 +266,9 @@ npm run verify
 │ 3. npm run test               │ 48 Vitest unit & immutability tests    │
 │ 4. npm run generate:benchmark │ Compile canonical benchmark.json/.md   │
 │ 5. npm run generate:heldout   │ Compile held-out report & JSON data    │
-│ 6. npm run build              │ Next.js 16 production Turbopack build   │
-│ 7. npm run test:e2e           │ 40 Playwright E2E browser tests        │
+│ 6. npm run verify:artifacts   │ Assert zero git diff on generated data │
+│ 7. npm run build              │ Next.js 16 production Turbopack build   │
+│ 8. npm run test:e2e           │ 40 Playwright E2E browser tests        │
 └───────────────────────────────┴────────────────────────────────────────┘
 ```
 
@@ -279,9 +281,10 @@ npm run type-check
 # Unit Tests (Vitest)
 npm run test
 
-# Re-generate Canonical Evaluation Artifacts
+# Re-generate & Verify Canonical Evaluation Artifacts
 npm run generate:benchmark
 npm run generate:heldout
+npm run verify:artifacts
 
 # Production Build & Local Production Server
 npm run build
@@ -297,7 +300,10 @@ npm run test:e2e
 
 ```
 sharecon-ai/
+├── .github/
+│   └── workflows/quality.yml              # Automated GitHub Actions CI pipeline
 ├── docs/                                  # Canonical documentation & audit reports
+│   ├── INTERNAL_SUBMISSION_AUDIT.md       # Internal self-assessment checklist
 │   ├── WHAT_BROKE.md                      # Post-mortem case study (4 formats)
 │   ├── METRIC_INTEGRITY_AUDIT.md          # Benchmark integrity audit report
 │   ├── METHODOLOGY.md                     # Math rules, 4-factor scoring & algorithms
