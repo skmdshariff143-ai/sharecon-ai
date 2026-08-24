@@ -139,7 +139,7 @@ export const ControlCenterTab: React.FC<ControlCenterTabProps> = ({
         <div className="surface-card p-4.5 flex flex-col justify-between border-t-2 border-t-slate-400">
           <div className="flex items-center justify-between text-slate-500 mb-2">
             <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 font-mono">
-              Total Gross Volume
+              Total Volume
             </span>
             <div className="w-7 h-7 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center">
               <Layers className="w-3.5 h-3.5" />
@@ -217,7 +217,7 @@ export const ControlCenterTab: React.FC<ControlCenterTabProps> = ({
         >
           <div className="flex items-center justify-between text-slate-500 mb-2">
             <span className="text-[10px] font-bold uppercase tracking-wider text-rose-700 font-mono">
-              Exposure At Risk
+              Financial Exposure
             </span>
             <div className="w-7 h-7 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center group-hover:bg-rose-100 transition-colors">
               <AlertOctagon className="w-3.5 h-3.5" />

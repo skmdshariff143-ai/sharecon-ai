@@ -149,7 +149,12 @@ export const LiveRunnerModal: React.FC<LiveRunnerModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs animate-in fade-in duration-150">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="live-runner-title"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs animate-in fade-in duration-150"
+    >
       <div className="surface-modal w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh] shadow-2xl">
         {/* Header */}
         <div className="px-6 py-4 border-b border-slate-200 bg-slate-50/80 flex items-center justify-between">
@@ -158,7 +163,7 @@ export const LiveRunnerModal: React.FC<LiveRunnerModalProps> = ({
               <Zap className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-sm font-extrabold text-slate-900 flex items-center gap-2 font-mono">
+              <h3 id="live-runner-title" className="text-sm font-extrabold text-slate-900 flex items-center gap-2 font-mono">
                 <span>Deterministic 3-Way Reconciliation Pipeline</span>
                 <span className="text-[10px] bg-indigo-100 text-indigo-800 font-bold px-2 py-0.5 rounded font-mono">
                   8-Stage Engine
