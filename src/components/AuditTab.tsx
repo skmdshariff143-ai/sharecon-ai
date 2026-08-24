@@ -48,20 +48,20 @@ export const AuditTab: React.FC<AuditTabProps> = ({
     switch (actor) {
       case 'SYSTEM_ENGINE':
         return (
-          <span className="status-badge bg-indigo-50 text-indigo-700 border border-indigo-200">
-            <Cpu className="w-3 h-3 text-indigo-600" /> System Engine
+          <span className="status-badge bg-[#7168ff]/15 text-[#c4b5fd] border border-[#7168ff]/35">
+            <Cpu className="w-3 h-3 text-[#7168ff]" /> System Engine
           </span>
         );
       case 'FINANCE_REVIEWER':
         return (
-          <span className="status-badge bg-emerald-50 text-emerald-800 border border-emerald-200">
-            <UserCheck className="w-3 h-3 text-emerald-600" /> Finance Reviewer
+          <span className="status-badge bg-[#2dd4bf]/15 text-[#2dd4bf] border border-[#2dd4bf]/35">
+            <UserCheck className="w-3 h-3 text-[#2dd4bf]" /> Finance Reviewer
           </span>
         );
       case 'ADMIN':
         return (
-          <span className="status-badge bg-slate-100 text-slate-700 border border-slate-200">
-            <Sliders className="w-3 h-3 text-slate-500" /> Admin Policy
+          <span className="status-badge bg-white/10 text-[#a7afc0] border border-white/10">
+            <Sliders className="w-3 h-3 text-[#7d879b]" /> Admin Policy
           </span>
         );
     }
@@ -72,20 +72,20 @@ export const AuditTab: React.FC<AuditTabProps> = ({
       case 'AUTO_RECONCILE':
       case 'MANUAL_APPROVE':
         return (
-          <span className="status-badge bg-emerald-50 text-emerald-800 border border-emerald-200">
-            <CheckCircle2 className="w-3 h-3 text-emerald-600" /> {action}
+          <span className="status-badge bg-[#2dd4bf]/15 text-[#2dd4bf] border border-[#2dd4bf]/35">
+            <CheckCircle2 className="w-3 h-3 text-[#2dd4bf]" /> {action}
           </span>
         );
       case 'MANUAL_REJECT':
       case 'INVESTIGATION_FLAG':
         return (
-          <span className="status-badge bg-rose-50 text-rose-800 border border-rose-200">
-            <AlertCircle className="w-3 h-3 text-rose-600" /> {action}
+          <span className="status-badge bg-[#ff6577]/15 text-[#ff6577] border border-[#ff6577]/35">
+            <AlertCircle className="w-3 h-3 text-[#ff6577]" /> {action}
           </span>
         );
       default:
         return (
-          <span className="status-badge bg-slate-100 text-slate-700 border border-slate-200">
+          <span className="status-badge bg-white/10 text-[#a7afc0] border border-white/10">
             {action}
           </span>
         );
@@ -93,15 +93,15 @@ export const AuditTab: React.FC<AuditTabProps> = ({
   };
 
   return (
-    <div className="surface-card overflow-hidden flex flex-col">
+    <div className="elevated-card overflow-hidden flex flex-col bg-[#111620] border-white/10">
       {/* Header & Export Controls */}
-      <div className="p-4 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3 bg-slate-50/50">
+      <div className="p-4 sm:p-5 border-b border-white/10 flex flex-wrap items-center justify-between gap-3 bg-[#090d16]/70">
         <div>
-          <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-            <History className="w-4 h-4 text-indigo-600" />
+          <h3 className="text-sm font-bold text-[#f7f8fc] flex items-center gap-2 font-mono">
+            <History className="w-4 h-4 text-[#7168ff]" />
             <span>Immutable Audit Trail ({auditEvents.length} Events Logged)</span>
           </h3>
-          <p className="text-xs text-slate-500 mt-0.5">
+          <p className="text-xs text-[#a7afc0] mt-0.5 font-sans">
             Append-only chronological decision record of all automated and reviewer transactions.
           </p>
         </div>
@@ -113,14 +113,14 @@ export const AuditTab: React.FC<AuditTabProps> = ({
             placeholder="Search Event ID, Payment, UTR..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="text-xs bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-slate-700 placeholder:text-slate-400 focus:outline-hidden focus:ring-1 focus:ring-indigo-500 w-48 transition-colors"
+            className="text-xs bg-[#0c101a] border border-white/10 rounded-xl px-3 py-1.5 text-[#f7f8fc] placeholder:text-[#7d879b] focus:outline-hidden focus:ring-1 focus:ring-[#7168ff] w-48 transition-colors"
           />
 
           {/* Actor Filter */}
           <select
             value={actorFilter}
             onChange={(e) => setActorFilter(e.target.value)}
-            className="text-xs bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-slate-700 focus:outline-hidden cursor-pointer"
+            className="text-xs bg-[#0c101a] border border-white/10 rounded-xl px-3 py-1.5 text-[#a7afc0] focus:outline-hidden cursor-pointer"
           >
             <option value="ALL">All Actors</option>
             <option value="SYSTEM_ENGINE">System Engine</option>
@@ -131,7 +131,7 @@ export const AuditTab: React.FC<AuditTabProps> = ({
           <select
             value={actionFilter}
             onChange={(e) => setActionFilter(e.target.value)}
-            className="text-xs bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-slate-700 focus:outline-hidden cursor-pointer"
+            className="text-xs bg-[#0c101a] border border-white/10 rounded-xl px-3 py-1.5 text-[#a7afc0] focus:outline-hidden cursor-pointer"
           >
             <option value="ALL">All Actions</option>
             <option value="AUTO_RECONCILE">AUTO_RECONCILE</option>
@@ -140,87 +140,68 @@ export const AuditTab: React.FC<AuditTabProps> = ({
             <option value="BATCH_RUN">BATCH_RUN</option>
           </select>
 
-          {/* Download JSON / CSV */}
-          <button
-            onClick={onDownloadAuditJson}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-medium rounded-lg transition-colors cursor-pointer"
-            title="Download immutable audit trail as JSON"
-          >
-            <FileCode className="w-3.5 h-3.5 text-slate-500" />
-            <span>Export JSON</span>
-          </button>
+          {/* Export CSV */}
           <button
             onClick={onDownloadAuditCsv}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-medium rounded-lg transition-colors cursor-pointer"
-            title="Download audit events as CSV"
+            className="px-3 py-1.5 bg-white/5 hover:bg-white/10 text-[#a7afc0] hover:text-white border border-white/10 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
           >
-            <Download className="w-3.5 h-3.5 text-slate-500" />
+            <Download className="w-3.5 h-3.5 text-[#7d879b]" />
             <span>Export CSV</span>
+          </button>
+
+          {/* Export JSON */}
+          <button
+            onClick={onDownloadAuditJson}
+            className="px-3 py-1.5 bg-white/5 hover:bg-white/10 text-[#a7afc0] hover:text-white border border-white/10 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
+          >
+            <FileCode className="w-3.5 h-3.5 text-[#7d879b]" />
+            <span>Export JSON</span>
           </button>
         </div>
       </div>
 
-      {/* Audit Event Table */}
-      <div className="overflow-x-auto max-h-[600px] overflow-y-auto custom-scrollbar">
-        <table className="w-full text-left text-xs border-collapse">
-          <thead className="sticky top-0 bg-slate-100/90 backdrop-blur-xs border-b border-slate-200 z-10 font-mono">
-            <tr className="text-slate-600 font-semibold uppercase text-[10px] tracking-wider">
-              <th className="py-2.5 px-4">Timestamp</th>
-              <th className="py-2.5 px-4">Actor</th>
-              <th className="py-2.5 px-4">Action</th>
-              <th className="py-2.5 px-4">Entity Reference</th>
-              <th className="py-2.5 px-4">State Transition</th>
-              <th className="py-2.5 px-4">Evidence Reason / Note</th>
-              <th className="py-2.5 px-4 text-center">Score</th>
+      {/* Events Table Grid */}
+      <div className="overflow-x-auto">
+        <table className="min-w-full text-xs text-left divide-y divide-white/10">
+          <thead className="bg-[#090d16] text-[#7d879b] font-semibold uppercase text-[10px] font-mono">
+            <tr>
+              <th className="py-2.5 px-3.5">Timestamp (UTC)</th>
+              <th className="py-2.5 px-3.5">Event ID</th>
+              <th className="py-2.5 px-3.5">Actor</th>
+              <th className="py-2.5 px-3.5">Action Executed</th>
+              <th className="py-2.5 px-3.5">Entity Trace</th>
+              <th className="py-2.5 px-3.5">Decision Rationale &amp; Evidence</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100 text-slate-700">
-            {filteredEvents.map((ev) => (
-              <tr key={ev.eventId} className="hover:bg-slate-50 transition-colors">
-                {/* Timestamp */}
-                <td className="py-2.5 px-4 font-mono text-[11px] text-slate-500 whitespace-nowrap tabular-nums">
-                  {ev.timestamp.replace('T', ' ').slice(0, 19)}
-                </td>
-
-                {/* Actor */}
-                <td className="py-2.5 px-4">{getActorBadge(ev.actor)}</td>
-
-                {/* Action */}
-                <td className="py-2.5 px-4">{getActionBadge(ev.action)}</td>
-
-                {/* Entity Reference */}
-                <td className="py-2.5 px-4 font-mono text-[11px]">
-                  <div className="text-slate-900 font-semibold">{ev.entityIds.paymentId || '—'}</div>
-                  {ev.entityIds.settlementId && (
-                    <div className="text-indigo-600 text-[10px]">{ev.entityIds.settlementId}</div>
-                  )}
-                </td>
-
-                {/* State Transition */}
-                <td className="py-2.5 px-4 whitespace-nowrap font-mono text-[11px]">
-                  <span className="text-slate-400">{ev.previousState}</span>
-                  <span className="text-slate-400 mx-1.5">➔</span>
-                  <strong className="text-slate-900">{ev.newState}</strong>
-                </td>
-
-                {/* Reason */}
-                <td className="py-2.5 px-4 text-slate-600 max-w-xs truncate font-sans" title={ev.reason}>
-                  {ev.reason}
-                </td>
-
-                {/* Score */}
-                <td className="py-2.5 px-4 text-center">
-                  <span className="font-bold text-slate-800 font-mono tabular-nums">{ev.confidence}%</span>
+          <tbody className="divide-y divide-white/5 font-mono">
+            {filteredEvents.length === 0 ? (
+              <tr>
+                <td colSpan={6} className="py-8 text-center text-[#7d879b] font-sans">
+                  No audit log events match the active search filter.
                 </td>
               </tr>
-            ))}
+            ) : (
+              filteredEvents.map((ev) => (
+                <tr key={ev.eventId} className="hover:bg-white/5 transition-colors">
+                  <td className="py-2.5 px-3.5 text-[#7d879b] whitespace-nowrap">
+                    {new Date(ev.timestamp).toISOString().replace('T', ' ').substring(0, 19)}
+                  </td>
+                  <td className="py-2.5 px-3.5 font-bold text-[#f7f8fc]">{ev.eventId}</td>
+                  <td className="py-2.5 px-3.5 font-sans">{getActorBadge(ev.actor)}</td>
+                  <td className="py-2.5 px-3.5 font-sans">{getActionBadge(ev.action)}</td>
+                  <td className="py-2.5 px-3.5 text-[#a7afc0] max-w-[200px] truncate">
+                    {ev.entityIds.paymentId && <div>Pay: {ev.entityIds.paymentId}</div>}
+                    {ev.entityIds.settlementId && <div>Set: {ev.entityIds.settlementId}</div>}
+                    {ev.entityIds.bankTransactionId && <div>Bank: {ev.entityIds.bankTransactionId}</div>}
+                  </td>
+                  <td className="py-2.5 px-3.5 text-[#a7afc0] font-sans max-w-md">
+                    <p className="line-clamp-2 leading-relaxed">{ev.reason}</p>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
-      </div>
-
-      {/* Footer */}
-      <div className="p-3 bg-slate-50 border-t border-slate-200 text-xs text-slate-500 font-mono">
-        Showing <strong>{filteredEvents.length}</strong> of <strong>{auditEvents.length}</strong> events logged.
       </div>
     </div>
   );

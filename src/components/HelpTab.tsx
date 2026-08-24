@@ -119,20 +119,12 @@ const GLOSSARY_TERMS = [
     definition: 'Indian Goods and Services Tax applied exclusively to the gateway fee component, deducted alongside MDR prior to bank payout.',
   },
   {
-    term: 'Integer-Paise Arithmetic',
-    definition: 'Mathematical approach that scales all currency values by 100 to eliminate floating-point approximation inaccuracies in financial software.',
+    term: 'Integer-Paise Math',
+    definition: 'Storing monetary values as integer sub-units (₹1 = 100 paise) to prevent floating-point binary rounding errors in financial computations.',
   },
   {
-    term: '1-to-1 Constraint Solver',
-    definition: 'Algorithmic safeguard that prevents a single gateway settlement or bank credit line from being double-assigned to multiple payments.',
-  },
-  {
-    term: 'Proposed-Pair Precision',
-    definition: 'The exact percentage of engine-matched (Settlement ID + Bank Tx ID) pairings where both references match labeled ground truth.',
-  },
-  {
-    term: 'False-Positive Exposure',
-    definition: 'The total monetary rupee value of records erroneously auto-reconciled without meeting ground-truth safety verification standards.',
+    term: '1-to-1 Collision Lock',
+    definition: 'A deterministic constraint solver ensuring no settlement line or bank transaction is assigned to more than one customer payment.',
   },
 ];
 
@@ -142,161 +134,156 @@ export const HelpTab: React.FC<HelpTabProps> = ({ onNavigateTab, onStartTour }) 
   const [expandedFaqId, setExpandedFaqId] = useState<string | null>('what-is-3way');
 
   const filteredFaqs = useMemo(() => {
-    return FAQ_DATABASE.filter((item) => {
-      if (activeCategory !== 'ALL' && item.category !== activeCategory) return false;
+    return FAQ_DATABASE.filter((faq) => {
+      if (activeCategory !== 'ALL' && faq.category !== activeCategory) return false;
       if (!searchQuery) return true;
       const q = searchQuery.toLowerCase();
       return (
-        item.question.toLowerCase().includes(q) ||
-        item.answer.toLowerCase().includes(q) ||
-        item.category.toLowerCase().includes(q)
+        faq.question.toLowerCase().includes(q) ||
+        faq.answer.toLowerCase().includes(q) ||
+        faq.category.toLowerCase().includes(q)
       );
     });
   }, [searchQuery, activeCategory]);
 
   return (
-    <div className="space-y-6">
-      {/* Help & Guide Header Hero Banner */}
-      <div className="surface-card bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 border border-slate-800 text-white p-6 shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="space-y-6 max-w-5xl">
+      {/* Header with Guided Tour CTA */}
+      <div className="elevated-card p-6 bg-gradient-to-r from-[#090d16] via-[#111620] to-[#090d16] border border-white/12 text-[#f7f8fc] flex flex-wrap items-center justify-between gap-4 shadow-2xl">
         <div className="space-y-1">
-          <div className="flex items-center gap-2 text-indigo-400 text-xs font-bold uppercase tracking-wider font-mono">
-            <BookOpen className="w-4 h-4" />
-            <span>Onboarding &amp; Reference Center</span>
+          <div className="flex items-center gap-2 text-[#7168ff] text-xs font-bold uppercase tracking-wider font-mono">
+            <BookOpen className="w-4 h-4 text-[#7168ff]" />
+            <span>Judge Guide &amp; Knowledge Base</span>
           </div>
-          <h2 className="text-xl font-extrabold tracking-tight text-white">
-            How ShaRecon AI Works — Reviewer Guide &amp; Technical Manual
+          <h2 className="text-xl font-extrabold tracking-tight text-[#f7f8fc] font-mono">
+            ShaRecon AI Architecture &amp; Reviewer Guide
           </h2>
-          <p className="text-xs text-slate-300 max-w-xl leading-relaxed">
-            Essential domain primer, 4-factor scoring mechanics, honest metric formulas, and financial terminology for buildathon evaluators.
+          <p className="text-xs text-[#a7afc0] max-w-xl leading-relaxed font-sans">
+            Understand the 3-way reconciliation lifecycle, deterministic 4-factor scoring graph, honest evaluation metrics, and non-destructive AI boundaries.
           </p>
         </div>
 
         <button
           onClick={onStartTour}
-          className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold flex items-center gap-2 transition-colors shrink-0 shadow-md cursor-pointer self-start md:self-auto"
+          className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#7168ff] to-[#5687ff] hover:from-[#5d53ea] hover:to-[#4375ea] text-white text-xs font-semibold flex items-center gap-2 transition-all shadow-[0_0_15px_rgba(113,104,255,0.4)] cursor-pointer"
         >
-          <HelpCircle className="w-4 h-4" />
-          <span>Start Guided Demo Tour</span>
+          <span>Start 5-Minute Guided Tour</span>
+          <ArrowRight className="w-4 h-4" />
         </button>
       </div>
 
-      {/* 3-Way Reconciliation Lifecycle Breakdown */}
-      <div className="surface-card p-6 space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-            <Layers className="w-5 h-5 text-indigo-600" />
-            <span>The 3-Way Reconciliation Lifecycle</span>
-          </h3>
-          <span className="text-xs font-mono text-slate-500 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200">
-            Payment ➔ Settlement ➔ Bank Credit
-          </span>
-        </div>
+      {/* 3-Source Reconciliation Visual Explanation */}
+      <div className="elevated-card p-6 space-y-4 bg-[#111620] border-white/10">
+        <h3 className="text-base font-bold text-[#f7f8fc] flex items-center gap-2 font-mono">
+          <Layers className="w-5 h-5 text-[#7168ff]" />
+          <span>Understanding the 3-Way Reconciliation Lifecycle</span>
+        </h3>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-          <div className="surface-inset p-4.5 rounded-xl space-y-2 border-t-2 border-t-indigo-500">
+          <div className="inset-panel p-4.5 rounded-xl space-y-2 border-t-2 border-t-[#7168ff] bg-[#0c101a] border-white/10">
             <div className="flex items-center justify-between">
-              <span className="font-bold text-slate-900 font-mono">Leg 1: Merchant Ledger</span>
-              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-100 text-indigo-800 font-mono">CAPTURE</span>
+              <span className="font-bold text-[#f7f8fc] font-mono">Leg 1: Merchant Payment</span>
+              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#7168ff]/20 text-[#c4b5fd] font-mono border border-[#7168ff]/30">ORDER</span>
             </div>
-            <p className="text-slate-600 leading-relaxed">
-              Customer payment captured via Razorpay checkout. Records Gross Amount (e.g. ₹5,000.00), Payment ID (`pay_0001`), Order Ref (`order_0001`), and timestamp.
+            <p className="text-[#a7afc0] leading-relaxed font-sans">
+              Customer payment captured via Razorpay checkout. Records Gross Amount (e.g. ₹5,000.00), Payment ID (<code className="text-[#c4b5fd]">pay_0001</code>), Order Ref (<code className="text-[#c4b5fd]">order_0001</code>), and timestamp.
             </p>
           </div>
 
-          <div className="surface-inset p-4.5 rounded-xl space-y-2 border-t-2 border-t-amber-500">
+          <div className="inset-panel p-4.5 rounded-xl space-y-2 border-t-2 border-t-[#f5b942] bg-[#0c101a] border-white/10">
             <div className="flex items-center justify-between">
-              <span className="font-bold text-slate-900 font-mono">Leg 2: Nodal Settlement</span>
-              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 font-mono">GATEWAY</span>
+              <span className="font-bold text-[#f7f8fc] font-mono">Leg 2: Nodal Settlement</span>
+              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#f5b942]/20 text-[#f5b942] font-mono border border-[#f5b942]/30">GATEWAY</span>
             </div>
-            <p className="text-slate-600 leading-relaxed">
+            <p className="text-[#a7afc0] leading-relaxed font-sans">
               Razorpay settles captured funds in payout batches deducting 2.0%-3.5% MDR + 18% GST on fee. Records Net Amount (e.g. ₹4,882.00), Settlement ID, and UTR.
             </p>
           </div>
 
-          <div className="surface-inset p-4.5 rounded-xl space-y-2 border-t-2 border-t-emerald-500">
+          <div className="inset-panel p-4.5 rounded-xl space-y-2 border-t-2 border-t-[#2dd4bf] bg-[#0c101a] border-white/10">
             <div className="flex items-center justify-between">
-              <span className="font-bold text-slate-900 font-mono">Leg 3: Bank Account</span>
-              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 font-mono">STATEMENT</span>
+              <span className="font-bold text-[#f7f8fc] font-mono">Leg 3: Bank Account</span>
+              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#2dd4bf]/20 text-[#2dd4bf] font-mono border border-[#2dd4bf]/30">STATEMENT</span>
             </div>
-            <p className="text-slate-600 leading-relaxed">
-              Merchant bank account credits arriving after T+1/T+2 clearing delay. Records exact credit amount, bank statement UTR (`RBIP100...`), and date.
+            <p className="text-[#a7afc0] leading-relaxed font-sans">
+              Merchant bank account credits arriving after T+1/T+2 clearing delay. Records exact credit amount, bank statement UTR (<code className="text-[#2dd4bf]">RBIP100...</code>), and date.
             </p>
           </div>
         </div>
       </div>
 
       {/* 4-Factor Scoring Breakdown */}
-      <div className="surface-card p-6 space-y-4">
-        <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-          <Scale className="w-5 h-5 text-indigo-600" />
+      <div className="elevated-card p-6 space-y-4 bg-[#111620] border-white/10">
+        <h3 className="text-base font-bold text-[#f7f8fc] flex items-center gap-2 font-mono">
+          <Scale className="w-5 h-5 text-[#7168ff]" />
           <span>Deterministic 4-Factor Confidence Scoring (0 - 100 Points)</span>
         </h3>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 text-xs">
-          <div className="surface-inset p-4 rounded-xl space-y-1.5">
+          <div className="inset-panel p-4 rounded-xl space-y-1.5 bg-[#0c101a] border-white/10">
             <div className="flex items-center justify-between">
-              <span className="font-bold text-slate-800">1. Reference Match</span>
-              <span className="font-mono font-bold text-indigo-600">40 Pts</span>
+              <span className="font-bold text-[#f7f8fc]">1. Reference Match</span>
+              <span className="font-mono font-bold text-[#7168ff]">40 Pts</span>
             </div>
-            <p className="text-slate-600 text-[11px] leading-relaxed">
-              Exact payment ID (`40 pts`), order reference (`30 pts`), or sanitized token substring (`20 pts`).
+            <p className="text-[#a7afc0] text-[11px] leading-relaxed font-sans">
+              Exact payment ID (<code className="text-[#c4b5fd]">40 pts</code>), order reference (<code className="text-[#c4b5fd]">30 pts</code>), or sanitized token substring (<code className="text-[#c4b5fd]">20 pts</code>).
             </p>
           </div>
 
-          <div className="surface-inset p-4 rounded-xl space-y-1.5">
+          <div className="inset-panel p-4 rounded-xl space-y-1.5 bg-[#0c101a] border-white/10">
             <div className="flex items-center justify-between">
-              <span className="font-bold text-slate-800">2. Amount Match</span>
-              <span className="font-mono font-bold text-emerald-600">35 Pts</span>
+              <span className="font-bold text-[#f7f8fc]">2. Amount Match</span>
+              <span className="font-mono font-bold text-[#2dd4bf]">35 Pts</span>
             </div>
-            <p className="text-slate-600 text-[11px] leading-relaxed">
-              Net settled vs expected MDR+GST net (`20 pts`) + Bank credit vs settled (`15 pts`) in exact paise.
+            <p className="text-[#a7afc0] text-[11px] leading-relaxed font-sans">
+              Net settled vs expected MDR+GST net (<code className="text-[#2dd4bf]">20 pts</code>) + Bank credit vs settled (<code className="text-[#2dd4bf]">15 pts</code>) in exact paise.
             </p>
           </div>
 
-          <div className="surface-inset p-4 rounded-xl space-y-1.5">
+          <div className="inset-panel p-4 rounded-xl space-y-1.5 bg-[#0c101a] border-white/10">
             <div className="flex items-center justify-between">
-              <span className="font-bold text-slate-800">3. Date Proximity</span>
-              <span className="font-mono font-bold text-amber-600">15 Pts</span>
+              <span className="font-bold text-[#f7f8fc]">3. Date Proximity</span>
+              <span className="font-mono font-bold text-[#f5b942]">15 Pts</span>
             </div>
-            <p className="text-slate-600 text-[11px] leading-relaxed">
-              T+0 to T+1 calendar proximity (`15 pts`), T+2 (`10 pts`), T+3 (`5 pts`). Negative delta penalized.
+            <p className="text-[#a7afc0] text-[11px] leading-relaxed font-sans">
+              T+0 to T+1 calendar proximity (<code className="text-[#f5b942]">15 pts</code>), T+2 (<code className="text-[#f5b942]">10 pts</code>), T+3 (<code className="text-[#f5b942]">5 pts</code>). Negative delta penalized.
             </p>
           </div>
 
-          <div className="surface-inset p-4 rounded-xl space-y-1.5">
+          <div className="inset-panel p-4 rounded-xl space-y-1.5 bg-[#0c101a] border-white/10">
             <div className="flex items-center justify-between">
-              <span className="font-bold text-slate-800">4. UTR &amp; Description</span>
-              <span className="font-mono font-bold text-violet-600">10 Pts</span>
+              <span className="font-bold text-[#f7f8fc]">4. UTR &amp; Description</span>
+              <span className="font-mono font-bold text-[#a78bfa]">10 Pts</span>
             </div>
-            <p className="text-slate-600 text-[11px] leading-relaxed">
-              Alphanumeric UTR format validation (`5 pts`) + statement description token overlap (`5 pts`).
+            <p className="text-[#a7afc0] text-[11px] leading-relaxed font-sans">
+              Alphanumeric UTR format validation (<code className="text-[#a78bfa]">5 pts</code>) + statement description token overlap (<code className="text-[#a78bfa]">5 pts</code>).
             </p>
           </div>
         </div>
       </div>
 
       {/* Searchable FAQ Section */}
-      <div className="surface-card p-6 space-y-4">
+      <div className="elevated-card p-6 space-y-4 bg-[#111620] border-white/10">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-              <HelpCircle className="w-5 h-5 text-indigo-600" />
+            <h3 className="text-base font-bold text-[#f7f8fc] flex items-center gap-2 font-mono">
+              <HelpCircle className="w-5 h-5 text-[#7168ff]" />
               <span>Frequently Asked Questions</span>
             </h3>
-            <p className="text-xs text-slate-500 mt-0.5">
+            <p className="text-xs text-[#a7afc0] mt-0.5 font-sans">
               Clear technical explanations for hackathon evaluators and finance controllers.
             </p>
           </div>
 
           {/* Search Box */}
           <div className="relative min-w-[240px]">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-[#7d879b] absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               placeholder="Search concepts, formulas..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-hidden focus:ring-1 focus:ring-indigo-500 transition-colors"
+              className="w-full pl-9 pr-3 py-1.5 bg-[#0c101a] border border-white/10 rounded-xl text-xs text-[#f7f8fc] placeholder:text-[#7d879b] focus:outline-hidden focus:ring-1 focus:ring-[#7168ff] transition-colors"
             />
           </div>
         </div>
@@ -309,8 +296,8 @@ export const HelpTab: React.FC<HelpTabProps> = ({ onNavigateTab, onStartTour }) 
               onClick={() => setActiveCategory(cat)}
               className={`px-3 py-1.5 rounded-lg font-semibold transition-all shrink-0 cursor-pointer ${
                 activeCategory === cat
-                  ? 'bg-indigo-600 text-white shadow-xs'
-                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                  ? 'bg-[#7168ff] text-white shadow-[0_0_10px_rgba(113,104,255,0.4)]'
+                  : 'bg-[#0c101a] text-[#a7afc0] hover:bg-white/5 hover:text-white border border-white/10'
               }`}
             >
               {cat === 'ALL' ? 'All Questions' : cat}
@@ -326,35 +313,35 @@ export const HelpTab: React.FC<HelpTabProps> = ({ onNavigateTab, onStartTour }) 
             return (
               <div
                 key={faq.id}
-                className="border border-slate-200 rounded-xl overflow-hidden transition-colors"
+                className="border border-white/10 rounded-xl overflow-hidden transition-colors bg-[#0c101a]"
               >
                 <button
                   onClick={() => setExpandedFaqId(isExpanded ? null : faq.id)}
-                  className="w-full px-4 py-3 text-left flex items-center justify-between gap-3 hover:bg-slate-50 transition-colors cursor-pointer"
+                  className="w-full px-4 py-3 text-left flex items-center justify-between gap-3 hover:bg-white/5 transition-colors cursor-pointer"
                   aria-expanded={isExpanded}
                 >
-                  <span className="text-xs sm:text-sm font-bold text-slate-900">
+                  <span className="text-xs sm:text-sm font-bold text-[#f7f8fc]">
                     {faq.question}
                   </span>
                   <div className="flex items-center gap-2 shrink-0">
-                    <span className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded bg-slate-100 text-slate-600 font-mono">
+                    <span className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded bg-white/10 text-[#a7afc0] font-mono">
                       {faq.category}
                     </span>
                     {isExpanded ? (
-                      <ChevronUp className="w-4 h-4 text-slate-400" />
+                      <ChevronUp className="w-4 h-4 text-[#7d879b]" />
                     ) : (
-                      <ChevronDown className="w-4 h-4 text-slate-400" />
+                      <ChevronDown className="w-4 h-4 text-[#7d879b]" />
                     )}
                   </div>
                 </button>
 
                 {isExpanded && (
-                  <div className="px-4 pb-3.5 pt-1 text-xs text-slate-600 bg-slate-50/50 border-t border-slate-100 space-y-2 leading-relaxed font-sans">
+                  <div className="px-4 pb-3.5 pt-1 text-xs text-[#a7afc0] bg-[#070a10] border-t border-white/10 space-y-2 leading-relaxed font-sans">
                     <p>{faq.answer}</p>
                     {faq.targetTab && (
                       <button
                         onClick={() => onNavigateTab(faq.targetTab!)}
-                        className="text-xs text-indigo-600 font-semibold hover:underline inline-flex items-center gap-1 cursor-pointer pt-1"
+                        className="text-xs text-[#7168ff] hover:text-[#5687ff] font-semibold hover:underline inline-flex items-center gap-1 cursor-pointer pt-1"
                       >
                         <span>Open related workspace</span>
                         <ArrowRight className="w-3 h-3" />
@@ -369,9 +356,9 @@ export const HelpTab: React.FC<HelpTabProps> = ({ onNavigateTab, onStartTour }) 
       </div>
 
       {/* Financial Terms Glossary */}
-      <div className="surface-card p-6 space-y-4">
-        <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-          <FileText className="w-5 h-5 text-emerald-600" />
+      <div className="elevated-card p-6 space-y-4 bg-[#111620] border-white/10">
+        <h3 className="text-base font-bold text-[#f7f8fc] flex items-center gap-2 font-mono">
+          <FileText className="w-5 h-5 text-[#2dd4bf]" />
           <span>Fintech &amp; Reconciliation Glossary</span>
         </h3>
 
@@ -379,24 +366,24 @@ export const HelpTab: React.FC<HelpTabProps> = ({ onNavigateTab, onStartTour }) 
           {GLOSSARY_TERMS.map((term) => (
             <div
               key={term.term}
-              className="surface-inset p-4 rounded-xl space-y-1"
+              className="inset-panel p-4 rounded-xl space-y-1 bg-[#0c101a] border-white/10"
             >
-              <span className="font-bold text-slate-900 font-mono text-[11px] block text-indigo-900">
+              <span className="font-bold text-[#f7f8fc] font-mono text-[11px] block text-[#c4b5fd]">
                 {term.term}
               </span>
-              <p className="text-slate-600 leading-relaxed">{term.definition}</p>
+              <p className="text-[#a7afc0] leading-relaxed font-sans">{term.definition}</p>
             </div>
           ))}
         </div>
       </div>
 
       {/* Non-Negotiable Safety Disclosures */}
-      <div className="bg-amber-50/80 border border-amber-200 rounded-2xl p-5 shadow-xs text-xs text-amber-900 space-y-2">
-        <div className="flex items-center gap-2 font-bold text-amber-950">
-          <ShieldCheck className="w-4 h-4 text-amber-600 shrink-0" />
+      <div className="bg-[#f5b942]/10 border border-[#f5b942]/30 rounded-2xl p-5 shadow-xs text-xs text-[#fde68a] space-y-2">
+        <div className="flex items-center gap-2 font-bold text-[#f5b942]">
+          <ShieldCheck className="w-4 h-4 text-[#f5b942] shrink-0" />
           <span>Buildathon Prototype Disclosures &amp; Safety Boundaries</span>
         </div>
-        <ul className="list-disc pl-5 space-y-1 text-amber-800 leading-relaxed">
+        <ul className="list-disc pl-5 space-y-1 text-[#fde68a]/90 leading-relaxed font-sans">
           <li><strong>Synthetic Simulation</strong>: All records, UTRs, and settlements are generated deterministically to model Razorpay fee rules and banking delays.</li>
           <li><strong>No Real Money Movement</strong>: ShaRecon AI is an analytical reconciliation controller and does not initiate bank transfers or payment gateway refunds.</li>
           <li><strong>Advisory AI</strong>: Gemini 2.5 Flash functions strictly as an advisory copilot; core reconciliation logic operates 100% deterministically without external LLM dependencies.</li>
