@@ -19,6 +19,7 @@ import {
   BankTransaction,
   SeedBenchmarkResult,
   PolicySimulationResult,
+  STANDARD_POLICY_PROFILES,
 } from '@/types/reconciliation';
 import { formatINR } from '@/lib/money';
 import { runMultiSeedBenchmark, simulatePolicyThresholds } from '@/lib/engine/evaluator';
@@ -540,23 +541,27 @@ export const EvaluationLabTab: React.FC<EvaluationLabTabProps> = ({
             <button
               onClick={() => {
                 const policies = [
-                  { name: 'Ultra-Safe', high: 95, med: 70 },
-                  { name: 'Conservative', high: 90, med: 60 },
-                  { name: 'Balanced (Default)', high: 85, med: 50 },
-                  { name: 'Aggressive', high: 75, med: 40 },
-                  { name: 'Custom Slider', high: simHighThreshold, med: simMediumThreshold },
+                  ...STANDARD_POLICY_PROFILES,
+                  {
+                    id: 'custom',
+                    name: 'Custom Simulator',
+                    tag: 'User Defined',
+                    description: 'User-configured custom threshold simulation',
+                    highThreshold: simHighThreshold,
+                    mediumThreshold: simMediumThreshold,
+                  },
                 ];
-                let csv = 'Policy,High Threshold,Med Threshold,Auto Rate,Review Rate,Exception Rate,Auto Precision,Auto Recall,Review Routing,FP Count,FP Exposure (INR)\n';
+                let csv = 'Policy,Tag,High Threshold,Med Threshold,Auto Rate,Review Rate,Exception Rate,Auto Precision,Auto Recall,Review Routing,FP Count,FP Exposure (INR)\n';
                 policies.forEach((p) => {
                   const res = simulatePolicyThresholds(
                     effectivePayments,
                     effectiveSettlements,
                     effectiveBankTransactions,
                     groundTruth,
-                    p.high,
-                    p.med
+                    p.highThreshold,
+                    p.mediumThreshold
                   );
-                  csv += `"${p.name}",${p.high}%,${p.med}%,${(res.autoReconciliationRate * 100).toFixed(1)}%,${(res.reviewRate * 100).toFixed(1)}%,${(res.exceptionRate * 100).toFixed(1)}%,${(res.autoResolutionPrecision * 100).toFixed(1)}%,${(res.autoResolutionRecall * 100).toFixed(1)}%,${(res.reviewRoutingAccuracy * 100).toFixed(1)}%,${res.falsePositiveCount},${(res.falsePositiveExposurePaise / 100).toFixed(2)}\n`;
+                  csv += `"${p.name}","${p.tag}",${p.highThreshold}%,${p.mediumThreshold}%,${(res.autoReconciliationRate * 100).toFixed(1)}%,${(res.reviewRate * 100).toFixed(1)}%,${(res.exceptionRate * 100).toFixed(1)}%,${(res.autoResolutionPrecision * 100).toFixed(1)}%,${(res.autoResolutionRecall * 100).toFixed(1)}%,${(res.reviewRoutingAccuracy * 100).toFixed(1)}%,${res.falsePositiveCount},${(res.falsePositiveExposurePaise / 100).toFixed(2)}\n`;
                 });
                 const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
                 const url = URL.createObjectURL(blob);
@@ -587,26 +592,30 @@ export const EvaluationLabTab: React.FC<EvaluationLabTabProps> = ({
               </thead>
               <tbody className="divide-y divide-white/5 font-mono text-[11px]">
                 {[
-                  { name: 'Ultra-Safe', high: 95, med: 70, tag: 'Zero Risk' },
-                  { name: 'Conservative', high: 90, med: 60, tag: 'High Caution' },
-                  { name: 'Balanced (Default)', high: 85, med: 50, tag: 'Engine Baseline' },
-                  { name: 'Aggressive', high: 75, med: 40, tag: 'High Clearing' },
-                  { name: 'Custom Slider', high: simHighThreshold, med: simMediumThreshold, tag: 'Active' },
+                  ...STANDARD_POLICY_PROFILES,
+                  {
+                    id: 'custom',
+                    name: 'Custom Simulator',
+                    tag: 'User Defined',
+                    description: 'Active slider thresholds',
+                    highThreshold: simHighThreshold,
+                    mediumThreshold: simMediumThreshold,
+                  },
                 ].map((p) => {
                   const res = simulatePolicyThresholds(
                     effectivePayments,
                     effectiveSettlements,
                     effectiveBankTransactions,
                     groundTruth,
-                    p.high,
-                    p.med
+                    p.highThreshold,
+                    p.mediumThreshold
                   );
 
-                  const isCustom = p.name === 'Custom Slider';
+                  const isCustom = p.id === 'custom';
 
                   return (
                     <tr
-                      key={p.name}
+                      key={p.id}
                       className={isCustom ? 'bg-[#7168ff]/15 font-semibold text-white' : 'hover:bg-white/5'}
                     >
                       <td className="py-2.5 px-3 font-sans font-medium text-[#f7f8fc]">
@@ -616,7 +625,7 @@ export const EvaluationLabTab: React.FC<EvaluationLabTabProps> = ({
                         </span>
                       </td>
                       <td className="py-2.5 px-3 text-[#a7afc0]">
-                        {p.high}% / {p.med}%
+                        {p.highThreshold}% / {p.mediumThreshold}%
                       </td>
                       <td className="py-2.5 px-3 text-[#2dd4bf] font-bold">
                         {(res.autoReconciliationRate * 100).toFixed(1)}% ({res.autoReconciledCount})

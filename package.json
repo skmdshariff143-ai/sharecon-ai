@@ -12,7 +12,8 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "test:e2e:headed": "playwright test --headed",
-    "test:e2e:report": "playwright show-report"
+    "test:e2e:report": "playwright show-report",
+    "generate:benchmark": "npx tsx scripts/generate-benchmark-artifacts.ts"
   },
   "dependencies": {
     "@google/genai": "^2.18.0",

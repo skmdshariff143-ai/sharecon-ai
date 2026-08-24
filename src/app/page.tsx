@@ -43,6 +43,19 @@ function DashboardContent() {
     return dataset.groundTruth;
   });
 
+  const [rawStatements, setRawStatements] = useState<{
+    payments: Payment[];
+    settlements: Settlement[];
+    bankTransactions: BankTransaction[];
+  }>(() => {
+    const dataset = generateSyntheticDataset(42);
+    return {
+      payments: dataset.payments,
+      settlements: dataset.settlements,
+      bankTransactions: dataset.bankTransactions,
+    };
+  });
+
   const [batch, setBatch] = useState<BatchReconciliationResult | null>(() => {
     const start = performance.now();
     const dataset = generateSyntheticDataset(42);
@@ -75,6 +88,11 @@ function DashboardContent() {
     setIsReconciling(true);
     const start = performance.now();
     const dataset = generateSyntheticDataset(42);
+    setRawStatements({
+      payments: dataset.payments,
+      settlements: dataset.settlements,
+      bankTransactions: dataset.bankTransactions,
+    });
     setGroundTruth(dataset.groundTruth);
 
     const result = reconcileBatch(
@@ -102,16 +120,14 @@ function DashboardContent() {
     setConfig(newConfig);
     if (!batch) return;
 
-    const payments = batch.records.map((r) => r.payment);
-    const settlements = batch.records
-      .map((r) => r.matchedSettlement)
-      .filter((s): s is Settlement => Boolean(s));
-    const bankTx = batch.records
-      .map((r) => r.matchedBankTransaction)
-      .filter((b): b is BankTransaction => Boolean(b));
-
     const start = performance.now();
-    const result = reconcileBatch(payments, settlements, bankTx, newConfig, batch.auditEvents);
+    const result = reconcileBatch(
+      rawStatements.payments,
+      rawStatements.settlements,
+      rawStatements.bankTransactions,
+      newConfig,
+      batch.auditEvents
+    );
     const duration = performance.now() - start;
 
     if (groundTruth.length > 0) {
@@ -224,9 +240,13 @@ function DashboardContent() {
     bankTx: BankTransaction[]
   ) => {
     setIsReconciling(true);
-    const result = reconcileBatch(payments, settlements, bankTx, config);
-
+    setRawStatements({ payments, settlements, bankTransactions: bankTx });
     setGroundTruth([]);
+    const start = performance.now();
+    const result = reconcileBatch(payments, settlements, bankTx, config);
+    const duration = performance.now() - start;
+    result.evaluation = evaluateReconciliation(result.records, [], duration);
+
     setBatch(result);
     setIsReconciling(false);
     showToast({
@@ -295,6 +315,7 @@ function DashboardContent() {
   const handleReset = () => {
     setBatch(null);
     setGroundTruth([]);
+    setRawStatements({ payments: [], settlements: [], bankTransactions: [] });
     setSelectedRecord(null);
     showToast({
       type: 'info',
@@ -391,6 +412,9 @@ function DashboardContent() {
               evaluation={batch?.evaluation}
               records={batch ? batch.records : []}
               groundTruth={groundTruth}
+              payments={rawStatements.payments}
+              settlements={rawStatements.settlements}
+              bankTransactions={rawStatements.bankTransactions}
             />
           )}
 

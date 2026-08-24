@@ -115,7 +115,9 @@ export function score3WayMatch(
     amountScore = 0;
   }
 
-  const amountTolerancePassed = bankTx ? setDiff <= feeTolerancePaise : false;
+  const amountTolerancePassed = bankTx
+    ? setDiff <= feeTolerancePaise && bankDiff <= feeTolerancePaise
+    : false;
 
   // 3. Date Proximity (Max 15 points)
   let dateScore = 0;
@@ -179,6 +181,11 @@ export function score3WayMatch(
     totalConfidence = Math.min(75, totalConfidence);
   }
 
+  // If bank amount mismatches, cap confidence so it cannot auto-reconcile
+  if (bankTx && bankDiff > feeTolerancePaise) {
+    totalConfidence = Math.min(75, totalConfidence);
+  }
+
   // Exception Classification & Exposure Determination
   let exceptionType: ExceptionType = 'CLEAN_MATCH';
   let financialExposurePaise = 0;
@@ -197,6 +204,9 @@ export function score3WayMatch(
   } else if (setDiff > 0) {
     exceptionType = 'AMOUNT_MISMATCH';
     financialExposurePaise = setDiff;
+  } else if (bankDiff > feeTolerancePaise) {
+    exceptionType = 'AMOUNT_MISMATCH';
+    financialExposurePaise = bankDiff;
   } else if (payToSetDays >= 6) {
     exceptionType = 'DELAYED_SETTLEMENT';
     financialExposurePaise = 0;

@@ -24,10 +24,10 @@ test.describe('Evaluation Lab & Policy Simulator Suite', () => {
 
   test('15. 5-Policy Comparative Matrix renders and exports comparison CSV', async ({ page }) => {
     await expect(page.locator('text=5-Policy Trade-Off Matrix').first()).toBeVisible();
-    await expect(page.locator('text=Ultra-Safe').first()).toBeVisible();
-    await expect(page.locator('text=Conservative').first()).toBeVisible();
-    await expect(page.locator('text=Balanced (Default)').first()).toBeVisible();
-    await expect(page.locator('text=Aggressive').first()).toBeVisible();
+    await expect(page.locator('text=Strict (High Confidence)').first()).toBeVisible();
+    await expect(page.locator('text=Conservative (Cautious)').first()).toBeVisible();
+    await expect(page.locator('text=Balanced (Default Baseline)').first()).toBeVisible();
+    await expect(page.locator('text=Aggressive (High Clearing)').first()).toBeVisible();
 
     const exportBtn = page.locator('button:has-text("Export Comparison CSV")').first();
     await exportBtn.scrollIntoViewIfNeeded();

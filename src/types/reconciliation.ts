@@ -276,3 +276,47 @@ export interface OperationalDecisionResult {
   newEvent: AuditEvent;
 }
 
+export interface PolicyProfile {
+  id: string;
+  name: string;
+  tag: string;
+  description: string;
+  highThreshold: number;
+  mediumThreshold: number;
+}
+
+export const STANDARD_POLICY_PROFILES: PolicyProfile[] = [
+  {
+    id: 'strict',
+    name: 'Strict (High Confidence)',
+    tag: 'Max Caution',
+    description: 'Requires 95% confidence for automated matching. Maximizes controller review.',
+    highThreshold: 95,
+    mediumThreshold: 70,
+  },
+  {
+    id: 'conservative',
+    name: 'Conservative (Cautious)',
+    tag: 'High Assurance',
+    description: 'Requires 90% confidence for automated matching. Suitable for high-value merchants.',
+    highThreshold: 90,
+    mediumThreshold: 60,
+  },
+  {
+    id: 'balanced',
+    name: 'Balanced (Default Baseline)',
+    tag: 'Engine Baseline',
+    description: 'Standard 85/50 calibration balancing automated throughput with safety gates.',
+    highThreshold: 85,
+    mediumThreshold: 50,
+  },
+  {
+    id: 'aggressive',
+    name: 'Aggressive (High Clearing)',
+    tag: 'High Yield',
+    description: 'Lower 75% auto threshold for high-volume, low-exposure microtransactions.',
+    highThreshold: 75,
+    mediumThreshold: 40,
+  },
+];
+

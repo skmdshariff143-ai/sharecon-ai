@@ -4,8 +4,8 @@
 > *Built for the Razorpay AI Buildathon (Track: AI Finance Controller)*
 
 [![Quality Gates](https://img.shields.io/badge/Quality%20Gates-Passing-emerald)](https://github.com/skmdshariff143-ai/sharecon-ai)
-[![Vitest Unit Tests](https://img.shields.io/badge/Unit%20Tests-31%2F31%20Passed-blue)](https://github.com/skmdshariff143-ai/sharecon-ai)
-[![Playwright E2E](https://img.shields.io/badge/Playwright%20E2E-21%2F21%20Passed-violet)](https://github.com/skmdshariff143-ai/sharecon-ai)
+[![Vitest Unit Tests](https://img.shields.io/badge/Unit%20Tests-43%2F43%20Passed-blue)](https://github.com/skmdshariff143-ai/sharecon-ai)
+[![Playwright E2E](https://img.shields.io/badge/Playwright%20E2E-35%2F35%20Passed-violet)](https://github.com/skmdshariff143-ai/sharecon-ai)
 [![Zero Horizontal Overflow](https://img.shields.io/badge/Responsive-1440%20%7C%201024%20%7C%20390-success)](https://sharecon-ai.vercel.app)
 [![Zero Live Money Movement](https://img.shields.io/badge/Safety-Zero%20Live%20Money%20Movement-amber)](https://sharecon-ai.vercel.app)
 
@@ -107,15 +107,16 @@ Metrics are separated into distinct mathematical categories rather than grouped 
 - **Review-Routing Accuracy**: Fraction of anomalies correctly routed to human triage.
 - **False-Positive Exposure**: Unsafe auto-resolution financial risk quantified in INR and integer paise.
 
-### Multi-Seed Benchmark Results (Calculated Dynamically)
+### Multi-Seed Benchmark Results (Canonical Output)
+*Committed artifact available at [`docs/generated/benchmark.md`](docs/generated/benchmark.md) and [`docs/METRIC_INTEGRITY_AUDIT.md`](docs/METRIC_INTEGRITY_AUDIT.md).*
 
 | Seed | Records | Proposed-Pair Precision | Proposed-Pair Recall | Auto-Resolution Precision | Auto-Resolution Recall | Review-Routing Acc | Latency |
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **42** | 180 | 91.1% | 88.0% | 100.0% | 76.7% | 98.7% | 4.8ms |
-| **101** | 180 | 92.4% | 89.2% | 100.0% | 78.1% | 99.1% | 4.6ms |
-| **777** | 180 | 90.7% | 87.5% | 100.0% | 75.9% | 98.4% | 4.9ms |
-| **2024** | 180 | 91.8% | 88.6% | 100.0% | 77.4% | 98.9% | 4.7ms |
-| **9999** | 180 | 91.3% | 88.1% | 100.0% | 76.9% | 98.6% | 4.8ms |
+| **42** | 180 | 90.6% | 91.1% | 100.0% | 100.0% | 83.0% | ~4.8ms |
+| **101** | 180 | 88.9% | 91.1% | 100.0% | 100.0% | 87.2% | ~4.6ms |
+| **777** | 180 | 90.1% | 91.8% | 100.0% | 100.0% | 87.2% | ~4.9ms |
+| **2024** | 180 | 91.7% | 90.5% | 100.0% | 100.0% | 78.7% | ~4.7ms |
+| **9999** | 180 | 91.4% | 94.3% | 100.0% | 100.0% | 80.9% | ~4.8ms |
 
 ---
 
@@ -130,13 +131,16 @@ npm run lint
 # 2. TypeScript Strict Type Check (0 errors)
 npm run type-check
 
-# 3. Vitest Unit Test Suite (31 unit tests)
+# 3. Vitest Unit & Adversarial Integrity Suite (43 unit tests)
 npm run test
 
-# 4. Production Turbopack Build
+# 4. Canonical Benchmark Artifact Generator
+npm run generate:benchmark
+
+# 5. Production Turbopack Build
 npm run build
 
-# 5. Playwright End-to-End Suite (21 E2E tests)
+# 6. Playwright End-to-End Suite (35 E2E checks)
 npm run test:e2e
 ```
 
