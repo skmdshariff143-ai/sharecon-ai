@@ -1,14 +1,26 @@
 import { test } from '@playwright/test';
 import path from 'path';
+import fs from 'fs';
 
 test.describe('Screenshot Capture Suite', () => {
   const outputDir = path.resolve(__dirname, '../../docs/assets/screenshots');
+  const premiumDir = path.resolve(__dirname, '../../docs/assets/screenshots/premium');
+
+  test.beforeAll(() => {
+    if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir, { recursive: true });
+    if (!fs.existsSync(premiumDir)) fs.mkdirSync(premiumDir, { recursive: true });
+  });
+
+  const saveScreenshots = async (page: any, filename: string) => {
+    await page.screenshot({ path: path.join(outputDir, filename), fullPage: false });
+    await page.screenshot({ path: path.join(premiumDir, filename), fullPage: false });
+  };
 
   test('Capture Desktop Control Center (1440x900)', async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto('/');
     await page.waitForLoadState('networkidle');
-    await page.screenshot({ path: path.join(outputDir, 'desktop_control_center.png'), fullPage: false });
+    await saveScreenshots(page, 'desktop_control_center.png');
   });
 
   test('Capture Desktop Reconciliation with Evidence Drawer (1440x900)', async ({ page }) => {
@@ -19,7 +31,16 @@ test.describe('Screenshot Capture Suite', () => {
     await page.waitForTimeout(300);
     await page.locator('table tbody tr').first().click();
     await page.waitForTimeout(300);
-    await page.screenshot({ path: path.join(outputDir, 'desktop_reconciliation_drawer.png'), fullPage: false });
+    await saveScreenshots(page, 'desktop_reconciliation_drawer.png');
+  });
+
+  test('Capture Desktop Exceptions Workspace (1440x900)', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto('/');
+    await page.waitForLoadState('networkidle');
+    await page.locator('aside button[title*="Exceptions"]').first().click();
+    await page.waitForTimeout(300);
+    await saveScreenshots(page, 'desktop_exceptions.png');
   });
 
   test('Capture Desktop Evaluation Lab (1440x900)', async ({ page }) => {
@@ -28,7 +49,25 @@ test.describe('Screenshot Capture Suite', () => {
     await page.waitForLoadState('networkidle');
     await page.locator('aside button[title*="Evaluation Lab"]').first().click();
     await page.waitForTimeout(300);
-    await page.screenshot({ path: path.join(outputDir, 'desktop_evaluation_lab.png'), fullPage: false });
+    await saveScreenshots(page, 'desktop_evaluation_lab.png');
+  });
+
+  test('Capture Desktop Audit Trail (1440x900)', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto('/');
+    await page.waitForLoadState('networkidle');
+    await page.locator('aside button[title*="Audit Trail"]').first().click();
+    await page.waitForTimeout(300);
+    await saveScreenshots(page, 'desktop_audit_trail.png');
+  });
+
+  test('Capture Desktop Methodology & Safety (1440x900)', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto('/');
+    await page.waitForLoadState('networkidle');
+    await page.locator('aside button[title*="Methodology & Safety"]').first().click();
+    await page.waitForTimeout(300);
+    await saveScreenshots(page, 'desktop_methodology.png');
   });
 
   test('Capture Desktop Help Workspace (1440x900)', async ({ page }) => {
@@ -37,7 +76,7 @@ test.describe('Screenshot Capture Suite', () => {
     await page.waitForLoadState('networkidle');
     await page.locator('aside button[title*="Help & Guide"]').first().click();
     await page.waitForTimeout(300);
-    await page.screenshot({ path: path.join(outputDir, 'desktop_help_workspace.png'), fullPage: false });
+    await saveScreenshots(page, 'desktop_help_workspace.png');
   });
 
   test('Capture Desktop Live Runner (1440x900)', async ({ page }) => {
@@ -48,20 +87,20 @@ test.describe('Screenshot Capture Suite', () => {
     await launchBtn.scrollIntoViewIfNeeded();
     await launchBtn.click();
     await page.waitForTimeout(400);
-    await page.screenshot({ path: path.join(outputDir, 'desktop_live_runner.png'), fullPage: false });
+    await saveScreenshots(page, 'desktop_live_runner.png');
   });
 
   test('Capture Tablet Control Center (1024x768)', async ({ page }) => {
     await page.setViewportSize({ width: 1024, height: 768 });
     await page.goto('/');
     await page.waitForLoadState('networkidle');
-    await page.screenshot({ path: path.join(outputDir, 'tablet_control_center.png'), fullPage: false });
+    await saveScreenshots(page, 'tablet_control_center.png');
   });
 
   test('Capture Mobile Control Center (390x844)', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto('/');
     await page.waitForLoadState('networkidle');
-    await page.screenshot({ path: path.join(outputDir, 'mobile_control_center.png'), fullPage: false });
+    await saveScreenshots(page, 'mobile_control_center.png');
   });
 });
