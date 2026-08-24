@@ -3,7 +3,8 @@
 > **Explainable reconciliation. Confident financial control.**  
 > *Built for the Razorpay AI Buildathon (Track: AI Finance Controller)*
 
-[![Quality Gates](https://img.shields.io/badge/Quality%20Gates-Passing-emerald)](https://github.com/skmdshariff143-ai/sharecon-ai)
+[![Quality Gates](https://github.com/skmdshariff143-ai/sharecon-ai/actions/workflows/quality.yml/badge.svg)](https://github.com/skmdshariff143-ai/sharecon-ai/actions/workflows/quality.yml)
+[![Node.js Runtime](https://img.shields.io/badge/Node.js-v20.18.3%20%7C%20v22%20%7C%20v24-brightgreen.svg)](https://nodejs.org)
 [![Vitest Unit Tests](https://img.shields.io/badge/Unit%20Tests-48%2F48%20Passed-blue)](https://github.com/skmdshariff143-ai/sharecon-ai)
 [![Playwright E2E](https://img.shields.io/badge/Playwright%20E2E-36%2F36%20Passed-violet)](https://github.com/skmdshariff143-ai/sharecon-ai)
 [![Zero Horizontal Overflow](https://img.shields.io/badge/Responsive-1440%20%7C%201024%20%7C%20390-success)](https://sharecon-ai.vercel.app)
@@ -11,6 +12,40 @@
 
 Production URL: **[https://sharecon-ai.vercel.app](https://sharecon-ai.vercel.app)**  
 GitHub Repository: **[https://github.com/skmdshariff143-ai/sharecon-ai](https://github.com/skmdshariff143-ai/sharecon-ai)**
+
+---
+
+## 🚀 Quickstart & Independent Evaluator Setup
+
+ShaRecon AI is designed to be 100% reproducible on a fresh machine with zero global tool dependencies.
+
+### 1. Prerequisites & Pinned Runtime
+- **Node.js**: `>=20.0.0` (Pinned: `.nvmrc` -> `20.18.3`, verified on Node 20 LTS, 22 LTS, and 24)
+- **npm**: `>=10.0.0`
+
+```bash
+# Clone the repository
+git clone https://github.com/skmdshariff143-ai/sharecon-ai.git
+cd sharecon-ai
+
+# Use pinned Node version (optional if Node >= 20 is already active)
+nvm use
+
+# Clean reproducible installation
+npm ci
+```
+
+### 2. Environment Variables & Deterministic Fallback
+ShaRecon AI requires **no environment variables** to run. All reconciliation, benchmarks, and multi-seed simulators run deterministically in browser and Node runtimes.
+
+```bash
+# Optional: To enable real-time Google Gemini exception analysis
+cp .env.example .env.local
+# Set GEMINI_API_KEY=your_gemini_api_key in .env.local
+```
+
+> [!NOTE]
+> **Expected Fallback Without Gemini Key**: If no `GEMINI_API_KEY` is provided or if network quotas are reached, the system automatically activates its **deterministic offline rule-based analyst** (`src/lib/ai/analyst.ts`), generating structured root-cause explanations and reviewer recommendations with zero downtime.
 
 ---
 
@@ -69,30 +104,12 @@ graph TD
 
 ### 4. Grounded Gemini Exception Analyst & Advisory Copilot
 - Gemini 2.5 Flash operates strictly as an advisory exception copilot via a server-side route.
-- Summarizes anomalies, classifies risk, and produces actionable checklists without ever altering numerical match scores or executing financial movement.
-- Deterministic fallback preserves core exception triage when Gemini is unavailable, with explicit UI disclosure (`[ShaRecon-Deterministic-Fallback]`).
+- **Strict Evidence Bounding**: Formatted as structured JSON containing root-cause analysis, missing settlement/credit notes, risk assessment, and recommended next steps.
+- **Resilient Fallback**: Falls back to deterministic rule-based analysis if API key is absent or quota is exceeded.
 
-### 5. Financial Safety & Human-in-the-Loop Controls
-- **Dry-Run by Default**: Simulates matching without committing live ledger state.
-- **Safety Circuit Breaker**: Halts automated matching if the batch anomaly rate exceeds 35%.
-- **Collision Protection**: Prevents duplicate settlements or bank credits from being double-assigned.
-- **Immutable Baseline Benchmark**: Human reviewer approve/reject operations update live session counters but do not rewrite baseline engine benchmark metrics.
-
----
-
-## 📸 Product Walkthrough & Responsive UI Screenshots
-
-| Desktop Control Center (1440 × 900) | Evidence Drawer & Candidate Explorer (1440 × 900) |
-| :---: | :---: |
-| ![Desktop Control Center](docs/assets/screenshots/desktop_control_center.png) | ![Evidence Drawer](docs/assets/screenshots/desktop_reconciliation_drawer.png) |
-
-| Evaluation Lab & 5-Policy Matrix (1440 × 900) | Help & Reviewer Onboarding Workspace (1440 × 900) |
-| :---: | :---: |
-| ![Evaluation Lab](docs/assets/screenshots/desktop_evaluation_lab.png) | ![Help Workspace](docs/assets/screenshots/desktop_help_workspace.png) |
-
-| Observable 8-Stage Live Runner (1440 × 900) | Tablet Control Center (1024 × 768) | Mobile Control Center (390 × 844) |
-| :---: | :---: | :---: |
-| ![Live Runner](docs/assets/screenshots/desktop_live_runner.png) | ![Tablet Control Center](docs/assets/screenshots/tablet_control_center.png) | ![Mobile Control Center](docs/assets/screenshots/mobile_control_center.png) |
+### 5. Controller Audit Trail & Export
+- Logs every manual human approval, rejection, note, or threshold adjustment with timestamps and reviewer IDs.
+- Full CSV and JSON export capability for regulatory accounting compliance.
 
 ---
 
@@ -151,29 +168,30 @@ Tracing the data flow revealed that `page.tsx` was only passing matched output r
 
 ## 🛠️ Verification & Quality Gates
 
-Run all automated checks locally:
+Run the single-command reproducible verification pipeline:
 
 ```bash
-# 1. ESLint (0 errors, 0 warnings)
-npm run lint
+# One-Command Quality Gate Pipeline
+npm run verify
+```
 
-# 2. TypeScript Strict Type Check (0 errors)
-npm run type-check
+`npm run verify` executes all quality gates in stable sequential order:
+1. **ESLint**: `npm run lint` (0 errors, 0 warnings)
+2. **TypeScript Strict Type Check**: `npm run type-check` (0 errors)
+3. **Vitest Unit & Held-Out Suite**: `npm run test` (48 tests in 7 suites)
+4. **Canonical Benchmark Generator**: `npm run generate:benchmark`
+5. **Held-Out Adversarial Generator**: `npm run generate:heldout`
+6. **Turbopack Production Build**: `npm run build`
+7. **Playwright End-to-End Suite**: `npm run test:e2e` (36 browser tests)
 
-# 3. Vitest Unit, Adversarial & Held-Out Suite (48 unit tests)
-npm run test
+### Local Development & Production Server
+```bash
+# Start Next.js development server
+npm run dev
 
-# 4. Canonical Benchmark Artifact Generator
-npm run generate:benchmark
-
-# 5. Held-Out Adversarial Artifact Generator
-npm run generate:heldout
-
-# 6. Production Turbopack Build
+# Or build and launch production server locally
 npm run build
-
-# 7. Playwright End-to-End Suite (36 E2E checks)
-npm run test:e2e
+npm run start
 ```
 
 ---

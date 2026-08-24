@@ -2,7 +2,7 @@
   "metadata": {
     "title": "ShaRecon AI — Held-Out Ground Truth Labels",
     "totalGroundTruthRecords": 80,
-    "generatedAt": "2026-08-24T14:51:11.755Z",
+    "generatedAt": "2026-08-24T14:59:40.248Z",
     "disclaimer": "Ground truth labels stored independently. Never accessed by the matching engine."
   },
   "groundTruth": [
