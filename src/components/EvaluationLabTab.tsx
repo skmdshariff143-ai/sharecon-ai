@@ -53,7 +53,6 @@ export const EvaluationLabTab: React.FC<EvaluationLabTabProps> = ({
   // Run real multi-seed benchmark computation on demand
   const calculateBenchmark = React.useCallback(() => {
     setIsCalculatingBenchmark(true);
-    // Use setTimeout to allow UI rendering of loader
     setTimeout(() => {
       try {
         const results = runMultiSeedBenchmark([42, 101, 777, 2024, 9999]);
@@ -160,7 +159,7 @@ export const EvaluationLabTab: React.FC<EvaluationLabTabProps> = ({
 
   if (!evaluation) {
     return (
-      <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center my-6 shadow-xs">
+      <div className="surface-card p-12 text-center my-6">
         <h3 className="text-sm font-semibold text-slate-700">No evaluation benchmark available</h3>
         <p className="text-xs text-slate-500 mt-1">Load the demo dataset to run ground-truth evaluation.</p>
       </div>
@@ -200,15 +199,15 @@ export const EvaluationLabTab: React.FC<EvaluationLabTabProps> = ({
   return (
     <div className="space-y-6">
       {/* Benchmark Summary Header */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs">
+      <div className="surface-card p-6 border-l-4 border-l-indigo-600">
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                <ShieldCheck className="w-5 h-5 text-blue-600" />
-                Baseline Engine Benchmark (Immutable)
+              <h2 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
+                <ShieldCheck className="w-5 h-5 text-indigo-600" />
+                <span>Baseline Engine Benchmark (Immutable)</span>
               </h2>
-              <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+              <span className="status-badge bg-emerald-50 text-emerald-800 border border-emerald-200">
                 Ground-Truth Verified
               </span>
             </div>
@@ -216,171 +215,171 @@ export const EvaluationLabTab: React.FC<EvaluationLabTabProps> = ({
               Evaluated directly against labeled synthetic ground truth upon batch execution. Preserved independently of subsequent human approvals.
             </p>
           </div>
-          <div className="text-xs text-slate-500 bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 font-mono">
-            Engine Latency: <strong>{processingDurationMs.toFixed(1)}ms</strong> | Total Volume:{' '}
-            <strong>{formatINR(totalGrossAmountPaise)}</strong>
+          <div className="text-xs text-slate-600 bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 font-mono">
+            Engine Latency: <strong className="text-slate-900">{processingDurationMs.toFixed(1)}ms</strong> | Total Volume:{' '}
+            <strong className="text-slate-900">{formatINR(totalGrossAmountPaise)}</strong>
           </div>
         </div>
 
         {/* 7-Card Honest Metrics Grid with Formulas */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
           {/* 1. Proposed-Pair Precision */}
-          <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col justify-between">
+          <div className="surface-inset p-4 rounded-xl flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                <span className="text-[10px] font-bold text-slate-700 uppercase tracking-wider font-mono">
                   Proposed-Pair Precision
                 </span>
-                <span className="text-[10px] font-mono bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded font-semibold">
+                <span className="text-[10px] font-mono bg-indigo-100 text-indigo-800 px-1.5 py-0.5 rounded font-semibold">
                   Entity Match
                 </span>
               </div>
-              <div className="text-2xl font-extrabold text-slate-900 mt-1.5">
+              <div className="text-2xl font-extrabold text-slate-900 mt-1.5 metric-value">
                 {(proposedPairPrecision * 100).toFixed(1)}%
               </div>
               <p className="text-xs text-slate-600 mt-1">
                 <strong>{correctProposedPairs}</strong> correct pairs of <strong>{totalProposedPairs}</strong> proposed.
               </p>
             </div>
-            <div className="pt-2.5 mt-2.5 border-t border-slate-200 text-[11px] text-slate-500 font-mono">
+            <div className="pt-2 mt-2 border-t border-slate-200/80 text-[10px] text-slate-500 font-mono">
               Formula: Correct Proposed Pairs / Total Proposed Pairs
             </div>
           </div>
 
           {/* 2. Proposed-Pair Recall */}
-          <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col justify-between">
+          <div className="surface-inset p-4 rounded-xl flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                <span className="text-[10px] font-bold text-slate-700 uppercase tracking-wider font-mono">
                   Proposed-Pair Recall
                 </span>
-                <span className="text-[10px] font-mono bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded font-semibold">
+                <span className="text-[10px] font-mono bg-indigo-100 text-indigo-800 px-1.5 py-0.5 rounded font-semibold">
                   Coverage
                 </span>
               </div>
-              <div className="text-2xl font-extrabold text-slate-900 mt-1.5">
+              <div className="text-2xl font-extrabold text-slate-900 mt-1.5 metric-value">
                 {(proposedPairRecall * 100).toFixed(1)}%
               </div>
               <p className="text-xs text-slate-600 mt-1">
-                <strong>{correctProposedPairs}</strong> captured of <strong>{totalExpectedPairs}</strong> expected pairs.
+                <strong>{correctProposedPairs}</strong> identified of <strong>{totalExpectedPairs}</strong> expected pairs.
               </p>
             </div>
-            <div className="pt-2.5 mt-2.5 border-t border-slate-200 text-[11px] text-slate-500 font-mono">
+            <div className="pt-2 mt-2 border-t border-slate-200/80 text-[10px] text-slate-500 font-mono">
               Formula: Correct Proposed Pairs / Total Expected Pairs
             </div>
           </div>
 
-          {/* 3. Auto-Resolution Precision (Safety) */}
-          <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col justify-between">
+          {/* 3. Auto-Resolution Precision */}
+          <div className="surface-inset p-4 rounded-xl flex flex-col justify-between border-t-2 border-t-emerald-500">
             <div>
               <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                <span className="text-[10px] font-bold text-emerald-800 uppercase tracking-wider font-mono">
                   Auto-Resolution Precision
                 </span>
                 <span className="text-[10px] font-mono bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded font-semibold">
                   Safety Gate
                 </span>
               </div>
-              <div className="text-2xl font-extrabold text-emerald-700 mt-1.5">
+              <div className="text-2xl font-extrabold text-emerald-700 mt-1.5 metric-value">
                 {(autoResolutionPrecision * 100).toFixed(1)}%
               </div>
               <p className="text-xs text-slate-600 mt-1">
-                <strong>{correctAutoReconciled}</strong> safe auto-matches of <strong>{totalAutoReconciled}</strong> total.
+                <strong>{correctAutoReconciled}</strong> safe records of <strong>{totalAutoReconciled}</strong> auto-resolved.
               </p>
             </div>
-            <div className="pt-2.5 mt-2.5 border-t border-slate-200 text-[11px] text-slate-500 font-mono">
-              Formula: Safe &amp; Correct Auto-Reconciled / Total Auto-Reconciled
+            <div className="pt-2 mt-2 border-t border-slate-200/80 text-[10px] text-slate-500 font-mono">
+              Formula: Safe &amp; Correct Auto / Total Auto-Reconciled
             </div>
           </div>
 
           {/* 4. Auto-Resolution Recall */}
-          <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col justify-between">
+          <div className="surface-inset p-4 rounded-xl flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                <span className="text-[10px] font-bold text-slate-700 uppercase tracking-wider font-mono">
                   Auto-Resolution Recall
                 </span>
-                <span className="text-[10px] font-mono bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded font-semibold">
-                  Automation
+                <span className="text-[10px] font-mono bg-indigo-100 text-indigo-800 px-1.5 py-0.5 rounded font-semibold">
+                  Throughput
                 </span>
               </div>
-              <div className="text-2xl font-extrabold text-emerald-700 mt-1.5">
+              <div className="text-2xl font-extrabold text-slate-900 mt-1.5 metric-value">
                 {(autoResolutionRecall * 100).toFixed(1)}%
               </div>
               <p className="text-xs text-slate-600 mt-1">
-                <strong>{correctAutoReconciled}</strong> auto-reconciled of <strong>{totalExpectedAutoSafe}</strong> safe expected.
+                <strong>{correctAutoReconciled}</strong> resolved of <strong>{totalExpectedAutoSafe}</strong> total safe records.
               </p>
             </div>
-            <div className="pt-2.5 mt-2.5 border-t border-slate-200 text-[11px] text-slate-500 font-mono">
-              Formula: Correct Auto-Reconciled / Ground-Truth Safe Records
+            <div className="pt-2 mt-2 border-t border-slate-200/80 text-[10px] text-slate-500 font-mono">
+              Formula: Safe &amp; Correct Auto / Total Ground-Truth Safe
             </div>
           </div>
 
           {/* 5. Review-Routing Accuracy */}
-          <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col justify-between">
+          <div className="surface-inset p-4 rounded-xl flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                <span className="text-[10px] font-bold text-slate-700 uppercase tracking-wider font-mono">
                   Review-Routing Accuracy
                 </span>
                 <span className="text-[10px] font-mono bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-semibold">
-                  Triage Gate
+                  Triage Safety
                 </span>
               </div>
-              <div className="text-2xl font-extrabold text-amber-800 mt-1.5">
+              <div className="text-2xl font-extrabold text-amber-800 mt-1.5 metric-value">
                 {(reviewRoutingAccuracy * 100).toFixed(1)}%
               </div>
               <p className="text-xs text-slate-600 mt-1">
-                <strong>{correctReviewRouted}</strong> routed of <strong>{totalExpectedReview}</strong> review cases.
+                <strong>{correctReviewRouted}</strong> routed to review of <strong>{totalExpectedReview}</strong> requiring triage.
               </p>
             </div>
-            <div className="pt-2.5 mt-2.5 border-t border-slate-200 text-[11px] text-slate-500 font-mono">
-              Formula: Correctly Routed to Review / Ground-Truth Review Cases
+            <div className="pt-2 mt-2 border-t border-slate-200/80 text-[10px] text-slate-500 font-mono">
+              Formula: Correct Review Routed / Total Expected Review
             </div>
           </div>
 
-          {/* 6. Exception Classification Accuracy */}
-          <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col justify-between">
+          {/* 6. Exception Detection Accuracy */}
+          <div className="surface-inset p-4 rounded-xl flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider">
-                  Exception Accuracy
+                <span className="text-[10px] font-bold text-slate-700 uppercase tracking-wider font-mono">
+                  Exception Classification
                 </span>
-                <span className="text-[10px] font-mono bg-purple-100 text-purple-800 px-1.5 py-0.5 rounded font-semibold">
+                <span className="text-[10px] font-mono bg-indigo-100 text-indigo-800 px-1.5 py-0.5 rounded font-semibold">
                   Triage Category
                 </span>
               </div>
-              <div className="text-2xl font-extrabold text-slate-900 mt-1.5">
+              <div className="text-2xl font-extrabold text-slate-900 mt-1.5 metric-value">
                 {(exceptionDetectionAccuracy * 100).toFixed(1)}%
               </div>
               <p className="text-xs text-slate-600 mt-1">
                 <strong>{correctExceptionCount}</strong> matching labels across <strong>{totalRecordsProcessed}</strong> records.
               </p>
             </div>
-            <div className="pt-2.5 mt-2.5 border-t border-slate-200 text-[11px] text-slate-500 font-mono">
+            <div className="pt-2 mt-2 border-t border-slate-200/80 text-[10px] text-slate-500 font-mono">
               Formula: Correct Exception Labels / Total Records Processed
             </div>
           </div>
 
           {/* 7. False-Positive Monetary Exposure */}
-          <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col justify-between">
+          <div className="surface-inset p-4 rounded-xl flex flex-col justify-between border-t-2 border-t-emerald-500">
             <div>
               <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                <span className="text-[10px] font-bold text-slate-700 uppercase tracking-wider font-mono">
                   False-Positive Exposure
                 </span>
-                <span className="text-[10px] font-mono bg-rose-100 text-rose-800 px-1.5 py-0.5 rounded font-semibold">
-                  Risk Exposure
+                <span className="text-[10px] font-mono bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded font-semibold">
+                  Risk Contained
                 </span>
               </div>
-              <div className="text-2xl font-extrabold text-emerald-700 mt-1.5">
+              <div className="text-2xl font-extrabold text-emerald-700 mt-1.5 metric-value">
                 {formatINR(falsePositiveExposurePaise)}
               </div>
               <p className="text-xs text-slate-600 mt-1">
                 Total rupee value of unsafe or wrong-entity auto-resolutions.
               </p>
             </div>
-            <div className="pt-2.5 mt-2.5 border-t border-slate-200 text-[11px] text-slate-500 font-mono">
+            <div className="pt-2 mt-2 border-t border-slate-200/80 text-[10px] text-slate-500 font-mono">
               Formula: Sum of Gross Amount for Unsafe Auto-Matches
             </div>
           </div>
@@ -388,15 +387,15 @@ export const EvaluationLabTab: React.FC<EvaluationLabTabProps> = ({
       </div>
 
       {/* Genuine Policy Confidence Threshold Simulator */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs space-y-4">
+      <div className="surface-card p-6 space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div>
             <div className="flex items-center gap-2">
               <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                <Sliders className="w-4 h-4 text-blue-600" />
-                Genuine Policy Confidence Threshold Simulator
+                <Sliders className="w-4 h-4 text-indigo-600" />
+                <span>Genuine Policy Confidence Threshold Simulator</span>
               </h3>
-              <span className="text-[10px] font-bold uppercase bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.5 rounded font-mono">
+              <span className="text-[10px] font-bold uppercase bg-indigo-50 text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded font-mono">
                 Real-Time Rerun
               </span>
             </div>
@@ -424,13 +423,13 @@ export const EvaluationLabTab: React.FC<EvaluationLabTabProps> = ({
         )}
 
         {/* Sliders */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-50 p-4.5 rounded-xl border border-slate-200 text-xs">
           <div>
             <div className="flex items-center justify-between font-semibold text-slate-800 mb-1.5">
               <label htmlFor="sim-high-threshold" className="cursor-pointer">
                 High-Confidence Auto-Reconcile Threshold
               </label>
-              <span className="font-mono font-bold text-blue-600">{simHighThreshold}%</span>
+              <span className="font-mono font-bold text-indigo-600 tabular-nums">{simHighThreshold}%</span>
             </div>
             <input
               id="sim-high-threshold"
@@ -440,7 +439,7 @@ export const EvaluationLabTab: React.FC<EvaluationLabTabProps> = ({
               value={simHighThreshold}
               onChange={(e) => setSimHighThreshold(Number(e.target.value))}
               aria-label="High-Confidence Auto-Reconcile Threshold"
-              className="w-full cursor-pointer accent-blue-600"
+              className="w-full cursor-pointer accent-indigo-600"
             />
             <div className="flex justify-between text-[10px] text-slate-400 font-mono mt-1">
               <span>50% (Aggressive Auto)</span>
@@ -454,7 +453,7 @@ export const EvaluationLabTab: React.FC<EvaluationLabTabProps> = ({
               <label htmlFor="sim-medium-threshold" className="cursor-pointer">
                 Medium-Confidence Review Threshold
               </label>
-              <span className="font-mono font-bold text-amber-600">{simMediumThreshold}%</span>
+              <span className="font-mono font-bold text-amber-600 tabular-nums">{simMediumThreshold}%</span>
             </div>
             <input
               id="sim-medium-threshold"
@@ -476,9 +475,9 @@ export const EvaluationLabTab: React.FC<EvaluationLabTabProps> = ({
 
         {/* Simulated Real Metrics Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center text-xs">
-          <div className="bg-emerald-50/70 border border-emerald-200 rounded-xl p-3">
-            <div className="text-[10px] font-bold text-emerald-800 uppercase">Simulated Auto Rate</div>
-            <div className="text-xl font-extrabold text-emerald-900 mt-1">
+          <div className="bg-emerald-50/70 border border-emerald-200/80 rounded-xl p-3">
+            <div className="text-[10px] font-bold text-emerald-800 uppercase font-mono">Simulated Auto Rate</div>
+            <div className="text-xl font-extrabold text-emerald-900 mt-1 metric-value">
               {simulationResult.autoReconciledCount} Records
             </div>
             <div className="text-[10px] text-emerald-700 mt-0.5 font-mono font-semibold">
@@ -486,9 +485,9 @@ export const EvaluationLabTab: React.FC<EvaluationLabTabProps> = ({
             </div>
           </div>
 
-          <div className="bg-amber-50/70 border border-amber-200 rounded-xl p-3">
-            <div className="text-[10px] font-bold text-amber-800 uppercase">Simulated Review Load</div>
-            <div className="text-xl font-extrabold text-amber-900 mt-1">
+          <div className="bg-amber-50/70 border border-amber-200/80 rounded-xl p-3">
+            <div className="text-[10px] font-bold text-amber-800 uppercase font-mono">Simulated Review Load</div>
+            <div className="text-xl font-extrabold text-amber-900 mt-1 metric-value">
               {simulationResult.reviewCount} Cases
             </div>
             <div className="text-[10px] text-amber-700 mt-0.5 font-mono font-semibold">
@@ -496,19 +495,19 @@ export const EvaluationLabTab: React.FC<EvaluationLabTabProps> = ({
             </div>
           </div>
 
-          <div className="bg-blue-50/70 border border-blue-200 rounded-xl p-3">
-            <div className="text-[10px] font-bold text-blue-800 uppercase">Auto-Precision (Safety)</div>
-            <div className="text-xl font-extrabold text-blue-900 mt-1">
+          <div className="bg-indigo-50/70 border border-indigo-200/80 rounded-xl p-3">
+            <div className="text-[10px] font-bold text-indigo-800 uppercase font-mono">Auto-Precision (Safety)</div>
+            <div className="text-xl font-extrabold text-indigo-900 mt-1 metric-value">
               {(simulationResult.autoResolutionPrecision * 100).toFixed(1)}%
             </div>
-            <div className="text-[10px] text-blue-700 mt-0.5 font-mono font-semibold">
+            <div className="text-[10px] text-indigo-700 mt-0.5 font-mono font-semibold">
               Recall: {(simulationResult.autoResolutionRecall * 100).toFixed(1)}%
             </div>
           </div>
 
-          <div className="bg-rose-50/70 border border-rose-200 rounded-xl p-3">
-            <div className="text-[10px] font-bold text-rose-800 uppercase">FP Risk Exposure</div>
-            <div className="text-xl font-extrabold text-rose-900 mt-1">
+          <div className="bg-rose-50/70 border border-rose-200/80 rounded-xl p-3">
+            <div className="text-[10px] font-bold text-rose-800 uppercase font-mono">FP Risk Exposure</div>
+            <div className="text-xl font-extrabold text-rose-900 mt-1 metric-value">
               {formatINR(simulationResult.falsePositiveExposurePaise)}
             </div>
             <div className="text-[10px] text-rose-700 mt-0.5 font-mono font-semibold">
@@ -606,11 +605,11 @@ export const EvaluationLabTab: React.FC<EvaluationLabTabProps> = ({
                   return (
                     <tr
                       key={p.name}
-                      className={isCustom ? 'bg-blue-50/60 font-semibold' : 'hover:bg-slate-50'}
+                      className={isCustom ? 'bg-indigo-50/60 font-semibold' : 'hover:bg-slate-50'}
                     >
                       <td className="py-2.5 px-3 font-sans font-medium text-slate-900">
                         {p.name}{' '}
-                        <span className="text-[9px] font-mono font-normal text-slate-400 bg-slate-100 px-1 py-0.2 rounded">
+                        <span className="text-[9px] font-mono font-normal text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">
                           {p.tag}
                         </span>
                       </td>
@@ -623,13 +622,13 @@ export const EvaluationLabTab: React.FC<EvaluationLabTabProps> = ({
                       <td className="py-2.5 px-3 text-amber-800">
                         {(res.reviewRate * 100).toFixed(1)}% ({res.reviewCount})
                       </td>
-                      <td className="py-2.5 px-3 text-emerald-700">
+                      <td className="py-2.5 px-3 text-emerald-700 font-bold">
                         {(res.autoResolutionPrecision * 100).toFixed(1)}%
                       </td>
                       <td className="py-2.5 px-3 text-slate-700">
                         {(res.reviewRoutingAccuracy * 100).toFixed(1)}%
                       </td>
-                      <td className="py-2.5 px-3 text-slate-900">
+                      <td className="py-2.5 px-3 text-slate-900 font-bold">
                         {formatINR(res.falsePositiveExposurePaise)}
                       </td>
                     </tr>
@@ -642,12 +641,12 @@ export const EvaluationLabTab: React.FC<EvaluationLabTabProps> = ({
       </div>
 
       {/* Dynamic Multi-Seed Benchmark Evaluation Table */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs space-y-3">
+      <div className="surface-card p-6 space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-              <Scale className="w-4 h-4 text-blue-600" />
-              Multi-Seed Benchmark Robustness (Calculated on-the-fly)
+              <Scale className="w-4 h-4 text-indigo-600" />
+              <span>Multi-Seed Benchmark Robustness (Calculated on-the-fly)</span>
             </h3>
             <p className="text-xs text-slate-500 mt-0.5">
               Engine accuracy dynamically calculated across 5 independent deterministic seeds without hardcoded strings.
@@ -657,7 +656,7 @@ export const EvaluationLabTab: React.FC<EvaluationLabTabProps> = ({
           <button
             onClick={calculateBenchmark}
             disabled={isCalculatingBenchmark}
-            className="px-3 py-1.5 rounded-lg text-xs font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50"
+            className="px-3 py-1.5 rounded-lg text-xs font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50"
           >
             {isCalculatingBenchmark ? (
               <>
@@ -673,10 +672,10 @@ export const EvaluationLabTab: React.FC<EvaluationLabTabProps> = ({
           </button>
         </div>
 
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto rounded-xl border border-slate-200">
           <table className="min-w-full text-xs text-left divide-y divide-slate-200">
             <caption className="sr-only">Multi-Seed Reconciliation Benchmark Results</caption>
-            <thead className="bg-slate-50 text-slate-600 font-semibold uppercase text-[10px]">
+            <thead className="bg-slate-50 text-slate-600 font-semibold uppercase text-[10px] font-mono">
               <tr>
                 <th scope="col" className="py-2.5 px-3">Evaluation Seed</th>
                 <th scope="col" className="py-2.5 px-3">Pair Precision</th>
@@ -693,7 +692,7 @@ export const EvaluationLabTab: React.FC<EvaluationLabTabProps> = ({
               {multiSeedResults.length === 0 ? (
                 <tr>
                   <td colSpan={9} className="py-8 text-center text-slate-400 font-sans">
-                    <Loader2 className="w-5 h-5 animate-spin mx-auto mb-1 text-blue-500" />
+                    <Loader2 className="w-5 h-5 animate-spin mx-auto mb-1 text-indigo-500" />
                     <span>Calculating real multi-seed evaluation...</span>
                   </td>
                 </tr>
@@ -701,28 +700,28 @@ export const EvaluationLabTab: React.FC<EvaluationLabTabProps> = ({
                 multiSeedResults.map((row) => (
                   <tr key={row.seed} className="hover:bg-slate-50/80">
                     <td className="py-2.5 px-3 font-semibold text-slate-900">{row.label}</td>
-                    <td className="py-2.5 px-3 font-bold text-slate-700">
+                    <td className="py-2.5 px-3 font-bold text-slate-700 tabular-nums">
                       {(row.proposedPairPrecision * 100).toFixed(1)}%
                     </td>
-                    <td className="py-2.5 px-3 text-slate-600">
+                    <td className="py-2.5 px-3 text-slate-600 tabular-nums">
                       {(row.proposedPairRecall * 100).toFixed(1)}%
                     </td>
-                    <td className="py-2.5 px-3 font-bold text-emerald-700 bg-emerald-50/50">
+                    <td className="py-2.5 px-3 font-bold text-emerald-700 bg-emerald-50/50 tabular-nums">
                       {(row.autoResolutionPrecision * 100).toFixed(1)}%
                     </td>
-                    <td className="py-2.5 px-3 text-emerald-700">
+                    <td className="py-2.5 px-3 text-emerald-700 tabular-nums">
                       {(row.autoResolutionRecall * 100).toFixed(1)}%
                     </td>
-                    <td className="py-2.5 px-3 text-amber-700">
+                    <td className="py-2.5 px-3 text-amber-700 tabular-nums">
                       {(row.reviewRoutingAccuracy * 100).toFixed(1)}%
                     </td>
-                    <td className="py-2.5 px-3 text-slate-600">
+                    <td className="py-2.5 px-3 text-slate-600 tabular-nums">
                       {(row.exceptionAccuracy * 100).toFixed(1)}%
                     </td>
-                    <td className="py-2.5 px-3 text-slate-600">
+                    <td className="py-2.5 px-3 text-slate-600 tabular-nums">
                       {(row.autoReconciliationRate * 100).toFixed(1)}%
                     </td>
-                    <td className="py-2.5 px-3 text-right font-bold text-emerald-700">
+                    <td className="py-2.5 px-3 text-right font-bold text-emerald-700 tabular-nums">
                       {formatINR(row.falsePositiveExposurePaise)}
                     </td>
                   </tr>
@@ -734,11 +733,11 @@ export const EvaluationLabTab: React.FC<EvaluationLabTabProps> = ({
       </div>
 
       {/* Operational Review Outcomes vs Baseline Benchmark */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs space-y-3">
+      <div className="surface-card p-6 space-y-3">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-            <Activity className="w-4 h-4 text-blue-600" />
-            Operational Review &amp; Controller Actions (Live Session State)
+            <Activity className="w-4 h-4 text-indigo-600" />
+            <span>Operational Review &amp; Controller Actions (Live Session State)</span>
           </h3>
           <span className="text-xs text-slate-500 font-mono">
             {totalRecordsProcessed} Active Records
@@ -749,46 +748,46 @@ export const EvaluationLabTab: React.FC<EvaluationLabTabProps> = ({
         </p>
 
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 text-center text-xs">
-          <div className="bg-emerald-50/70 border border-emerald-200 rounded-xl p-3.5">
-            <div className="text-[11px] font-bold text-emerald-800 uppercase">Auto-Reconciled</div>
-            <div className="text-xl font-extrabold text-emerald-900 mt-1">{autoReconciled}</div>
+          <div className="bg-emerald-50/70 border border-emerald-200/80 rounded-xl p-3.5">
+            <div className="text-[10px] font-bold text-emerald-800 uppercase font-mono">Auto-Reconciled</div>
+            <div className="text-xl font-extrabold text-emerald-900 mt-1 metric-value">{autoReconciled}</div>
             <div className="text-[10px] text-emerald-700 mt-0.5 font-medium">
               {((autoReconciled / totalRecordsProcessed) * 100).toFixed(1)}% of batch
             </div>
           </div>
 
-          <div className="bg-blue-50/70 border border-blue-200 rounded-xl p-3.5">
-            <div className="text-[11px] font-bold text-blue-800 uppercase">Manually Approved</div>
-            <div className="text-xl font-extrabold text-blue-900 mt-1">{manuallyApproved}</div>
-            <div className="text-[10px] text-blue-700 mt-0.5 font-medium">Controller Verified</div>
+          <div className="bg-indigo-50/70 border border-indigo-200/80 rounded-xl p-3.5">
+            <div className="text-[10px] font-bold text-indigo-800 uppercase font-mono">Manually Approved</div>
+            <div className="text-xl font-extrabold text-indigo-900 mt-1 metric-value">{manuallyApproved}</div>
+            <div className="text-[10px] text-indigo-700 mt-0.5 font-medium">Controller Verified</div>
           </div>
 
-          <div className="bg-rose-50/70 border border-rose-200 rounded-xl p-3.5">
-            <div className="text-[11px] font-bold text-rose-800 uppercase">Manually Rejected</div>
-            <div className="text-xl font-extrabold text-rose-900 mt-1">{manuallyRejected}</div>
+          <div className="bg-rose-50/70 border border-rose-200/80 rounded-xl p-3.5">
+            <div className="text-[10px] font-bold text-rose-800 uppercase font-mono">Manually Rejected</div>
+            <div className="text-xl font-extrabold text-rose-900 mt-1 metric-value">{manuallyRejected}</div>
             <div className="text-[10px] text-rose-700 mt-0.5 font-medium">Controller Disallowed</div>
           </div>
 
-          <div className="bg-amber-50/70 border border-amber-200 rounded-xl p-3.5">
-            <div className="text-[11px] font-bold text-amber-800 uppercase">Pending Review</div>
-            <div className="text-xl font-extrabold text-amber-900 mt-1">{pendingReview}</div>
+          <div className="bg-amber-50/70 border border-amber-200/80 rounded-xl p-3.5">
+            <div className="text-[10px] font-bold text-amber-800 uppercase font-mono">Pending Review</div>
+            <div className="text-xl font-extrabold text-amber-900 mt-1 metric-value">{pendingReview}</div>
             <div className="text-[10px] text-amber-700 mt-0.5 font-medium">Awaiting Triage</div>
           </div>
 
           <div className="bg-slate-100 border border-slate-200 rounded-xl p-3.5">
-            <div className="text-[11px] font-bold text-slate-700 uppercase">Unmatched Exceptions</div>
-            <div className="text-xl font-extrabold text-slate-900 mt-1">{unmatched}</div>
+            <div className="text-[10px] font-bold text-slate-700 uppercase font-mono">Unmatched Exceptions</div>
+            <div className="text-xl font-extrabold text-slate-900 mt-1 metric-value">{unmatched}</div>
             <div className="text-[10px] text-slate-500 mt-0.5 font-medium">Incomplete Leg</div>
           </div>
         </div>
       </div>
 
       {/* Error & Discrepancy Inspector */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs space-y-3">
+      <div className="surface-card p-6 space-y-3">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
             <Bug className="w-4 h-4 text-slate-600" />
-            Ground-Truth Discrepancy &amp; Review Inspector
+            <span>Ground-Truth Discrepancy &amp; Review Inspector</span>
           </h3>
           <span className="text-xs text-slate-500 font-mono">
             {errors.length} {errors.length === 1 ? 'case' : 'cases'} flagged
@@ -799,14 +798,14 @@ export const EvaluationLabTab: React.FC<EvaluationLabTabProps> = ({
         </p>
 
         {errors.length === 0 ? (
-          <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4 text-center text-xs text-emerald-800 font-medium">
+          <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-center text-xs text-emerald-800 font-medium">
             Zero classification errors or missed matches detected on this benchmark dataset!
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto rounded-xl border border-slate-200">
             <table className="min-w-full text-xs text-left divide-y divide-slate-200">
               <caption className="sr-only">Ground-Truth Error and Discrepancy Inspection Table</caption>
-              <thead className="bg-slate-50 text-slate-600 font-semibold uppercase text-[10px]">
+              <thead className="bg-slate-50 text-slate-600 font-semibold uppercase text-[10px] font-mono">
                 <tr>
                   <th scope="col" className="py-2.5 px-3">Payment ID</th>
                   <th scope="col" className="py-2.5 px-3">Gross Amount</th>
@@ -820,15 +819,15 @@ export const EvaluationLabTab: React.FC<EvaluationLabTabProps> = ({
                 {errors.slice(0, 15).map((err, idx) => (
                   <tr key={idx} className="hover:bg-slate-50/80">
                     <td className="py-2.5 px-3 font-semibold text-slate-900">{err.paymentId}</td>
-                    <td className="py-2.5 px-3">{formatINR(err.grossAmountPaise)}</td>
+                    <td className="py-2.5 px-3 tabular-nums">{formatINR(err.grossAmountPaise)}</td>
                     <td className="py-2.5 px-3">
                       <span
-                        className={`inline-flex px-1.5 py-0.5 rounded text-[10px] font-bold ${
+                        className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold ${
                           err.predictedOutcome === 'AUTO_RECONCILED'
-                            ? 'bg-emerald-100 text-emerald-800'
+                            ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
                             : err.predictedOutcome === 'PENDING_REVIEW'
-                            ? 'bg-amber-100 text-amber-800'
-                            : 'bg-rose-100 text-rose-800'
+                            ? 'bg-amber-100 text-amber-800 border border-amber-200'
+                            : 'bg-rose-100 text-rose-800 border border-rose-200'
                         }`}
                       >
                         {err.predictedOutcome}

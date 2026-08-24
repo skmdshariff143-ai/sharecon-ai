@@ -82,10 +82,10 @@ export const TrendIntelligence: React.FC<TrendIntelligenceProps> = ({ records })
   // 3. Confidence Score Histogram
   const confidenceHistogram = useMemo(() => {
     const buckets = [
-      { range: '0 - 49%', count: 0, color: '#ef4444' },
-      { range: '50 - 69%', count: 0, color: '#f59e0b' },
-      { range: '70 - 84%', count: 0, color: '#eab308' },
-      { range: '85 - 100%', count: 0, color: '#10b981' },
+      { range: '0 - 49%', count: 0, color: '#e11d48', label: 'Exceptions' },
+      { range: '50 - 69%', count: 0, color: '#d97706', label: 'Caution' },
+      { range: '70 - 84%', count: 0, color: '#eab308', label: 'Review' },
+      { range: '85 - 100%', count: 0, color: '#059669', label: 'Auto-Safe' },
     ];
 
     records.forEach((r) => {
@@ -103,13 +103,13 @@ export const TrendIntelligence: React.FC<TrendIntelligenceProps> = ({ records })
   }, [dateTrends]);
 
   return (
-    <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs space-y-6">
+    <div className="surface-card p-6 space-y-6">
       {/* Header & Category Filter */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
         <div>
           <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-            <TrendingUp className="w-5 h-5 text-blue-600" />
-            Anomaly &amp; Settlement Trend Intelligence
+            <TrendingUp className="w-5 h-5 text-indigo-600" />
+            <span>Anomaly &amp; Settlement Trend Intelligence</span>
           </h3>
           <p className="text-xs text-slate-500 mt-0.5">
             Derived deterministically from loaded dataset timestamps ({records.length} records).
@@ -121,7 +121,7 @@ export const TrendIntelligence: React.FC<TrendIntelligenceProps> = ({ records })
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
-            className="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 cursor-pointer"
+            className="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 cursor-pointer hover:bg-slate-100 transition-colors"
             aria-label="Filter trends by anomaly category"
           >
             <option value="ALL">All Categories</option>
@@ -147,21 +147,21 @@ export const TrendIntelligence: React.FC<TrendIntelligenceProps> = ({ records })
             </span>
           </div>
 
-          <div className="h-56 w-full bg-slate-50/50 rounded-xl p-3 border border-slate-100">
+          <div className="h-56 w-full surface-inset rounded-xl p-3 border border-slate-200/80">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={dateTrends} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                <XAxis dataKey="date" tick={{ fontSize: 10 }} />
-                <YAxis tick={{ fontSize: 10 }} allowDecimals={false} />
+                <XAxis dataKey="date" tick={{ fontSize: 10 }} stroke="#94a3b8" />
+                <YAxis tick={{ fontSize: 10 }} allowDecimals={false} stroke="#94a3b8" />
                 <Tooltip
                   formatter={(val, name) => [
                     `${val} records`,
                     name === 'auto' ? 'Auto-Reconciled' : name === 'review' ? 'Pending Review' : 'Exceptions',
                   ]}
                 />
-                <Bar dataKey="auto" stackId="a" fill="#10b981" name="auto" />
-                <Bar dataKey="review" stackId="a" fill="#f59e0b" name="review" />
-                <Bar dataKey="exception" stackId="a" fill="#ef4444" name="exception" />
+                <Bar dataKey="auto" stackId="a" fill="#059669" name="auto" />
+                <Bar dataKey="review" stackId="a" fill="#d97706" name="review" />
+                <Bar dataKey="exception" stackId="a" fill="#e11d48" name="exception" />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -173,13 +173,13 @@ export const TrendIntelligence: React.FC<TrendIntelligenceProps> = ({ records })
             Settlement Clearing Window
           </h4>
 
-          <div className="h-56 w-full bg-slate-50/50 rounded-xl p-3 border border-slate-100">
+          <div className="h-56 w-full surface-inset rounded-xl p-3 border border-slate-200/80">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={lagDistribution} layout="vertical" margin={{ left: 10, right: 10, top: 10, bottom: 0 }}>
-                <XAxis type="number" allowDecimals={false} tick={{ fontSize: 10 }} />
-                <YAxis type="category" dataKey="name" width={70} tick={{ fontSize: 10 }} />
+                <XAxis type="number" allowDecimals={false} tick={{ fontSize: 10 }} stroke="#94a3b8" />
+                <YAxis type="category" dataKey="name" width={70} tick={{ fontSize: 10 }} stroke="#94a3b8" />
                 <Tooltip formatter={(val) => [`${val} records`, 'Volume']} />
-                <Bar dataKey="count" fill="#6366f1" radius={[0, 4, 4, 0]} />
+                <Bar dataKey="count" fill="#4338ca" radius={[0, 4, 4, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -196,18 +196,18 @@ export const TrendIntelligence: React.FC<TrendIntelligenceProps> = ({ records })
           {confidenceHistogram.map((bucket) => (
             <div
               key={bucket.range}
-              className="bg-slate-50 border border-slate-200/80 rounded-xl p-3 flex items-center justify-between"
+              className="surface-inset p-3.5 rounded-xl flex items-center justify-between"
             >
               <div>
                 <span className="text-[11px] font-semibold text-slate-600 block">
-                  {bucket.range}
+                  {bucket.range} ({bucket.label})
                 </span>
                 <span className="text-sm font-bold font-mono text-slate-900 tabular-nums">
                   {bucket.count} records
                 </span>
               </div>
               <span
-                className="w-3 h-3 rounded-full shrink-0"
+                className="w-3 h-3 rounded-full shrink-0 shadow-xs"
                 style={{ backgroundColor: bucket.color }}
               />
             </div>

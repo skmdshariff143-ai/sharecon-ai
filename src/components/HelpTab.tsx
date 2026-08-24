@@ -119,16 +119,20 @@ const GLOSSARY_TERMS = [
     definition: 'Indian Goods and Services Tax applied exclusively to the gateway fee component, deducted alongside MDR prior to bank payout.',
   },
   {
-    term: 'Paise',
-    definition: 'The smallest unit of Indian currency (1 INR = 100 paise). ShaRecon AI stores all financial values as integer paise to prevent floating-point drift.',
+    term: 'Integer-Paise Arithmetic',
+    definition: 'Mathematical approach that scales all currency values by 100 to eliminate floating-point approximation inaccuracies in financial software.',
   },
   {
-    term: 'T+1 / T+2 Settlement',
-    definition: 'The time lag (in business days) between customer payment capture (T) and gateway funds credit into the merchant bank account.',
+    term: '1-to-1 Constraint Solver',
+    definition: 'Algorithmic safeguard that prevents a single gateway settlement or bank credit line from being double-assigned to multiple payments.',
   },
   {
-    term: 'Collision Prevention',
-    definition: 'An algorithmic constraint solver ensuring no single settlement batch or bank statement credit is double-assigned to multiple payments.',
+    term: 'Proposed-Pair Precision',
+    definition: 'The exact percentage of engine-matched (Settlement ID + Bank Tx ID) pairings where both references match labeled ground truth.',
+  },
+  {
+    term: 'False-Positive Exposure',
+    definition: 'The total monetary rupee value of records erroneously auto-reconciled without meeting ground-truth safety verification standards.',
   },
 ];
 
@@ -139,85 +143,80 @@ export const HelpTab: React.FC<HelpTabProps> = ({ onNavigateTab, onStartTour }) 
 
   const filteredFaqs = useMemo(() => {
     return FAQ_DATABASE.filter((item) => {
-      const matchesCategory = activeCategory === 'ALL' || item.category === activeCategory;
-      const matchesSearch =
-        !searchQuery ||
-        item.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.answer.toLowerCase().includes(searchQuery.toLowerCase());
-      return matchesCategory && matchesSearch;
+      if (activeCategory !== 'ALL' && item.category !== activeCategory) return false;
+      if (!searchQuery) return true;
+      const q = searchQuery.toLowerCase();
+      return (
+        item.question.toLowerCase().includes(q) ||
+        item.answer.toLowerCase().includes(q) ||
+        item.category.toLowerCase().includes(q)
+      );
     });
   }, [searchQuery, activeCategory]);
 
   return (
     <div className="space-y-6">
-      {/* Help Hero Banner */}
-      <div className="bg-slate-900 text-white rounded-2xl p-6 sm:p-8 shadow-xs relative overflow-hidden">
-        <div className="max-w-2xl space-y-3 relative z-10">
-          <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-blue-900/80 border border-blue-700/60 text-blue-300 text-xs font-semibold">
-            <BookOpen className="w-3.5 h-3.5" />
-            <span>Judge Guide &amp; Fintech Onboarding</span>
+      {/* Help & Guide Header Hero Banner */}
+      <div className="surface-card bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 border border-slate-800 text-white p-6 shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2 text-indigo-400 text-xs font-bold uppercase tracking-wider font-mono">
+            <BookOpen className="w-4 h-4" />
+            <span>Onboarding &amp; Reference Center</span>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
-            How ShaRecon AI Works
+          <h2 className="text-xl font-extrabold tracking-tight text-white">
+            ShaRecon AI — Reviewer Guide &amp; Technical Manual
           </h2>
-          <p className="text-slate-300 text-xs sm:text-sm leading-relaxed">
-            ShaRecon AI is an AI Finance Controller prototype designed for the Razorpay AI Buildathon. It reconciles multi-leg transaction streams with integer-paise arithmetic, 4-factor scoring, collision prevention, and grounded Gemini advisory triage.
+          <p className="text-xs text-slate-300 max-w-xl leading-relaxed">
+            Essential domain primer, 4-factor scoring mechanics, honest metric formulas, and financial terminology for buildathon evaluators.
           </p>
-          <div className="flex flex-wrap items-center gap-3 pt-2">
-            <button
-              onClick={onStartTour}
-              className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-xs cursor-pointer"
-            >
-              <span>Launch 8-Step Demo Tour</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-            <button
-              onClick={() => onNavigateTab('methodology')}
-              className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 transition-colors cursor-pointer"
-            >
-              View Architecture &amp; Math
-            </button>
-          </div>
         </div>
+
+        <button
+          onClick={onStartTour}
+          className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold flex items-center gap-2 transition-colors shrink-0 shadow-md cursor-pointer self-start md:self-auto"
+        >
+          <HelpCircle className="w-4 h-4" />
+          <span>Start Guided Demo Tour</span>
+        </button>
       </div>
 
-      {/* 3-Way Reconciliation Core Primer Card */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs space-y-4">
+      {/* 3-Way Reconciliation Lifecycle Breakdown */}
+      <div className="surface-card p-6 space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-            <Layers className="w-5 h-5 text-blue-600" />
-            The 3-Way Reconciliation Lifecycle
+            <Layers className="w-5 h-5 text-indigo-600" />
+            <span>The 3-Way Financial Reconciliation Lifecycle</span>
           </h3>
-          <span className="text-xs font-semibold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-lg">
-            Integer Paise • 4-Factor Scoring
+          <span className="text-xs font-mono text-slate-500 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200">
+            Payment ➔ Settlement ➔ Bank Credit
           </span>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-          <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2">
+          <div className="surface-inset p-4.5 rounded-xl space-y-2 border-t-2 border-t-indigo-500">
             <div className="flex items-center justify-between">
-              <span className="font-bold text-slate-900">Leg 1: Merchant Ledger</span>
-              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-800">CAPTURE</span>
+              <span className="font-bold text-slate-900 font-mono">Leg 1: Captured Payments</span>
+              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-100 text-indigo-800 font-mono">CAPTURE</span>
             </div>
             <p className="text-slate-600 leading-relaxed">
               Customer payment captured via Razorpay checkout. Records Gross Amount (e.g. ₹5,000.00), Payment ID (`pay_0001`), Order Ref (`order_0001`), and timestamp.
             </p>
           </div>
 
-          <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2">
+          <div className="surface-inset p-4.5 rounded-xl space-y-2 border-t-2 border-t-amber-500">
             <div className="flex items-center justify-between">
-              <span className="font-bold text-slate-900">Leg 2: Nodal Settlement</span>
-              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800">GATEWAY</span>
+              <span className="font-bold text-slate-900 font-mono">Leg 2: Nodal Settlement</span>
+              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 font-mono">GATEWAY</span>
             </div>
             <p className="text-slate-600 leading-relaxed">
               Razorpay settles captured funds in payout batches deducting 2.0%-3.5% MDR + 18% GST on fee. Records Net Amount (e.g. ₹4,882.00), Settlement ID, and UTR.
             </p>
           </div>
 
-          <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2">
+          <div className="surface-inset p-4.5 rounded-xl space-y-2 border-t-2 border-t-emerald-500">
             <div className="flex items-center justify-between">
-              <span className="font-bold text-slate-900">Leg 3: Bank Account</span>
-              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">STATEMENT</span>
+              <span className="font-bold text-slate-900 font-mono">Leg 3: Bank Account</span>
+              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 font-mono">STATEMENT</span>
             </div>
             <p className="text-slate-600 leading-relaxed">
               Merchant bank account credits arriving after T+1/T+2 clearing delay. Records exact credit amount, bank statement UTR (`RBIP100...`), and date.
@@ -227,24 +226,24 @@ export const HelpTab: React.FC<HelpTabProps> = ({ onNavigateTab, onStartTour }) 
       </div>
 
       {/* 4-Factor Scoring Breakdown */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs space-y-4">
+      <div className="surface-card p-6 space-y-4">
         <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-          <Scale className="w-5 h-5 text-violet-600" />
-          Deterministic 4-Factor Confidence Scoring (0 - 100 Points)
+          <Scale className="w-5 h-5 text-indigo-600" />
+          <span>Deterministic 4-Factor Confidence Scoring (0 - 100 Points)</span>
         </h3>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
-          <div className="border border-slate-200 rounded-xl p-3.5 space-y-1.5 bg-slate-50/50">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 text-xs">
+          <div className="surface-inset p-4 rounded-xl space-y-1.5">
             <div className="flex items-center justify-between">
               <span className="font-bold text-slate-800">1. Reference Match</span>
-              <span className="font-mono font-bold text-blue-600">40 Pts</span>
+              <span className="font-mono font-bold text-indigo-600">40 Pts</span>
             </div>
             <p className="text-slate-600 text-[11px] leading-relaxed">
               Exact payment ID (`40 pts`), order reference (`30 pts`), or sanitized token substring (`20 pts`).
             </p>
           </div>
 
-          <div className="border border-slate-200 rounded-xl p-3.5 space-y-1.5 bg-slate-50/50">
+          <div className="surface-inset p-4 rounded-xl space-y-1.5">
             <div className="flex items-center justify-between">
               <span className="font-bold text-slate-800">2. Amount Match</span>
               <span className="font-mono font-bold text-emerald-600">35 Pts</span>
@@ -254,7 +253,7 @@ export const HelpTab: React.FC<HelpTabProps> = ({ onNavigateTab, onStartTour }) 
             </p>
           </div>
 
-          <div className="border border-slate-200 rounded-xl p-3.5 space-y-1.5 bg-slate-50/50">
+          <div className="surface-inset p-4 rounded-xl space-y-1.5">
             <div className="flex items-center justify-between">
               <span className="font-bold text-slate-800">3. Date Proximity</span>
               <span className="font-mono font-bold text-amber-600">15 Pts</span>
@@ -264,7 +263,7 @@ export const HelpTab: React.FC<HelpTabProps> = ({ onNavigateTab, onStartTour }) 
             </p>
           </div>
 
-          <div className="border border-slate-200 rounded-xl p-3.5 space-y-1.5 bg-slate-50/50">
+          <div className="surface-inset p-4 rounded-xl space-y-1.5">
             <div className="flex items-center justify-between">
               <span className="font-bold text-slate-800">4. UTR &amp; Description</span>
               <span className="font-mono font-bold text-violet-600">10 Pts</span>
@@ -277,12 +276,12 @@ export const HelpTab: React.FC<HelpTabProps> = ({ onNavigateTab, onStartTour }) 
       </div>
 
       {/* Searchable FAQ Section */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs space-y-4">
+      <div className="surface-card p-6 space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-              <HelpCircle className="w-5 h-5 text-blue-600" />
-              Frequently Asked Questions
+              <HelpCircle className="w-5 h-5 text-indigo-600" />
+              <span>Frequently Asked Questions</span>
             </h3>
             <p className="text-xs text-slate-500 mt-0.5">
               Clear technical explanations for hackathon evaluators and finance controllers.
@@ -297,7 +296,7 @@ export const HelpTab: React.FC<HelpTabProps> = ({ onNavigateTab, onStartTour }) 
               placeholder="Search concepts, formulas..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-hidden focus:ring-1 focus:ring-blue-500"
+              className="w-full pl-9 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-hidden focus:ring-1 focus:ring-indigo-500 transition-colors"
             />
           </div>
         </div>
@@ -308,9 +307,9 @@ export const HelpTab: React.FC<HelpTabProps> = ({ onNavigateTab, onStartTour }) 
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
-              className={`px-3 py-1 rounded-lg font-semibold transition-colors shrink-0 cursor-pointer ${
+              className={`px-3 py-1.5 rounded-lg font-semibold transition-all shrink-0 cursor-pointer ${
                 activeCategory === cat
-                  ? 'bg-blue-600 text-white'
+                  ? 'bg-indigo-600 text-white shadow-xs'
                   : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
               }`}
             >
@@ -350,12 +349,12 @@ export const HelpTab: React.FC<HelpTabProps> = ({ onNavigateTab, onStartTour }) 
                 </button>
 
                 {isExpanded && (
-                  <div className="px-4 pb-3.5 pt-1 text-xs text-slate-600 bg-slate-50/50 border-t border-slate-100 space-y-2 leading-relaxed">
+                  <div className="px-4 pb-3.5 pt-1 text-xs text-slate-600 bg-slate-50/50 border-t border-slate-100 space-y-2 leading-relaxed font-sans">
                     <p>{faq.answer}</p>
                     {faq.targetTab && (
                       <button
                         onClick={() => onNavigateTab(faq.targetTab!)}
-                        className="text-xs text-blue-600 font-semibold hover:underline inline-flex items-center gap-1 cursor-pointer pt-1"
+                        className="text-xs text-indigo-600 font-semibold hover:underline inline-flex items-center gap-1 cursor-pointer pt-1"
                       >
                         <span>Open related workspace</span>
                         <ArrowRight className="w-3 h-3" />
@@ -370,19 +369,19 @@ export const HelpTab: React.FC<HelpTabProps> = ({ onNavigateTab, onStartTour }) 
       </div>
 
       {/* Financial Terms Glossary */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs space-y-4">
+      <div className="surface-card p-6 space-y-4">
         <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
           <FileText className="w-5 h-5 text-emerald-600" />
-          Fintech &amp; Reconciliation Glossary
+          <span>Fintech &amp; Reconciliation Glossary</span>
         </h3>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 text-xs">
           {GLOSSARY_TERMS.map((term) => (
             <div
               key={term.term}
-              className="bg-slate-50 border border-slate-200/80 rounded-xl p-3.5 space-y-1"
+              className="surface-inset p-4 rounded-xl space-y-1"
             >
-              <span className="font-bold text-slate-900 font-mono text-[11px] block text-blue-900">
+              <span className="font-bold text-slate-900 font-mono text-[11px] block text-indigo-900">
                 {term.term}
               </span>
               <p className="text-slate-600 leading-relaxed">{term.definition}</p>
