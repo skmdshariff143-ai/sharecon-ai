@@ -76,30 +76,30 @@ export const TopCommandBar: React.FC<TopCommandBarProps> = ({
   }, [isMoreOpen]);
 
   return (
-    <header className="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-2xs">
+    <header className="surface-glass sticky top-0 z-30">
       <div className="px-3 sm:px-6 py-2.5 flex items-center justify-between gap-2 max-w-full">
         {/* Left Side: Mobile Menu Button & Dataset Context */}
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           <button
             onClick={onToggleNavigation}
-            className="lg:hidden p-1.5 rounded-lg text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer shrink-0"
+            className="lg:hidden p-1.5 rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors cursor-pointer shrink-0"
             aria-label="Toggle navigation drawer"
           >
             <Menu className="w-5 h-5" />
           </button>
 
           {/* Dataset Status Pill (Full on md+, compact on sm) */}
-          <div className="hidden sm:flex items-center gap-2 px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 text-xs font-medium border border-slate-200/80 shrink-0">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
-            <span className="hidden md:inline">Dataset: <strong>Synthetic Multi-Leg</strong></span>
-            <span className="hidden md:inline text-slate-400">|</span>
+          <div className="hidden sm:flex items-center gap-2 px-2.5 py-1 rounded-lg bg-slate-100/90 text-slate-700 text-xs font-medium border border-slate-200/90 shrink-0">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0 shadow-[0_0_6px_rgba(16,185,129,0.5)]"></span>
+            <span className="hidden md:inline text-slate-600">Dataset: <strong className="text-slate-800 font-semibold">Synthetic 3-Way</strong></span>
+            <span className="hidden md:inline text-slate-300">|</span>
             <span className="font-mono text-slate-900 font-bold tabular-nums">{totalRecords}</span> records
           </div>
 
           {/* AI / Fallback Status Badge */}
           <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-violet-50 text-violet-700 text-xs font-medium border border-violet-200/80 shrink-0">
             <Bot className="w-3.5 h-3.5 text-violet-600 shrink-0" />
-            <span className="hidden xl:inline">Gemini Analyst:</span>
+            <span className="hidden xl:inline text-violet-800 font-medium">Gemini Analyst:</span>
             <span className="font-semibold text-[11px] sm:text-xs">Advisory + Fallback</span>
           </div>
         </div>
@@ -109,12 +109,12 @@ export const TopCommandBar: React.FC<TopCommandBarProps> = ({
           {/* Command Palette Trigger */}
           <button
             onClick={onOpenCommandPalette}
-            className="hidden lg:flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-500 bg-slate-50 border border-slate-200 hover:bg-slate-100 hover:text-slate-700 transition-colors cursor-pointer"
+            className="hidden lg:flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium text-slate-500 bg-slate-50/90 border border-slate-200 hover:bg-slate-100 hover:text-slate-800 transition-colors cursor-pointer"
             title="Open Command Palette (Ctrl+K or ⌘K)"
           >
             <Search className="w-3.5 h-3.5 text-slate-400" />
-            <span className="hidden xl:inline">Quick jump</span>
-            <kbd className="text-[10px] font-mono bg-white border border-slate-200 rounded px-1.5 py-0.5 text-slate-400 shadow-2xs">
+            <span className="hidden xl:inline">Quick Jump</span>
+            <kbd className="text-[10px] font-mono bg-white border border-slate-200 rounded px-1.5 py-0.5 text-slate-500 shadow-xs">
               ⌘K
             </kbd>
           </button>
@@ -122,10 +122,10 @@ export const TopCommandBar: React.FC<TopCommandBarProps> = ({
           {/* Guided Tour Trigger (Full on md+, icon on mobile/tablet) */}
           <button
             onClick={onStartTour}
-            className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-violet-700 bg-violet-50 hover:bg-violet-100 border border-violet-200 transition-colors cursor-pointer shadow-2xs shrink-0"
+            className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 transition-colors cursor-pointer shadow-xs shrink-0"
             title="Start interactive demo walkthrough"
           >
-            <Sparkles className="w-3.5 h-3.5 text-violet-600 shrink-0" />
+            <Sparkles className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
             <span className="hidden lg:inline">Guided Demo</span>
           </button>
 
@@ -134,8 +134,8 @@ export const TopCommandBar: React.FC<TopCommandBarProps> = ({
             onClick={toggleDryRun}
             className={`hidden md:inline-flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs font-medium border transition-colors cursor-pointer shrink-0 ${
               config.dryRun
-                ? 'bg-amber-50 text-amber-800 border-amber-200 hover:bg-amber-100'
-                : 'bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100'
+                ? 'bg-amber-50 text-amber-800 border-amber-200/90 hover:bg-amber-100'
+                : 'bg-emerald-50 text-emerald-800 border-emerald-200/90 hover:bg-emerald-100'
             }`}
             title="When Dry-Run is enabled, match outcomes are simulated without live ledger commitments."
           >
@@ -152,7 +152,7 @@ export const TopCommandBar: React.FC<TopCommandBarProps> = ({
           <button
             onClick={onLoadDemo}
             disabled={isReconciling}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 transition-colors shadow-2xs cursor-pointer shrink-0"
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 transition-colors shadow-xs cursor-pointer shrink-0"
           >
             <Play className="w-3.5 h-3.5 fill-current shrink-0" />
             <span>{isReconciling ? 'Reconciling...' : 'Run Demo (180)'}</span>
@@ -162,7 +162,7 @@ export const TopCommandBar: React.FC<TopCommandBarProps> = ({
           <div className="hidden xl:flex items-center gap-1.5">
             <button
               onClick={onOpenSettings}
-              className="p-1.5 rounded-lg text-slate-600 hover:bg-slate-100 transition-colors border border-slate-200 cursor-pointer"
+              className="p-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors border border-slate-200 cursor-pointer"
               title="Configure confidence scoring thresholds and fee tolerances"
               aria-label="Threshold Settings"
             >
@@ -171,7 +171,7 @@ export const TopCommandBar: React.FC<TopCommandBarProps> = ({
 
             <button
               onClick={onOpenUpload}
-              className="p-1.5 rounded-lg text-slate-600 hover:bg-slate-100 transition-colors border border-slate-200 cursor-pointer"
+              className="p-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors border border-slate-200 cursor-pointer"
               title="Upload custom 3-way statements"
               aria-label="Upload CSVs"
             >
@@ -180,7 +180,7 @@ export const TopCommandBar: React.FC<TopCommandBarProps> = ({
 
             <button
               onClick={onExportReports}
-              className="p-1.5 rounded-lg text-slate-600 hover:bg-slate-100 transition-colors border border-slate-200 cursor-pointer"
+              className="p-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors border border-slate-200 cursor-pointer"
               title="Export reconciliation results and audit logs"
               aria-label="Export Reports"
             >
@@ -210,8 +210,8 @@ export const TopCommandBar: React.FC<TopCommandBarProps> = ({
             </button>
 
             {isMoreOpen && (
-              <div className="absolute right-0 mt-2 w-56 bg-white border border-slate-200 rounded-xl shadow-xl py-1.5 z-50 text-xs text-slate-700 animate-in fade-in zoom-in-95 duration-100">
-                <div className="px-3 py-1.5 text-[10px] font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-100">
+              <div className="absolute right-0 mt-2 w-56 surface-modal rounded-xl shadow-xl py-1.5 z-50 text-xs text-slate-700 animate-in fade-in zoom-in-95 duration-100">
+                <div className="px-3 py-1.5 text-[10px] font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-100 font-mono">
                   Workspace Actions
                 </div>
 
@@ -220,7 +220,7 @@ export const TopCommandBar: React.FC<TopCommandBarProps> = ({
                     setIsMoreOpen(false);
                     onOpenCommandPalette();
                   }}
-                  className="w-full px-3 py-2 text-left hover:bg-slate-50 flex items-center gap-2 cursor-pointer"
+                  className="w-full px-3 py-2 text-left hover:bg-slate-50 flex items-center gap-2 cursor-pointer text-slate-700"
                 >
                   <Search className="w-3.5 h-3.5 text-slate-400" />
                   <span>Command Palette (⌘K)</span>
@@ -231,9 +231,9 @@ export const TopCommandBar: React.FC<TopCommandBarProps> = ({
                     setIsMoreOpen(false);
                     onStartTour();
                   }}
-                  className="w-full px-3 py-2 text-left hover:bg-slate-50 flex items-center gap-2 cursor-pointer"
+                  className="w-full px-3 py-2 text-left hover:bg-slate-50 flex items-center gap-2 cursor-pointer text-slate-700"
                 >
-                  <Sparkles className="w-3.5 h-3.5 text-violet-600" />
+                  <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
                   <span>Start Guided Tour</span>
                 </button>
 
@@ -241,7 +241,7 @@ export const TopCommandBar: React.FC<TopCommandBarProps> = ({
                   onClick={() => {
                     toggleDryRun();
                   }}
-                  className="w-full px-3 py-2 text-left hover:bg-slate-50 flex items-center justify-between cursor-pointer"
+                  className="w-full px-3 py-2 text-left hover:bg-slate-50 flex items-center justify-between cursor-pointer text-slate-700"
                 >
                   <span className="flex items-center gap-2">
                     {config.dryRun ? (
@@ -263,7 +263,7 @@ export const TopCommandBar: React.FC<TopCommandBarProps> = ({
                     setIsMoreOpen(false);
                     onOpenSettings();
                   }}
-                  className="w-full px-3 py-2 text-left hover:bg-slate-50 flex items-center gap-2 cursor-pointer"
+                  className="w-full px-3 py-2 text-left hover:bg-slate-50 flex items-center gap-2 cursor-pointer text-slate-700"
                 >
                   <Sliders className="w-3.5 h-3.5 text-slate-500" />
                   <span>Threshold Settings</span>
@@ -274,7 +274,7 @@ export const TopCommandBar: React.FC<TopCommandBarProps> = ({
                     setIsMoreOpen(false);
                     onOpenUpload();
                   }}
-                  className="w-full px-3 py-2 text-left hover:bg-slate-50 flex items-center gap-2 cursor-pointer"
+                  className="w-full px-3 py-2 text-left hover:bg-slate-50 flex items-center gap-2 cursor-pointer text-slate-700"
                 >
                   <Upload className="w-3.5 h-3.5 text-slate-500" />
                   <span>Upload Statements (CSV)</span>
@@ -285,7 +285,7 @@ export const TopCommandBar: React.FC<TopCommandBarProps> = ({
                     setIsMoreOpen(false);
                     onExportReports();
                   }}
-                  className="w-full px-3 py-2 text-left hover:bg-slate-50 flex items-center gap-2 cursor-pointer"
+                  className="w-full px-3 py-2 text-left hover:bg-slate-50 flex items-center gap-2 cursor-pointer text-slate-700"
                 >
                   <Download className="w-3.5 h-3.5 text-slate-500" />
                   <span>Export Reports</span>
@@ -311,4 +311,3 @@ export const TopCommandBar: React.FC<TopCommandBarProps> = ({
     </header>
   );
 };
-
