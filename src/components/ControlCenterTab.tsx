@@ -1,8 +1,5 @@
 import React, { useMemo } from 'react';
 import {
-  PieChart,
-  Pie,
-  Cell,
   ResponsiveContainer,
   BarChart,
   Bar,
@@ -24,16 +21,21 @@ import {
 import { BatchReconciliationResult, ReconciliationRecord } from '@/types/reconciliation';
 import { formatINR } from '@/lib/money';
 
+import { TrendIntelligence } from './TrendIntelligence';
+import { Zap } from 'lucide-react';
+
 interface ControlCenterTabProps {
   batch: BatchReconciliationResult | null;
-  onNavigateToTab: (tab: 'reconciliation' | 'exceptions' | 'audit' | 'evaluation') => void;
+  onNavigateToTab: (tab: 'reconciliation' | 'exceptions' | 'audit' | 'evaluation' | 'methodology' | 'help') => void;
   onSelectRecord: (record: ReconciliationRecord) => void;
+  onOpenLiveRunner?: () => void;
 }
 
 export const ControlCenterTab: React.FC<ControlCenterTabProps> = ({
   batch,
   onNavigateToTab,
   onSelectRecord,
+  onOpenLiveRunner,
 }) => {
   const records = useMemo(() => batch?.records || [], [batch]);
   const evaluation = batch?.evaluation;
@@ -59,13 +61,6 @@ export const ControlCenterTab: React.FC<ControlCenterTabProps> = ({
       .sort((a, b) => b.financialExposurePaise - a.financialExposurePaise)
       .slice(0, 5);
   }, [records]);
-
-  // Outcome Pie Data
-  const statusPieData = useMemo(() => [
-    { name: 'Auto-Reconciled', value: autoRecords.length, color: '#10b981' },
-    { name: 'Pending Review', value: reviewRecords.length, color: '#f59e0b' },
-    { name: 'Unmatched Exceptions', value: exceptionRecords.length, color: '#ef4444' },
-  ], [autoRecords.length, reviewRecords.length, exceptionRecords.length]);
 
   // Exception Bar Chart Data
   const exceptionCategoryCounts = useMemo(() => {
@@ -273,67 +268,144 @@ export const ControlCenterTab: React.FC<ControlCenterTabProps> = ({
 
       {/* Visual Analytics & Breakdown */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Outcome Pie */}
-        <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-xs flex flex-col justify-between">
+        {/* Outcome Distribution Card */}
+        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs flex flex-col justify-between" data-testid="outcome-distribution-card">
           <div>
             <div className="flex items-center justify-between mb-1">
-              <h3 className="text-sm font-bold text-slate-800">Outcome Distribution</h3>
-              <span className="text-xs font-semibold text-slate-500">{records.length} Total</span>
+              <h3 className="text-sm font-bold text-slate-900">Outcome Distribution</h3>
+              <span className="text-xs font-semibold text-slate-500 font-mono tabular-nums">{records.length} Total</span>
             </div>
-            <p className="text-xs text-slate-500 mb-4">
+            <p className="text-xs text-slate-500 mb-3">
               Automated high-confidence routing vs human controller triage.
             </p>
 
-            <div className="h-44 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={statusPieData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={50}
-                    outerRadius={70}
-                    paddingAngle={4}
-                    dataKey="value"
-                  >
-                    {statusPieData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    formatter={(val) => [
-                      `${val ?? 0} records (${(((Number(val) || 0) / records.length) * 100).toFixed(1)}%)`,
-                      'Count',
-                    ]}
+            {/* Robust SVG Donut Visualization */}
+            <div className="flex items-center justify-center py-2">
+              <div className="relative w-36 h-36 flex items-center justify-center">
+                <svg
+                  className="w-full h-full transform -rotate-90"
+                  viewBox="0 0 140 140"
+                  data-testid="outcome-donut-chart"
+                  role="img"
+                  aria-label={`Outcome distribution: ${autoRecords.length} auto-reconciled, ${reviewRecords.length} pending review, ${exceptionRecords.length} unmatched exceptions`}
+                >
+                  <title>Reconciliation Outcome Distribution</title>
+                  {/* Background Track */}
+                  <circle
+                    cx="70"
+                    cy="70"
+                    r="54"
+                    fill="transparent"
+                    stroke="#f1f5f9"
+                    strokeWidth="14"
                   />
-                </PieChart>
-              </ResponsiveContainer>
+                  {records.length > 0 && (
+                    <>
+                      {/* Auto-Reconciled Arc (Emerald) */}
+                      <circle
+                        cx="70"
+                        cy="70"
+                        r="54"
+                        fill="transparent"
+                        stroke="#10b981"
+                        strokeWidth="14"
+                        strokeDasharray={`${(autoRecords.length / records.length) * 339.292} 339.292`}
+                        strokeDashoffset="0"
+                        strokeLinecap="round"
+                        className="transition-all duration-500"
+                      />
+                      {/* Pending Review Arc (Amber) */}
+                      <circle
+                        cx="70"
+                        cy="70"
+                        r="54"
+                        fill="transparent"
+                        stroke="#f59e0b"
+                        strokeWidth="14"
+                        strokeDasharray={`${(reviewRecords.length / records.length) * 339.292} 339.292`}
+                        strokeDashoffset={`-${(autoRecords.length / records.length) * 339.292}`}
+                        strokeLinecap="round"
+                        className="transition-all duration-500"
+                      />
+                      {/* Unmatched Exceptions Arc (Rose) */}
+                      <circle
+                        cx="70"
+                        cy="70"
+                        r="54"
+                        fill="transparent"
+                        stroke="#ef4444"
+                        strokeWidth="14"
+                        strokeDasharray={`${(exceptionRecords.length / records.length) * 339.292} 339.292`}
+                        strokeDashoffset={`-${((autoRecords.length + reviewRecords.length) / records.length) * 339.292}`}
+                        strokeLinecap="round"
+                        className="transition-all duration-500"
+                      />
+                    </>
+                  )}
+                </svg>
+
+                {/* Donut Center Content */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none">
+                  <span className="text-xl font-extrabold text-slate-900 font-mono tabular-nums leading-tight">
+                    {records.length}
+                  </span>
+                  <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
+                    Records
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Stacked Proportional Bar */}
+            <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden flex my-2">
+              {records.length > 0 ? (
+                <>
+                  <div
+                    style={{ width: `${(autoRecords.length / records.length) * 100}%` }}
+                    className="bg-emerald-500 h-full transition-all duration-300"
+                    title={`Auto-Reconciled: ${autoRecords.length}`}
+                  />
+                  <div
+                    style={{ width: `${(reviewRecords.length / records.length) * 100}%` }}
+                    className="bg-amber-500 h-full transition-all duration-300"
+                    title={`Pending Review: ${reviewRecords.length}`}
+                  />
+                  <div
+                    style={{ width: `${(exceptionRecords.length / records.length) * 100}%` }}
+                    className="bg-rose-500 h-full transition-all duration-300"
+                    title={`Unmatched Exceptions: ${exceptionRecords.length}`}
+                  />
+                </>
+              ) : (
+                <div className="w-full bg-slate-200 h-full" />
+              )}
             </div>
           </div>
 
+          {/* Outcome Breakdown Legend & Counts */}
           <div className="space-y-2 pt-3 border-t border-slate-100 text-xs">
             <div className="flex items-center justify-between">
               <span className="flex items-center gap-2 text-slate-600">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Auto-Reconciled
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0"></span> Auto-Reconciled
               </span>
-              <strong className="text-slate-800">
-                {autoRecords.length} ({((autoRecords.length / records.length) * 100).toFixed(1)}%)
+              <strong className="text-slate-900 font-mono tabular-nums">
+                {autoRecords.length} <span className="text-slate-500 font-normal">({records.length > 0 ? ((autoRecords.length / records.length) * 100).toFixed(1) : 0}%)</span>
               </strong>
             </div>
             <div className="flex items-center justify-between">
               <span className="flex items-center gap-2 text-slate-600">
-                <span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span> Pending Review
+                <span className="w-2.5 h-2.5 rounded-full bg-amber-500 shrink-0"></span> Pending Review
               </span>
-              <strong className="text-slate-800">
-                {reviewRecords.length} ({((reviewRecords.length / records.length) * 100).toFixed(1)}%)
+              <strong className="text-slate-900 font-mono tabular-nums">
+                {reviewRecords.length} <span className="text-slate-500 font-normal">({records.length > 0 ? ((reviewRecords.length / records.length) * 100).toFixed(1) : 0}%)</span>
               </strong>
             </div>
             <div className="flex items-center justify-between">
               <span className="flex items-center gap-2 text-slate-600">
-                <span className="w-2.5 h-2.5 rounded-full bg-rose-500"></span> Unmatched Exceptions
+                <span className="w-2.5 h-2.5 rounded-full bg-rose-500 shrink-0"></span> Unmatched Exceptions
               </span>
-              <strong className="text-slate-800">
-                {exceptionRecords.length} ({((exceptionRecords.length / records.length) * 100).toFixed(1)}%)
+              <strong className="text-slate-900 font-mono tabular-nums">
+                {exceptionRecords.length} <span className="text-slate-500 font-normal">({records.length > 0 ? ((exceptionRecords.length / records.length) * 100).toFixed(1) : 0}%)</span>
               </strong>
             </div>
           </div>
@@ -444,6 +516,35 @@ export const ControlCenterTab: React.FC<ControlCenterTabProps> = ({
           </table>
         </div>
       </div>
+
+      {/* Trend Intelligence Section */}
+      <TrendIntelligence records={records} />
+
+      {/* Live Reconciliation Runner Trigger Card */}
+      {onOpenLiveRunner && (
+        <div className="bg-gradient-to-r from-slate-900 via-blue-950 to-slate-900 border border-slate-800 text-white rounded-2xl p-6 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2 text-blue-400 text-xs font-bold uppercase tracking-wider font-mono">
+              <Zap className="w-4 h-4" />
+              <span>Deterministic Execution Inspector</span>
+            </div>
+            <h3 className="text-base font-bold text-white">
+              Launch Live 8-Stage Reconciliation Runner
+            </h3>
+            <p className="text-xs text-slate-300 max-w-xl leading-relaxed">
+              Observe every step of the real engine calculation in slow motion: file schema validation, integer-paise normalization, 4-factor scoring graph, collision prevention solver, and audit trail emission.
+            </p>
+          </div>
+
+          <button
+            onClick={onOpenLiveRunner}
+            className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold flex items-center gap-2 transition-colors shrink-0 shadow-xs cursor-pointer"
+          >
+            <Zap className="w-4 h-4" />
+            <span>Launch Live Runner</span>
+          </button>
+        </div>
+      )}
     </div>
   );
 };

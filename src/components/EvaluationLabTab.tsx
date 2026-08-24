@@ -523,6 +523,122 @@ export const EvaluationLabTab: React.FC<EvaluationLabTabProps> = ({
             <strong>Hypothetical Simulation Notice:</strong> These metrics reflect simulated matching outcomes recalculated against ground truth using the adjusted thresholds. They do not alter active session records or the immutable baseline benchmark above.
           </span>
         </div>
+
+        {/* Multi-Policy Comparative Matrix Table */}
+        <div className="pt-4 border-t border-slate-200 space-y-3">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider font-mono">
+                5-Policy Trade-Off Matrix
+              </h4>
+              <p className="text-[11px] text-slate-500">
+                Compare automation volume vs controller workload across standardized risk profiles.
+              </p>
+            </div>
+
+            <button
+              onClick={() => {
+                const policies = [
+                  { name: 'Ultra-Safe', high: 95, med: 70 },
+                  { name: 'Conservative', high: 90, med: 60 },
+                  { name: 'Balanced (Default)', high: 85, med: 50 },
+                  { name: 'Aggressive', high: 75, med: 40 },
+                  { name: 'Custom Slider', high: simHighThreshold, med: simMediumThreshold },
+                ];
+                let csv = 'Policy,High Threshold,Med Threshold,Auto Rate,Review Rate,Exception Rate,Auto Precision,Auto Recall,Review Routing,FP Count,FP Exposure (INR)\n';
+                policies.forEach((p) => {
+                  const res = simulatePolicyThresholds(
+                    effectivePayments,
+                    effectiveSettlements,
+                    effectiveBankTransactions,
+                    groundTruth,
+                    p.high,
+                    p.med
+                  );
+                  csv += `"${p.name}",${p.high}%,${p.med}%,${(res.autoReconciliationRate * 100).toFixed(1)}%,${(res.reviewRate * 100).toFixed(1)}%,${(res.exceptionRate * 100).toFixed(1)}%,${(res.autoResolutionPrecision * 100).toFixed(1)}%,${(res.autoResolutionRecall * 100).toFixed(1)}%,${(res.reviewRoutingAccuracy * 100).toFixed(1)}%,${res.falsePositiveCount},${(res.falsePositiveExposurePaise / 100).toFixed(2)}\n`;
+                });
+                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `sharecon_policy_comparison_${Date.now()}.csv`;
+                a.click();
+                URL.revokeObjectURL(url);
+              }}
+              className="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors cursor-pointer flex items-center gap-1.5"
+            >
+              <span>Export Comparison CSV</span>
+            </button>
+          </div>
+
+          <div className="overflow-x-auto rounded-xl border border-slate-200">
+            <table className="w-full text-xs text-left divide-y divide-slate-200">
+              <thead className="bg-slate-50 text-[10px] uppercase font-bold text-slate-600 font-mono">
+                <tr>
+                  <th className="py-2.5 px-3">Policy Profile</th>
+                  <th className="py-2.5 px-3">Thresholds</th>
+                  <th className="py-2.5 px-3">Auto Rate</th>
+                  <th className="py-2.5 px-3">Review Rate</th>
+                  <th className="py-2.5 px-3">Auto Precision</th>
+                  <th className="py-2.5 px-3">Routing Acc</th>
+                  <th className="py-2.5 px-3">FP Exposure</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 bg-white font-mono text-[11px]">
+                {[
+                  { name: 'Ultra-Safe', high: 95, med: 70, tag: 'Zero Risk' },
+                  { name: 'Conservative', high: 90, med: 60, tag: 'High Caution' },
+                  { name: 'Balanced (Default)', high: 85, med: 50, tag: 'Engine Baseline' },
+                  { name: 'Aggressive', high: 75, med: 40, tag: 'High Clearing' },
+                  { name: 'Custom Slider', high: simHighThreshold, med: simMediumThreshold, tag: 'Active' },
+                ].map((p) => {
+                  const res = simulatePolicyThresholds(
+                    effectivePayments,
+                    effectiveSettlements,
+                    effectiveBankTransactions,
+                    groundTruth,
+                    p.high,
+                    p.med
+                  );
+
+                  const isCustom = p.name === 'Custom Slider';
+
+                  return (
+                    <tr
+                      key={p.name}
+                      className={isCustom ? 'bg-blue-50/60 font-semibold' : 'hover:bg-slate-50'}
+                    >
+                      <td className="py-2.5 px-3 font-sans font-medium text-slate-900">
+                        {p.name}{' '}
+                        <span className="text-[9px] font-mono font-normal text-slate-400 bg-slate-100 px-1 py-0.2 rounded">
+                          {p.tag}
+                        </span>
+                      </td>
+                      <td className="py-2.5 px-3 text-slate-600">
+                        {p.high}% / {p.med}%
+                      </td>
+                      <td className="py-2.5 px-3 text-emerald-700 font-bold">
+                        {(res.autoReconciliationRate * 100).toFixed(1)}% ({res.autoReconciledCount})
+                      </td>
+                      <td className="py-2.5 px-3 text-amber-800">
+                        {(res.reviewRate * 100).toFixed(1)}% ({res.reviewCount})
+                      </td>
+                      <td className="py-2.5 px-3 text-emerald-700">
+                        {(res.autoResolutionPrecision * 100).toFixed(1)}%
+                      </td>
+                      <td className="py-2.5 px-3 text-slate-700">
+                        {(res.reviewRoutingAccuracy * 100).toFixed(1)}%
+                      </td>
+                      <td className="py-2.5 px-3 text-slate-900">
+                        {formatINR(res.falsePositiveExposurePaise)}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
 
       {/* Dynamic Multi-Seed Benchmark Evaluation Table */}

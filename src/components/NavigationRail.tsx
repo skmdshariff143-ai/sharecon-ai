@@ -21,7 +21,8 @@ export type WorkspaceTab =
   | 'exceptions'
   | 'audit'
   | 'evaluation'
-  | 'methodology';
+  | 'methodology'
+  | 'help';
 
 interface NavigationRailProps {
   activeTab: WorkspaceTab;
@@ -37,8 +38,8 @@ interface NavigationRailProps {
 export const NavigationRail: React.FC<NavigationRailProps> = ({
   activeTab,
   onSelectTab,
-  isCollapsed,
   onToggleCollapse,
+  isCollapsed,
   isMobileOpen,
   onCloseMobile,
   pendingReviewCount,
@@ -100,6 +101,13 @@ export const NavigationRail: React.FC<NavigationRailProps> = ({
       icon: BookOpen,
       badge: null,
       description: 'System architecture & math rules',
+    },
+    {
+      id: 'help' as WorkspaceTab,
+      label: 'Help & Guide',
+      icon: ShieldCheck,
+      badge: null,
+      description: 'Judge guide, FAQs & glossary',
     },
   ];
 

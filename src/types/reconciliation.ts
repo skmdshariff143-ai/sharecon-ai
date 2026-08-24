@@ -5,6 +5,15 @@
 
 export type CurrencyCode = 'INR' | 'USD' | 'EUR' | 'GBP';
 
+export type WorkspaceTab =
+  | 'control_center'
+  | 'reconciliation'
+  | 'exceptions'
+  | 'audit'
+  | 'evaluation'
+  | 'methodology'
+  | 'help';
+
 export interface Payment {
   paymentId: string;
   orderId: string;

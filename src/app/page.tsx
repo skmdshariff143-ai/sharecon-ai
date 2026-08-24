@@ -25,11 +25,13 @@ import { ExceptionsTab } from '@/components/ExceptionsTab';
 import { AuditTab } from '@/components/AuditTab';
 import { EvaluationLabTab } from '@/components/EvaluationLabTab';
 import { MethodologyTab } from '@/components/MethodologyTab';
+import { HelpTab } from '@/components/HelpTab';
 import { MatchDetailDrawer } from '@/components/MatchDetailDrawer';
 import { SettingsModal } from '@/components/SettingsModal';
 import { CsvUploadModal } from '@/components/CsvUploadModal';
 import { CommandPaletteModal } from '@/components/CommandPaletteModal';
 import { GuidedDemoTour } from '@/components/GuidedDemoTour';
+import { LiveRunnerModal } from '@/components/LiveRunnerModal';
 import { ToastProvider, useToast } from '@/components/Toast';
 
 function DashboardContent() {
@@ -64,6 +66,7 @@ function DashboardContent() {
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [isTourOpen, setIsTourOpen] = useState(false);
+  const [isLiveRunnerOpen, setIsLiveRunnerOpen] = useState(false);
   const [isAnalyzingAi, setIsAnalyzingAi] = useState(false);
   const [isReconciling, setIsReconciling] = useState(false);
 
@@ -309,7 +312,7 @@ function DashboardContent() {
     : 0;
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans antialiased flex flex-col">
+    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans antialiased flex flex-col overflow-x-hidden max-w-full">
       {/* Left Navigation Rail (Desktop & Mobile Drawer) */}
       <NavigationRail
         activeTab={activeTab}
@@ -351,6 +354,7 @@ function DashboardContent() {
               batch={batch}
               onNavigateToTab={(tab) => setActiveTab(tab)}
               onSelectRecord={(rec) => setSelectedRecord(rec)}
+              onOpenLiveRunner={() => setIsLiveRunnerOpen(true)}
             />
           )}
 
@@ -391,6 +395,13 @@ function DashboardContent() {
           )}
 
           {activeTab === 'methodology' && <MethodologyTab />}
+
+          {activeTab === 'help' && (
+            <HelpTab
+              onNavigateTab={(tab) => setActiveTab(tab)}
+              onStartTour={() => setIsTourOpen(true)}
+            />
+          )}
         </main>
 
         {/* Footer */}
@@ -449,6 +460,14 @@ function DashboardContent() {
         isOpen={isUploadOpen}
         onClose={() => setIsUploadOpen(false)}
         onUploadSuccess={handleUploadSuccess}
+      />
+
+      {/* Live Reconciliation Runner Modal */}
+      <LiveRunnerModal
+        isOpen={isLiveRunnerOpen}
+        onClose={() => setIsLiveRunnerOpen(false)}
+        batch={batch}
+        onComplete={() => setActiveTab('reconciliation')}
       />
     </div>
   );

@@ -6,7 +6,6 @@ import {
   Ban,
   Loader2,
   ArrowUpDown,
-  Bot,
 } from 'lucide-react';
 import { ReconciliationRecord, ExceptionType } from '@/types/reconciliation';
 import { formatINR } from '@/lib/money';
@@ -104,7 +103,7 @@ export const ExceptionsTab: React.FC<ExceptionsTabProps> = ({
           <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
             Total Financial Exposure
           </div>
-          <div className="text-2xl font-extrabold text-rose-400 font-mono mt-0.5">
+          <div className="text-2xl font-extrabold text-rose-400 font-mono mt-0.5 tabular-nums">
             {formatINR(totalExposurePaise)}
           </div>
         </div>
@@ -112,12 +111,12 @@ export const ExceptionsTab: React.FC<ExceptionsTabProps> = ({
 
       {/* Filter Category & Severity Toolbar */}
       <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs space-y-3">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          {/* Category Filter Pills */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
+        <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
+          {/* Category Filter Pills (Scrollable with smooth touch scrolling) */}
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1.5 text-xs max-w-full no-scrollbar">
             <button
               onClick={() => setSelectedCategory('ALL')}
-              className={`px-3 py-1.5 rounded-lg font-semibold transition-colors shrink-0 cursor-pointer ${
+              className={`px-3 py-1.5 rounded-lg font-semibold transition-colors shrink-0 cursor-pointer min-h-[36px] flex items-center ${
                 selectedCategory === 'ALL'
                   ? 'bg-blue-600 text-white shadow-2xs'
                   : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
@@ -130,7 +129,7 @@ export const ExceptionsTab: React.FC<ExceptionsTabProps> = ({
               <button
                 key={cat}
                 onClick={() => setSelectedCategory(cat)}
-                className={`px-3 py-1.5 rounded-lg font-medium transition-colors shrink-0 cursor-pointer ${
+                className={`px-3 py-1.5 rounded-lg font-medium transition-colors shrink-0 cursor-pointer min-h-[36px] flex items-center ${
                   selectedCategory === cat
                     ? 'bg-blue-600 text-white shadow-2xs'
                     : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
@@ -142,11 +141,12 @@ export const ExceptionsTab: React.FC<ExceptionsTabProps> = ({
           </div>
 
           {/* Severity & Sort Toggle */}
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2 shrink-0">
             <select
               value={severityFilter}
               onChange={(e) => setSeverityFilter(e.target.value as 'ALL' | 'CRITICAL' | 'WARNING' | 'ADVISORY')}
-              className="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 cursor-pointer"
+              className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 cursor-pointer min-h-[36px]"
+              aria-label="Filter by exception severity"
             >
               <option value="ALL">All Severities</option>
               <option value="CRITICAL">Critical Severity</option>
@@ -156,7 +156,8 @@ export const ExceptionsTab: React.FC<ExceptionsTabProps> = ({
 
             <button
               onClick={() => setSortByExposure(!sortByExposure)}
-              className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
+              className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer min-h-[36px]"
+              aria-label="Toggle sort order"
             >
               <ArrowUpDown className="w-3.5 h-3.5 text-slate-500" />
               <span>{sortByExposure ? 'Exposure (High ➔ Low)' : 'Date'}</span>
@@ -182,12 +183,12 @@ export const ExceptionsTab: React.FC<ExceptionsTabProps> = ({
             return (
               <div
                 key={record.recordId}
-                className="bg-white border border-slate-200 hover:border-slate-300 rounded-2xl p-5 shadow-xs flex flex-col justify-between space-y-4 transition-all"
+                className="bg-white border border-slate-200 hover:border-slate-300 rounded-2xl p-4 sm:p-5 shadow-xs transition-all flex flex-col justify-between space-y-4"
               >
                 <div>
-                  {/* Top Bar */}
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
+                  {/* Header: Exception Type & Severity */}
+                  <div className="flex items-start justify-between gap-2 mb-2">
+                    <div className="flex flex-wrap items-center gap-1.5">
                       <span
                         className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full font-mono ${
                           severity === 'CRITICAL'
@@ -199,43 +200,40 @@ export const ExceptionsTab: React.FC<ExceptionsTabProps> = ({
                       >
                         {severity}
                       </span>
-                      <span className="font-mono font-bold text-slate-900 text-xs">
+                      <span className="font-mono text-xs font-bold text-slate-900">
                         {record.payment.paymentId}
                       </span>
                     </div>
 
-                    <div className="text-right">
-                      <span className="text-[10px] text-slate-400 font-bold uppercase block">Exposure</span>
-                      <span className="text-sm font-bold text-rose-600 font-mono">
+                    <div className="text-right shrink-0">
+                      <div className="text-[10px] uppercase font-semibold text-slate-400">Exposure</div>
+                      <div className="font-mono text-sm font-bold text-rose-600 tabular-nums">
                         {formatINR(record.financialExposurePaise)}
-                      </span>
+                      </div>
                     </div>
                   </div>
 
-                  {/* Anomaly Category & Confidence */}
-                  <div className="flex items-center gap-2 text-xs text-slate-600 mb-2">
-                    <span className="font-semibold text-slate-900">
+                  {/* Anomaly Label & Confidence */}
+                  <div className="flex items-center justify-between text-xs mb-2">
+                    <span className="font-semibold text-slate-700">
                       {record.exceptionType.replace(/_/g, ' ')}
                     </span>
-                    <span className="text-slate-300">|</span>
-                    <span>Confidence: <strong className="text-slate-800">{record.confidence}%</strong></span>
+                    <span className="font-mono text-slate-500 tabular-nums">
+                      Confidence: <strong className="text-slate-800">{record.confidence}%</strong>
+                    </span>
                   </div>
 
-                  {/* Audit Explanation */}
+                  {/* Trace explanation summary */}
                   <p className="text-xs text-slate-600 bg-slate-50 p-2.5 rounded-xl border border-slate-100 leading-relaxed">
                     {record.explanation}
                   </p>
 
-                  {/* AI Advisory Analysis if available */}
+                  {/* Gemini AI Advisory analysis card if already analyzed */}
                   {record.aiAnalysis && (
-                    <div className="mt-3 bg-violet-50/60 border border-violet-200 rounded-xl p-3 text-xs space-y-1.5">
-                      <div className="flex items-center justify-between text-violet-950 font-bold">
-                        <span className="flex items-center gap-1.5">
-                          <Bot className="w-3.5 h-3.5 text-violet-600" /> Grounded Analysis
-                        </span>
-                        <span className="text-[10px] font-mono bg-violet-100 text-violet-800 px-1.5 py-0.2 rounded font-semibold">
-                          [{record.aiAnalysis.modelUsed}]
-                        </span>
+                    <div className="mt-3 bg-violet-50/80 border border-violet-200/80 rounded-xl p-3 text-xs space-y-1.5">
+                      <div className="flex items-center gap-1.5 text-violet-700 font-bold">
+                        <Sparkles className="w-3.5 h-3.5" />
+                        <span>AI Advisory Diagnosis: {record.aiAnalysis.exceptionCategory.replace(/_/g, ' ')}</span>
                       </div>
                       <p className="text-slate-700">{record.aiAnalysis.summary}</p>
                       <div className="text-[11px] text-violet-900 font-semibold pt-1 border-t border-violet-200/50">
@@ -245,46 +243,46 @@ export const ExceptionsTab: React.FC<ExceptionsTabProps> = ({
                   )}
                 </div>
 
-                {/* Bottom Actions */}
-                <div className="flex items-center justify-between pt-3 border-t border-slate-100 text-xs">
+                {/* Bottom Actions (Responsive Flex Wrap) */}
+                <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-slate-100 text-xs">
                   <div className="flex items-center gap-2">
                     {!record.aiAnalysis && (
                       <button
                         onClick={() => onAnalyzeException(record)}
                         disabled={isAnalyzingAi}
-                        className="px-2.5 py-1 rounded-lg text-xs font-semibold text-violet-700 bg-violet-50 hover:bg-violet-100 border border-violet-200 transition-colors flex items-center gap-1 cursor-pointer"
+                        className="px-3 py-2 rounded-lg text-xs font-semibold text-violet-700 bg-violet-50 hover:bg-violet-100 border border-violet-200 transition-colors flex items-center gap-1.5 cursor-pointer min-h-[36px]"
                       >
                         {isAnalyzingAi ? (
                           <>
-                            <Loader2 className="w-3 h-3 animate-spin" /> Analyzing...
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" /> Analyzing...
                           </>
                         ) : (
                           <>
-                            <Sparkles className="w-3 h-3 text-violet-600" /> Advisory Diagnosis
+                            <Sparkles className="w-3.5 h-3.5 text-violet-600" /> Advisory Diagnosis
                           </>
                         )}
                       </button>
                     )}
                   </div>
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-1.5">
                     <button
                       onClick={() => onSelectRecord(record)}
-                      className="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors cursor-pointer"
+                      className="px-3 py-2 rounded-lg text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors cursor-pointer min-h-[36px]"
                     >
                       3-Way Trace
                     </button>
                     <button
                       onClick={() => onQuickApprove(record.recordId)}
-                      className="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 transition-colors cursor-pointer flex items-center gap-1"
+                      className="px-3 py-2 rounded-lg text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 transition-colors cursor-pointer flex items-center gap-1 min-h-[36px]"
                     >
-                      <CheckCircle2 className="w-3 h-3" /> Approve
+                      <CheckCircle2 className="w-3.5 h-3.5" /> Approve
                     </button>
                     <button
                       onClick={() => onQuickReject(record.recordId)}
-                      className="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 transition-colors cursor-pointer flex items-center gap-1"
+                      className="px-3 py-2 rounded-lg text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 transition-colors cursor-pointer flex items-center gap-1 min-h-[36px]"
                     >
-                      <Ban className="w-3 h-3" /> Reject
+                      <Ban className="w-3.5 h-3.5" /> Reject
                     </button>
                   </div>
                 </div>

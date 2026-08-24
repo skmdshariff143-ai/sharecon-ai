@@ -23,7 +23,8 @@ export type WorkspaceTab =
   | 'exceptions'
   | 'audit'
   | 'evaluation'
-  | 'methodology';
+  | 'methodology'
+  | 'help';
 
 interface CommandPaletteModalProps {
   isOpen: boolean;
@@ -312,6 +313,21 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
                   <BookOpen className="w-3.5 h-3.5 text-slate-600" />
                   <span className="font-semibold text-slate-800">Methodology &amp; Safety</span>
                   <span className="text-slate-400 text-[11px]">Architecture &amp; math rules</span>
+                </div>
+                <ArrowRight className="w-3 h-3 text-slate-300" />
+              </button>
+
+              <button
+                onClick={() => {
+                  onSelectTab('help');
+                  onClose();
+                }}
+                className="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-100 text-slate-700 flex items-center justify-between transition-colors cursor-pointer"
+              >
+                <div className="flex items-center gap-2.5">
+                  <BookOpen className="w-3.5 h-3.5 text-emerald-600" />
+                  <span className="font-semibold text-slate-800">Help &amp; Guide (Judge Onboarding)</span>
+                  <span className="text-slate-400 text-[11px]">FAQs &amp; glossary</span>
                 </div>
                 <ArrowRight className="w-3 h-3 text-slate-300" />
               </button>
