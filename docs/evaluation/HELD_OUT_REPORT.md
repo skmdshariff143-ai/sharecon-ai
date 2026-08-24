@@ -1,7 +1,7 @@
 # ShaRecon AI — Held-Out Adversarial Evaluation Report
 
 > **Evaluation Classification**: Manually Curated Held-Out Adversarial Fixture  
-> **Evaluation Date**: 2026-08-24  
+> **Benchmark Baseline As Of**: 2026-08-24 | **Artifact Version**: 1  
 > **Evaluation Model**: Un-Tuned Baseline Engine (85% High / 50% Medium Threshold)  
 > **Total Held-Out Records**: 80 payments, 80 settlements, 76 bank statement credits  
 > **Production Notice**: *This benchmark is evaluated on manually curated adversarial test cases and deterministic synthetic generators. Neither benchmark represents live production financial performance, external third-party certification, or real merchant account data.*
@@ -33,7 +33,6 @@ To prevent circular evaluation (where a synthetic generator and reconciliation e
 | **Financial Exposure**| **False-Positive Count** | **7** | **$0$** | Number of non-matching or unsafe records falsely auto-reconciled. |
 | **Financial Exposure**| **False-Positive Exposure** | **₹28,100.00** | **₹0.00** | Rupee value exposed to improper auto-clearance. |
 | **Operational Yield**| **Automation Rate** | **52.5%** | $40\% - 60\%$ | 42 of 80 records safely processed hands-free. |
-| **Performance** | **Engine Execution Latency** | **24.4 ms** | $< 50\text{ ms}$ | Deterministic engine matching execution latency measured in V8 runtime for 80 records (excluding disk I/O and report generation). |
 
 ---
 

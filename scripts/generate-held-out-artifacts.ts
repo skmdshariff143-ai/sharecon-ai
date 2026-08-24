@@ -27,7 +27,8 @@ function run() {
       totalPayments: HELD_OUT_DATASET.payments.length,
       totalSettlements: HELD_OUT_DATASET.settlements.length,
       totalBankTransactions: HELD_OUT_DATASET.bankTransactions.length,
-      generatedAt: '2026-08-24T20:00:00.000Z',
+      benchmarkAsOf: '2026-08-24',
+      artifactVersion: 1,
       disclaimer: 'Curated test dataset. Does not represent production volume or live transaction traffic.',
     },
     payments: HELD_OUT_DATASET.payments,
@@ -43,7 +44,8 @@ function run() {
     metadata: {
       title: 'ShaRecon AI — Held-Out Ground Truth Labels',
       totalGroundTruthRecords: HELD_OUT_DATASET.groundTruth.length,
-      generatedAt: '2026-08-24T20:00:00.000Z',
+      benchmarkAsOf: '2026-08-24',
+      artifactVersion: 1,
       disclaimer: 'Ground truth labels stored independently. Never accessed by the matching engine.',
     },
     groundTruth: HELD_OUT_DATASET.groundTruth,
@@ -68,7 +70,7 @@ function run() {
   const markdownContent = `# ShaRecon AI — Held-Out Adversarial Evaluation Report
 
 > **Evaluation Classification**: Manually Curated Held-Out Adversarial Fixture  
-> **Evaluation Date**: 2026-08-24  
+> **Benchmark Baseline As Of**: 2026-08-24 | **Artifact Version**: 1  
 > **Evaluation Model**: Un-Tuned Baseline Engine (85% High / 50% Medium Threshold)  
 > **Total Held-Out Records**: ${evaluation.totalRecordsProcessed} payments, ${HELD_OUT_DATASET.settlements.length} settlements, ${HELD_OUT_DATASET.bankTransactions.length} bank statement credits  
 > **Production Notice**: *This benchmark is evaluated on manually curated adversarial test cases and deterministic synthetic generators. Neither benchmark represents live production financial performance, external third-party certification, or real merchant account data.*
@@ -100,7 +102,6 @@ To prevent circular evaluation (where a synthetic generator and reconciliation e
 | **Financial Exposure**| **False-Positive Count** | **${evaluation.falsePositiveCount}** | **$0$** | Number of non-matching or unsafe records falsely auto-reconciled. |
 | **Financial Exposure**| **False-Positive Exposure** | **${formatINR(evaluation.falsePositiveExposurePaise)}** | **₹0.00** | Rupee value exposed to improper auto-clearance. |
 | **Operational Yield**| **Automation Rate** | **${pct(evaluation.autoReconciliationRate)}** | $40\\% - 60\\%$ | ${evaluation.autoReconciledCount} of ${evaluation.totalRecordsProcessed} records safely processed hands-free. |
-| **Performance** | **Engine Execution Latency** | **24.4 ms** | $< 50\\text{ ms}$ | Deterministic engine matching execution latency measured in V8 runtime for 80 records (excluding disk I/O and report generation). |
 
 ---
 
@@ -185,7 +186,6 @@ npm test src/lib/__tests__/held_out.test.ts
   console.log(`False-Positive Count: ${evaluation.falsePositiveCount}`);
   console.log(`False-Positive Exposure: ${formatINR(evaluation.falsePositiveExposurePaise)}`);
   console.log(`Total Errors in Inspector: ${evaluation.errors.length}`);
-  console.log('Engine Latency: 24.40 ms');
 }
 
 run();

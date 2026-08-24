@@ -115,13 +115,13 @@ ShaRecon AI enforces a strict boundary between deterministic algorithmic verific
 ### Track 1: Multi-Seed Deterministic Benchmark (Synthetic PRNG)
 *Generated directly from [`docs/generated/benchmark.json`](docs/generated/benchmark.json) across 5 independent seeds (180 records per seed):*
 
-| Evaluation Seed | Total Records | Proposed-Pair Precision | Proposed-Pair Recall | Auto-Resolution Precision (Safety) | Auto-Resolution Recall (Yield) | Review-Routing Accuracy | False-Positive Exposure | Execution Latency |
-| :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Seed 42** (Baseline) | 180 | **90.6%** (163/180) | **91.1%** (164/180) | **100.0%** (111/111 clean records) | **100.0%** (111/111 clean records) | **83.0%** (39/47 review cases) | **₹0.00** (0 paise) | **4.8 ms** |
-| **Seed 101** | 180 | **88.9%** (160/180) | **91.1%** (164/180) | **100.0%** (108/108 clean records) | **100.0%** (108/108 clean records) | **87.2%** (41/47 review cases) | **₹0.00** (0 paise) | **4.6 ms** |
-| **Seed 777** | 180 | **90.1%** (162/180) | **91.8%** (165/180) | **100.0%** (114/114 clean records) | **100.0%** (114/114 clean records) | **87.2%** (41/47 review cases) | **₹0.00** (0 paise) | **4.9 ms** |
-| **Seed 2024** | 180 | **91.7%** (165/180) | **90.5%** (163/180) | **100.0%** (112/112 clean records) | **100.0%** (112/112 clean records) | **78.7%** (37/47 review cases) | **₹0.00** (0 paise) | **4.7 ms** |
-| **Seed 9999** | 180 | **91.4%** (165/180) | **94.3%** (170/180) | **100.0%** (115/115 clean records) | **100.0%** (115/115 clean records) | **80.9%** (38/47 review cases) | **₹0.00** (0 paise) | **4.8 ms** |
+| Evaluation Seed | Total Records | Proposed-Pair Precision | Proposed-Pair Recall | Auto-Resolution Precision (Safety) | Auto-Resolution Recall (Yield) | Review-Routing Accuracy | False-Positive Exposure |
+| :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Seed 42** (Baseline) | 180 | **90.6%** (163/180) | **91.1%** (164/180) | **100.0%** (111/111 clean records) | **100.0%** (111/111 clean records) | **83.0%** (39/47 review cases) | **₹0.00** (0 paise) |
+| **Seed 101** | 180 | **88.9%** (160/180) | **91.1%** (164/180) | **100.0%** (108/108 clean records) | **100.0%** (108/108 clean records) | **87.2%** (41/47 review cases) | **₹0.00** (0 paise) |
+| **Seed 777** | 180 | **90.1%** (162/180) | **91.8%** (165/180) | **100.0%** (114/114 clean records) | **100.0%** (114/114 clean records) | **87.2%** (41/47 review cases) | **₹0.00** (0 paise) |
+| **Seed 2024** | 180 | **91.7%** (165/180) | **90.5%** (163/180) | **100.0%** (112/112 clean records) | **100.0%** (112/112 clean records) | **78.7%** (37/47 review cases) | **₹0.00** (0 paise) |
+| **Seed 9999** | 180 | **91.4%** (165/180) | **94.3%** (170/180) | **100.0%** (115/115 clean records) | **100.0%** (115/115 clean records) | **80.9%** (38/47 review cases) | **₹0.00** (0 paise) |
 
 *Key Takeaway: Across all 5 seeds on the synthetic benchmark, **no unsafe auto-match was observed** on clean records under standard 85% high / 50% medium confidence thresholds.*
 
@@ -141,7 +141,17 @@ To avoid circular generator-matcher bias, the held-out adversarial fixture evalu
 | **Review-Routing Accuracy** | **75.9%** | $\ge 70.0\%$ | **22 anomaly cases of 29 routed to human review** |
 | **Exception Detection Accuracy** | **91.3%** | $\ge 85.0\%$ | **73 exact exception classifications of 80 records** |
 | **False-Positive Risk Exposure** | **₹28,100.00** | Reported Honestly | **7 edge-case records documented in Error Inspector** |
-| **Engine Execution Latency** | **24.4 ms** | $< 50\text{ ms}$ | **Deterministic V8 matching runtime for 80 records (excluding disk I/O)** |
+
+---
+
+### Measured Runtime Performance Benchmark
+*Empirical measurement report: [`docs/generated/PERFORMANCE_REPORT.md`](docs/generated/PERFORMANCE_REPORT.md) | Command: `npm run benchmark:performance`*
+
+> *“Performance measurements are environment-specific and are not production guarantees.”*
+
+- Evaluates pure in-memory deterministic 3-way matching execution time (`reconcileBatch`) separated from disk I/O, report compilation, and UI rendering.
+- Runs 25 warm-up iterations followed by 100 timed iterations using high-resolution timers (`performance.now()`).
+- Reports empirical median (p50), 95th-percentile (p95), and calculated transaction throughput (records/second).
 
 ---
 
@@ -221,8 +231,8 @@ ShaRecon AI implements programmatic safety boundaries designed to prevent financ
 > **Evaluator Notice**: ShaRecon AI runs **completely offline without requiring an API key**. All matching, scoring, benchmarks, policy simulations, and rule-based AI advisory fallbacks execute locally out-of-the-box.
 
 ### Prerequisites:
-- **Node.js**: `>=20.0.0` (Pinned: `.nvmrc` -> `20.18.3`, compatible with Node 20 LTS, 22 LTS, and 24)
-- **npm**: `>=10.0.0`
+- **Node.js**: `20.x` supported (`Node.js v20.18.3` used for the verified local run, pinned via `.nvmrc` and Volta)
+- **npm**: `10.x` supported (`npm 10.8.2+`)
 
 ### 1. Clone & Install
 ```bash

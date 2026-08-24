@@ -1,6 +1,6 @@
 # ShaRecon AI — Verified Canonical Benchmark Artifacts
 
-> Generated on `2026-08-24T20:00:00.000Z` directly from the canonical evaluation engine.
+> **Benchmark Baseline As Of**: `2026-08-24` | **Artifact Version**: `1`
 
 ## 1. Immutable Baseline Benchmark (Seed 42)
 

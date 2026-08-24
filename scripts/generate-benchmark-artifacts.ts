@@ -71,7 +71,8 @@ function main() {
   // Compile JSON artifact
   const benchmarkArtifact = {
     metadata: {
-      generatedAt: '2026-08-24T20:00:00.000Z',
+      benchmarkAsOf: '2026-08-24',
+      artifactVersion: 1,
       engineVersion: '0.1.0',
       totalBenchmarkSeeds: seeds.length,
       defaultSeed: 42,
@@ -95,7 +96,6 @@ function main() {
       reviewRoutingAccuracy: baseMetrics.reviewRoutingAccuracy,
       exceptionDetectionAccuracy: baseMetrics.exceptionDetectionAccuracy,
       falsePositiveExposurePaise: baseMetrics.falsePositiveExposurePaise,
-      processingDurationMs: 4.8,
       errorCount: baseMetrics.errors.length,
     },
     policySimulationMatrix: policyResults,
@@ -111,7 +111,6 @@ function main() {
       exceptionAccuracy: s.exceptionAccuracy,
       autoReconciliationRate: s.autoReconciliationRate,
       falsePositiveExposurePaise: s.falsePositiveExposurePaise,
-      processingDurationMs: 4.8,
     })),
   };
 
@@ -122,7 +121,7 @@ function main() {
 
   // Compile Markdown artifact
   let mdContent = `# ShaRecon AI — Verified Canonical Benchmark Artifacts\n\n`;
-  mdContent += `> Generated on \`${benchmarkArtifact.metadata.generatedAt}\` directly from the canonical evaluation engine.\n\n`;
+  mdContent += `> **Benchmark Baseline As Of**: \`${benchmarkArtifact.metadata.benchmarkAsOf}\` | **Artifact Version**: \`${benchmarkArtifact.metadata.artifactVersion}\`\n\n`;
   mdContent += `## 1. Immutable Baseline Benchmark (Seed 42)\n\n`;
   mdContent += `| Metric | Measured Value | Integer Formula / Standard |\n`;
   mdContent += `| :--- | :--- | :--- |\n`;

@@ -1,0 +1,37 @@
+{
+  "metadata": {
+    "benchmarkTimestamp": "2026-08-24T17:03:23.497Z",
+    "nodeVersion": "v24.16.0",
+    "platform": "Windows_NT 10.0.26200",
+    "arch": "x64",
+    "cpuModel": "13th Gen Intel(R) Core(TM) i5-1335U",
+    "cpuCores": 12,
+    "disclaimer": "Performance measurements are environment-specific and are not production guarantees."
+  },
+  "syntheticBenchmark180": {
+    "warmupIterations": 25,
+    "measuredIterations": 100,
+    "totalRecords": 180,
+    "durationsMs": {
+      "min": 8.278,
+      "median": 9.979,
+      "p95": 21.882,
+      "max": 39.669,
+      "mean": 11.802
+    },
+    "throughputRecordsPerSec": 18038
+  },
+  "heldOutBenchmark80": {
+    "warmupIterations": 25,
+    "measuredIterations": 100,
+    "totalRecords": 80,
+    "durationsMs": {
+      "min": 3.35,
+      "median": 4.179,
+      "p95": 7.452,
+      "max": 11.839,
+      "mean": 4.789
+    },
+    "throughputRecordsPerSec": 19143
+  }
+}

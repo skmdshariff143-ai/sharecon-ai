@@ -44,7 +44,7 @@
   - Auto-Resolution Recall: 100.0% (111 / 111 clean records).
   - Review-Routing Accuracy: 83.0% (39 / 47 review cases).
   - False-Positive Exposure: ₹0.00 (0 paise).
-  - Deterministic V8 Engine Latency: ~4.8 ms.
+  - Runtime Performance: Benchmarked separately in [`docs/generated/PERFORMANCE_REPORT.md`](generated/PERFORMANCE_REPORT.md) via `npm run benchmark:performance`.
 - **Manually Curated Held-Out Adversarial Fixture (80 Cases)**:
   - Proposed-Pair Precision: 97.1% (68 / 70 proposed links).
   - Proposed-Pair Recall: 97.1% (68 / 70 expected links).
@@ -52,7 +52,7 @@
   - Auto-Resolution Recall: 100.0% (35 / 35 clean records).
   - Review-Routing Accuracy: 75.9% (22 / 29 anomaly cases).
   - False-Positive Exposure: ₹28,100.00 (7 edge cases reported honestly without post-hoc engine tuning).
-  - Deterministic V8 Engine Latency: ~24.4 ms.
+  - Runtime Performance: Benchmarked separately in [`docs/generated/PERFORMANCE_REPORT.md`](generated/PERFORMANCE_REPORT.md).
 - **Consistency Verification**: All values across UI components, `README.md`, `docs/generated/benchmark.json`, `docs/evaluation/HELD_OUT_REPORT.md`, and Vitest tests match exact formulas.
 
 ---

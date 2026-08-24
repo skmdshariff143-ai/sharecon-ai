@@ -15,12 +15,13 @@
     "test:e2e:report": "playwright show-report",
     "generate:benchmark": "tsx scripts/generate-benchmark-artifacts.ts",
     "generate:heldout": "tsx scripts/generate-held-out-artifacts.ts",
-    "verify:artifacts": "git diff --exit-code -- docs/generated docs/evaluation",
+    "benchmark:performance": "tsx scripts/measure-performance.ts",
+    "verify:artifacts": "git diff --exit-code HEAD -- docs/generated/benchmark.json docs/generated/benchmark.md docs/evaluation",
     "verify": "npm run lint && npm run type-check && npm run test && npm run generate:benchmark && npm run generate:heldout && npm run verify:artifacts && npm run build && npm run test:e2e"
   },
   "engines": {
-    "node": "^20.18.3",
-    "npm": ">=10.0.0"
+    "node": "20.x",
+    "npm": "10.x"
   },
   "volta": {
     "node": "20.18.3",
