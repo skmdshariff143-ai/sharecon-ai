@@ -153,7 +153,7 @@ export const HelpTab: React.FC<HelpTabProps> = ({ onNavigateTab, onStartTour }) 
         <div className="space-y-1">
           <div className="flex items-center gap-2 text-[#7168ff] text-xs font-bold uppercase tracking-wider font-mono">
             <BookOpen className="w-4 h-4 text-[#7168ff]" />
-            <span>Judge Guide &amp; Knowledge Base</span>
+            <span>How ShaRecon AI Works</span>
           </div>
           <h2 className="text-xl font-extrabold tracking-tight text-[#f7f8fc] font-mono">
             ShaRecon AI Architecture &amp; Reviewer Guide
@@ -176,13 +176,13 @@ export const HelpTab: React.FC<HelpTabProps> = ({ onNavigateTab, onStartTour }) 
       <div className="elevated-card p-6 space-y-4 bg-[#111620] border-white/10">
         <h3 className="text-base font-bold text-[#f7f8fc] flex items-center gap-2 font-mono">
           <Layers className="w-5 h-5 text-[#7168ff]" />
-          <span>Understanding the 3-Way Reconciliation Lifecycle</span>
+          <span>The 3-Way Reconciliation Lifecycle</span>
         </h3>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
           <div className="inset-panel p-4.5 rounded-xl space-y-2 border-t-2 border-t-[#7168ff] bg-[#0c101a] border-white/10">
             <div className="flex items-center justify-between">
-              <span className="font-bold text-[#f7f8fc] font-mono">Leg 1: Merchant Payment</span>
+              <span className="font-bold text-[#f7f8fc] font-mono">Leg 1: Merchant Ledger</span>
               <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#7168ff]/20 text-[#c4b5fd] font-mono border border-[#7168ff]/30">ORDER</span>
             </div>
             <p className="text-[#a7afc0] leading-relaxed font-sans">

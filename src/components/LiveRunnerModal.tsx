@@ -104,8 +104,6 @@ export const LiveRunnerModal: React.FC<LiveRunnerModalProps> = ({
 
   useEffect(() => {
     if (!isOpen) {
-      setCurrentStageIdx(0);
-      setIsPlaying(true);
       if (timerRef.current) clearInterval(timerRef.current);
       return;
     }
@@ -157,6 +155,7 @@ export const LiveRunnerModal: React.FC<LiveRunnerModalProps> = ({
 
   const handleClose = () => {
     setIsPlaying(false);
+    setCurrentStageIdx(0);
     if (timerRef.current) clearInterval(timerRef.current);
     onClose();
   };
@@ -167,7 +166,7 @@ export const LiveRunnerModal: React.FC<LiveRunnerModalProps> = ({
       onClick={handleClose}
       role="dialog"
       aria-modal="true"
-      aria-labelledby="runner-modal-title"
+      aria-labelledby="live-runner-title"
     >
       <div
         className="modal-surface w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] bg-[#111620] border border-white/15 animate-in zoom-in-95 duration-150"
@@ -180,7 +179,7 @@ export const LiveRunnerModal: React.FC<LiveRunnerModalProps> = ({
               <Zap className="w-5 h-5" />
             </div>
             <div>
-              <h3 id="runner-modal-title" className="text-base font-extrabold text-[#f7f8fc] flex items-center gap-2 font-mono">
+              <h3 id="live-runner-title" className="text-base font-extrabold text-[#f7f8fc] flex items-center gap-2 font-mono">
                 <span>Observable Engine Pipeline Runner</span>
                 <span className="text-[10px] font-bold uppercase bg-[#7168ff]/15 text-[#7168ff] border border-[#7168ff]/30 px-2 py-0.5 rounded font-mono">
                   8-Stage Real Logic

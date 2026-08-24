@@ -5,15 +5,18 @@ import fs from 'fs';
 test.describe('Screenshot Capture Suite', () => {
   const outputDir = path.resolve(__dirname, '../../docs/assets/screenshots');
   const premiumDir = path.resolve(__dirname, '../../docs/assets/screenshots/premium');
+  const darkPremiumDir = path.resolve(__dirname, '../../docs/assets/screenshots/dark-premium');
 
   test.beforeAll(() => {
     if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir, { recursive: true });
     if (!fs.existsSync(premiumDir)) fs.mkdirSync(premiumDir, { recursive: true });
+    if (!fs.existsSync(darkPremiumDir)) fs.mkdirSync(darkPremiumDir, { recursive: true });
   });
 
   const saveScreenshots = async (page: Page, filename: string) => {
     await page.screenshot({ path: path.join(outputDir, filename), fullPage: false });
     await page.screenshot({ path: path.join(premiumDir, filename), fullPage: false });
+    await page.screenshot({ path: path.join(darkPremiumDir, filename), fullPage: false });
   };
 
   test('Capture Desktop Control Center (1440x900)', async ({ page }) => {
@@ -95,6 +98,15 @@ test.describe('Screenshot Capture Suite', () => {
     await launchBtn.click();
     await page.waitForTimeout(400);
     await saveScreenshots(page, 'desktop_live_runner.png');
+  });
+
+  test('Capture Desktop Command Palette (1440x900)', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto('/');
+    await page.waitForLoadState('networkidle');
+    await page.locator('header button[title*="Command Palette"]').first().click();
+    await page.waitForTimeout(300);
+    await saveScreenshots(page, 'desktop_command_palette.png');
   });
 
   test('Capture Tablet Control Center (1024x768)', async ({ page }) => {

@@ -15,7 +15,6 @@ import {
   Filter,
 } from 'lucide-react';
 import { ReconciliationRecord } from '@/types/reconciliation';
-import { formatINR } from '@/lib/money';
 
 interface TrendIntelligenceProps {
   records: ReconciliationRecord[];

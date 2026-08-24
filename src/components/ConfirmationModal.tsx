@@ -32,7 +32,6 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   useEffect(() => {
     if (!isOpen) return;
 
-    // Focus confirm button when modal opens
     confirmBtnRef.current?.focus();
 
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -52,23 +51,23 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-title"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs animate-in fade-in duration-150"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#070a10]/85 backdrop-blur-md animate-in fade-in duration-150"
     >
       <div
         ref={modalRef}
-        className="surface-modal max-w-md w-full p-6 shadow-2xl space-y-4"
+        className="modal-surface max-w-md w-full p-6 shadow-2xl space-y-4 bg-[#111620] border border-white/15 rounded-2xl animate-in zoom-in-95 duration-150"
       >
         {/* Header */}
         <div className="flex items-start gap-3.5">
           <div
             className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
               actionType === 'APPROVE'
-                ? 'bg-emerald-50 text-emerald-600 border border-emerald-200'
+                ? 'bg-[#2dd4bf]/20 text-[#2dd4bf] border border-[#2dd4bf]/40'
                 : actionType === 'REJECT' || actionType === 'DANGER'
-                ? 'bg-rose-50 text-rose-600 border border-rose-200'
+                ? 'bg-[#ff6577]/20 text-[#ff6577] border border-[#ff6577]/40'
                 : actionType === 'FLAG'
-                ? 'bg-amber-50 text-amber-600 border border-amber-200'
-                : 'bg-indigo-50 text-indigo-600 border border-indigo-200'
+                ? 'bg-[#f5b942]/20 text-[#f5b942] border border-[#f5b942]/40'
+                : 'bg-[#7168ff]/20 text-[#7168ff] border border-[#7168ff]/40'
             }`}
           >
             {actionType === 'APPROVE' && <CheckCircle2 className="w-5 h-5" />}
@@ -82,30 +81,30 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
           <div className="flex-1">
             <h3
               id="modal-title"
-              className="text-base font-extrabold text-slate-900 leading-tight font-mono"
+              className="text-base font-extrabold text-[#f7f8fc] leading-tight font-mono"
             >
               {title}
             </h3>
-            <p className="text-xs text-slate-600 mt-1 leading-relaxed font-sans">
+            <p className="text-xs text-[#a7afc0] mt-1 leading-relaxed font-sans">
               {description}
             </p>
           </div>
 
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-600 p-1 rounded-lg transition-colors cursor-pointer"
+            className="text-[#7d879b] hover:text-white p-1 rounded-lg transition-colors cursor-pointer"
             aria-label="Close dialog"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100">
+        {/* Actions */}
+        <div className="flex items-center justify-end gap-2 pt-2">
           <button
             onClick={onClose}
             disabled={isLoading}
-            className="px-3.5 py-2 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors cursor-pointer min-h-[36px]"
+            className="px-4 py-2 text-xs font-semibold text-[#a7afc0] hover:text-white hover:bg-white/10 border border-white/10 rounded-xl transition-colors cursor-pointer min-h-[38px]"
           >
             {cancelLabel}
           </button>
@@ -114,14 +113,14 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
             ref={confirmBtnRef}
             onClick={onConfirm}
             disabled={isLoading}
-            className={`px-4 py-2 text-xs font-semibold text-white rounded-xl transition-colors shadow-xs cursor-pointer flex items-center gap-1.5 min-h-[36px] ${
+            className={`px-4 py-2 text-xs font-semibold text-white rounded-xl transition-colors cursor-pointer flex items-center gap-1.5 shadow-xs min-h-[38px] ${
               actionType === 'APPROVE'
-                ? 'bg-emerald-600 hover:bg-emerald-700'
+                ? 'bg-[#2dd4bf]/30 hover:bg-[#2dd4bf]/40 text-[#2dd4bf] border border-[#2dd4bf]/50'
                 : actionType === 'REJECT' || actionType === 'DANGER'
-                ? 'bg-rose-600 hover:bg-rose-700'
+                ? 'bg-[#ff6577]/20 hover:bg-[#ff6577]/30 text-[#ff6577] border border-[#ff6577]/40'
                 : actionType === 'FLAG'
-                ? 'bg-amber-600 hover:bg-amber-700'
-                : 'bg-indigo-600 hover:bg-indigo-700'
+                ? 'bg-[#f5b942]/20 hover:bg-[#f5b942]/30 text-[#f5b942] border border-[#f5b942]/40'
+                : 'bg-gradient-to-r from-[#7168ff] to-[#5687ff] hover:from-[#5d53ea] hover:to-[#4375ea]'
             }`}
           >
             {confirmLabel}

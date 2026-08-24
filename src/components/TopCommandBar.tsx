@@ -97,7 +97,7 @@ export const TopCommandBar: React.FC<TopCommandBarProps> = ({
           </div>
 
           {/* AI / Fallback Status Badge */}
-          <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-[#a78bfa]/10 text-[#a78bfa] text-xs font-medium border border-[#a78bfa]/30 shrink-0 shadow-xs">
+          <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-[#a78bfa]/10 text-[#a78bfa] text-xs font-medium border border-[#a78bfa]/30 shrink-0 shadow-xs">
             <Bot className="w-3.5 h-3.5 text-[#a78bfa] shrink-0" />
             <span className="hidden xl:inline text-[#c4b5fd] font-medium">Gemini Analyst:</span>
             <span className="font-bold text-[11px] sm:text-xs">Advisory + Fallback</span>
