@@ -405,12 +405,12 @@ function DashboardContent() {
         </main>
 
         {/* Footer */}
-        <footer className="bg-white border-t border-slate-200 py-3.5 mt-12 text-center text-xs text-slate-500">
+        <footer className="bg-[#090d16]/80 border-t border-white/10 py-3.5 mt-12 text-center text-xs text-[#7d879b]">
           <div className="max-w-7xl mx-auto px-4 flex flex-wrap items-center justify-between gap-2">
-            <span>
-              <strong>ShaRecon AI</strong> — Built for Razorpay AI Buildathon (AI Finance Controller Track)
+            <span className="text-[#a7afc0]">
+              <strong className="text-[#f7f8fc]">ShaRecon AI</strong> — Built for Razorpay AI Buildathon (AI Finance Controller Track)
             </span>
-            <span className="text-[11px] text-slate-400">
+            <span className="text-[11px] text-[#7d879b]">
               Evaluated using synthetic simulations. Zero live money movement.
             </span>
           </div>
