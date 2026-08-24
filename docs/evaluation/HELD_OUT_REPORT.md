@@ -33,7 +33,7 @@ To prevent circular evaluation (where a synthetic generator and reconciliation e
 | **Financial Exposure**| **False-Positive Count** | **7** | **$0$** | Number of non-matching or unsafe records falsely auto-reconciled. |
 | **Financial Exposure**| **False-Positive Exposure** | **₹28,100.00** | **₹0.00** | Rupee value exposed to improper auto-clearance. |
 | **Operational Yield**| **Automation Rate** | **52.5%** | $40\% - 60\%$ | 42 of 80 records safely processed hands-free. |
-| **Performance** | **Execution Latency** | **24.38 ms** | $< 25\text{ ms}$ | High-throughput sub-10ms deterministic execution. |
+| **Performance** | **Execution Latency** | **62.71 ms** | $< 25\text{ ms}$ | High-throughput sub-10ms deterministic execution. |
 
 ---
 
