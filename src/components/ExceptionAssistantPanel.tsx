@@ -98,14 +98,14 @@ export const ExceptionAssistantPanel: React.FC<ExceptionAssistantPanelProps> = (
     counterRef.current += 1;
     const userMsgId = `user_${counterRef.current}_${record.recordId}`;
 
-    const userMsg: Message = {
+    const userMessage: Message = {
       id: userMsgId,
       sender: 'user',
       text,
-      timestamp: 'Just now',
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     };
 
-    setMessages((prev) => [...prev, userMsg]);
+    setMessages((prev) => [...prev, userMessage]);
     setInputQuery('');
     setIsLoading(true);
 
@@ -115,87 +115,90 @@ export const ExceptionAssistantPanel: React.FC<ExceptionAssistantPanelProps> = (
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           record,
-          userQuestion: text,
+          customPrompt: text,
         }),
       });
 
-      counterRef.current += 1;
-      const assistantMsgId = `assistant_${counterRef.current}_${record.recordId}`;
-
       if (res.ok) {
         const data = await res.json();
-        const assistantMsg: Message = {
-          id: assistantMsgId,
-          sender: 'assistant',
-          text: data.summary || data.explanation || 'Analysis completed.',
-          timestamp: 'Just now',
-          source: data.modelUsed || 'Gemini-2.5-Flash',
-          recommendedAction: data.recommendedAction,
-          suggestedNextSteps: data.suggestedNextSteps,
-        };
-        setMessages((prev) => [...prev, assistantMsg]);
+        counterRef.current += 1;
+        const assistantMsgId = `ai_${counterRef.current}_${record.recordId}`;
+
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: assistantMsgId,
+            sender: 'assistant',
+            text: data.analysis.summary,
+            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            source: data.source === 'GEMINI_2_5_FLASH' ? 'Gemini 2.5 Flash' : 'Deterministic Advisory Fallback',
+            recommendedAction: data.analysis.recommendedAction,
+            suggestedNextSteps: data.analysis.suggestedNextSteps,
+          },
+        ]);
       } else {
-        const det = buildDeterministicResponse(record, text);
-        const fallbackMsg: Message = {
-          id: assistantMsgId,
-          sender: 'assistant',
-          text: det.text,
-          timestamp: 'Just now',
-          source: 'Deterministic Rule Engine (Offline Fallback)',
-          recommendedAction: det.action,
-          suggestedNextSteps: det.nextSteps,
-        };
-        setMessages((prev) => [...prev, fallbackMsg]);
+        throw new Error('API request failed');
       }
     } catch {
-      const det = buildDeterministicResponse(record, text);
+      // Deterministic Offline Fallback
+      const fallback = buildDeterministicResponse(record, text);
       counterRef.current += 1;
-      const fallbackMsg: Message = {
-        id: `assistant_${counterRef.current}_${record.recordId}`,
-        sender: 'assistant',
-        text: det.text,
-        timestamp: 'Just now',
-        source: 'Deterministic Rule Engine (Offline Fallback)',
-        recommendedAction: det.action,
-        suggestedNextSteps: det.nextSteps,
-      };
-      setMessages((prev) => [...prev, fallbackMsg]);
+      const fallbackMsgId = `fb_${counterRef.current}_${record.recordId}`;
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: fallbackMsgId,
+          sender: 'assistant',
+          text: fallback.text,
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          source: 'Deterministic Advisory Fallback (Offline)',
+          recommendedAction: fallback.action,
+          suggestedNextSteps: fallback.nextSteps,
+        },
+      ]);
     } finally {
       setIsLoading(false);
     }
   };
 
+  const handleResetChat = () => {
+    counterRef.current += 1;
+    setMessages([
+      {
+        id: `reset_${counterRef.current}`,
+        sender: 'assistant',
+        text: `Chat reset for record ${record.payment.paymentId}. Ask any question regarding ledger evidence, fee tolerances, or settlement delays.`,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        source: 'ShaRecon-Advisory-Copilot',
+      },
+    ]);
+  };
+
   return (
-    <div className="surface-card p-4 space-y-3.5 flex flex-col h-full">
-      {/* Header */}
-      <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+    <div className="flex flex-col space-y-3.5 bg-[#111620] border border-white/10 rounded-2xl p-4.5 shadow-2xl">
+      {/* Header with Grounded Badge */}
+      <div className="flex items-center justify-between pb-3 border-b border-white/10">
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-lg bg-[#f1efff] text-[#6d28d9] flex items-center justify-center">
-            <Bot className="w-3.5 h-3.5" />
+          <div className="w-7 h-7 rounded-lg bg-[#a78bfa]/20 text-[#a78bfa] flex items-center justify-center border border-[#a78bfa]/40 shadow-[0_0_8px_rgba(167,139,250,0.4)]">
+            <Bot className="w-4 h-4" />
           </div>
           <div>
-            <h4 className="text-xs font-bold text-slate-900 font-mono">
-              Gemini Exception Advisory Copilot
-            </h4>
-            <span className="text-[10px] text-slate-500 font-sans">
-              Non-destructive explanatory reasoning
-            </span>
+            <div className="text-xs font-bold text-[#f7f8fc] flex items-center gap-1.5 font-mono">
+              <span>Gemini Advisory Copilot</span>
+              <span className="text-[10px] font-bold uppercase bg-[#a78bfa]/20 text-[#a78bfa] border border-[#a78bfa]/35 px-1.5 py-0.2 rounded font-mono">
+                Advisory Only
+              </span>
+            </div>
+            <div className="text-[10px] text-[#7d879b]">
+              Grounded on 3-way ledger context for <strong className="text-[#f7f8fc] font-mono">{record.payment.paymentId}</strong>
+            </div>
           </div>
         </div>
 
         <button
-          onClick={() => {
-            setMessages([
-              {
-                id: 'reset',
-                sender: 'assistant',
-                text: `Conversation reset. Ready to inspect record ${record.payment.paymentId}.`,
-                timestamp: 'Just now',
-                source: 'ShaRecon-Advisory-Copilot',
-              },
-            ]);
-          }}
-          className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
+          onClick={handleResetChat}
+          className="p-1.5 rounded-lg text-[#7d879b] hover:text-[#a7afc0] hover:bg-white/5 transition-colors cursor-pointer"
           title="Reset conversation"
           aria-label="Reset chat"
         >
@@ -205,7 +208,7 @@ export const ExceptionAssistantPanel: React.FC<ExceptionAssistantPanelProps> = (
 
       {/* Preset Fast-Prompt Buttons */}
       <div className="space-y-1.5">
-        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-mono">
+        <span className="text-[10px] font-bold text-[#7d879b] uppercase tracking-wider font-mono">
           Suggested Controller Queries
         </span>
         <div className="flex flex-wrap gap-1.5">
@@ -214,7 +217,7 @@ export const ExceptionAssistantPanel: React.FC<ExceptionAssistantPanelProps> = (
               key={q}
               onClick={() => handleSendMessage(q)}
               disabled={isLoading}
-              className="text-[11px] px-2.5 py-1.5 rounded-lg bg-slate-50 hover:bg-[#f1efff] text-slate-700 hover:text-[#5b21b6] border border-slate-200 hover:border-[#ddd6fe] transition-colors text-left cursor-pointer disabled:opacity-50"
+              className="text-[11px] px-2.5 py-1.5 rounded-xl bg-[#0c101a] hover:bg-[#a78bfa]/15 text-[#a7afc0] hover:text-[#c4b5fd] border border-white/10 hover:border-[#a78bfa]/35 transition-colors text-left cursor-pointer disabled:opacity-50 font-sans"
             >
               {q}
             </button>
@@ -229,26 +232,26 @@ export const ExceptionAssistantPanel: React.FC<ExceptionAssistantPanelProps> = (
             key={m.id}
             className={`p-3.5 rounded-xl leading-relaxed ${
               m.sender === 'user'
-                ? 'bg-[#635bff] text-white ml-6 font-medium shadow-xs'
-                : 'surface-inset text-slate-800 mr-4'
+                ? 'bg-[#7168ff] text-white ml-6 font-medium shadow-xs'
+                : 'bg-[#0c101a] border border-white/10 text-[#f7f8fc] mr-4'
             }`}
           >
-            <div className="flex items-center justify-between text-[10px] opacity-80 mb-1 font-mono">
+            <div className="flex items-center justify-between text-[10px] opacity-80 mb-1 font-mono text-[#a7afc0]">
               <span>{m.sender === 'user' ? 'Finance Controller' : m.source || 'ShaRecon AI'}</span>
               <span>{m.timestamp}</span>
             </div>
             <p className="whitespace-pre-wrap font-sans">{m.text}</p>
 
             {m.recommendedAction && (
-              <div className="mt-2 pt-2 border-t border-slate-200/80 text-[11px] text-[#4c1d95] bg-[#f1efff] p-2.5 rounded-lg font-semibold font-sans">
+              <div className="mt-2 pt-2 border-t border-[#a78bfa]/20 text-[11px] text-[#c4b5fd] bg-[#a78bfa]/15 p-2.5 rounded-xl font-semibold font-sans">
                 Remediation Action: {m.recommendedAction}
               </div>
             )}
 
             {m.suggestedNextSteps && m.suggestedNextSteps.length > 0 && (
-              <div className="mt-2 text-[10px] text-slate-500 font-mono">
-                <span className="font-bold uppercase tracking-wider text-slate-700">Next Steps:</span>
-                <ul className="list-disc list-inside mt-0.5 space-y-0.5 font-sans">
+              <div className="mt-2 text-[10px] text-[#7d879b] font-mono">
+                <span className="font-bold uppercase tracking-wider text-[#a7afc0]">Next Steps:</span>
+                <ul className="list-disc list-inside mt-0.5 space-y-0.5 font-sans text-[#a7afc0]">
                   {m.suggestedNextSteps.map((step, idx) => (
                     <li key={idx}>{step}</li>
                   ))}
@@ -259,8 +262,8 @@ export const ExceptionAssistantPanel: React.FC<ExceptionAssistantPanelProps> = (
         ))}
 
         {isLoading && (
-          <div className="p-3 bg-[#f1efff] border border-[#ddd6fe] rounded-xl text-[#6d28d9] text-xs flex items-center gap-2">
-            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+          <div className="p-3 bg-[#a78bfa]/15 border border-[#a78bfa]/30 rounded-xl text-[#c4b5fd] text-xs flex items-center gap-2">
+            <Loader2 className="w-3.5 h-3.5 animate-spin text-[#a78bfa]" />
             <span>Generating grounded remediation advice from 3-way trace...</span>
           </div>
         )}
@@ -277,12 +280,12 @@ export const ExceptionAssistantPanel: React.FC<ExceptionAssistantPanelProps> = (
             if (e.key === 'Enter') handleSendMessage();
           }}
           disabled={isLoading}
-          className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-hidden focus:ring-1 focus:ring-[#635bff] focus:bg-white transition-colors"
+          className="flex-1 bg-[#0c101a] border border-white/10 rounded-xl px-3 py-2 text-xs text-[#f7f8fc] placeholder:text-[#7d879b] focus:outline-hidden focus:ring-1 focus:ring-[#7168ff] transition-colors"
         />
         <button
           onClick={() => handleSendMessage()}
           disabled={!inputQuery.trim() || isLoading}
-          className="p-2.5 rounded-xl bg-[#6d28d9] hover:bg-[#5b21b6] text-white transition-colors disabled:opacity-40 cursor-pointer shadow-xs min-h-[36px] min-w-[36px] flex items-center justify-center"
+          className="p-2.5 rounded-xl bg-[#a78bfa] hover:bg-[#8b5cf6] text-[#070a10] font-bold transition-colors disabled:opacity-40 cursor-pointer shadow-xs min-h-[36px] min-w-[36px] flex items-center justify-center"
           aria-label="Send query"
         >
           <Send className="w-3.5 h-3.5" />
@@ -290,8 +293,8 @@ export const ExceptionAssistantPanel: React.FC<ExceptionAssistantPanelProps> = (
       </div>
 
       {/* Safety Disclosure Banner */}
-      <div className="p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-[10px] text-slate-500 flex items-start gap-2">
-        <ShieldCheck className="w-3.5 h-3.5 text-[#098f74] shrink-0 mt-0.5" />
+      <div className="p-2.5 bg-[#0c101a] border border-white/10 rounded-xl text-[10px] text-[#7d879b] flex items-start gap-2">
+        <ShieldCheck className="w-3.5 h-3.5 text-[#2dd4bf] shrink-0 mt-0.5" />
         <span className="font-sans">
           <strong>Grounded Advisory Guarantee:</strong> Gemini advisory answers are informational only. They do not alter financial balances, transaction IDs, or the deterministic 4-factor scoring matrix.
         </span>

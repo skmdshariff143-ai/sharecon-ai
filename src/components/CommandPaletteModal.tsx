@@ -79,78 +79,79 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, handleClose]);
 
-  const matchedRecords = useMemo(() => {
-    if (!query.trim() || query.length < 2) return [];
+  const filteredRecords = useMemo(() => {
+    if (!query || query.trim().length < 2) return [];
     const q = query.toLowerCase().trim();
     return records
       .filter(
         (r) =>
-          r.recordId.toLowerCase().includes(q) ||
+          r.payment.paymentId.toLowerCase().includes(q) ||
           r.payment.orderId.toLowerCase().includes(q) ||
-          (r.matchedSettlement?.utr && r.matchedSettlement.utr.toLowerCase().includes(q)) ||
-          r.exceptionType.toLowerCase().includes(q)
+          (r.matchedSettlement?.utr && r.matchedSettlement.utr.toLowerCase().includes(q))
       )
-      .slice(0, 6);
-  }, [query, records]);
+      .slice(0, 5);
+  }, [records, query]);
 
   if (!isOpen) return null;
 
   return (
     <div
+      className="fixed inset-0 z-50 flex items-start justify-center pt-16 sm:pt-24 p-4 bg-[#070a10]/80 backdrop-blur-sm animate-in fade-in duration-100"
+      onClick={handleClose}
       role="dialog"
       aria-modal="true"
-      className="fixed inset-0 z-50 flex items-start justify-center pt-20 p-4 bg-slate-950/70 backdrop-blur-xs animate-in fade-in duration-100"
-      onClick={handleClose}
+      aria-labelledby="command-palette-title"
     >
       <div
-        className="surface-modal max-w-xl w-full shadow-2xl overflow-hidden flex flex-col max-h-[80vh]"
+        className="modal-surface w-full max-w-xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[80vh] bg-[#111620] border border-white/15 animate-in zoom-in-95 duration-100"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Search Header */}
-        <div className="flex items-center px-4 py-3.5 border-b border-slate-100 bg-slate-50/80">
-          <Search className="w-4 h-4 text-slate-400 shrink-0 mr-3" />
+        {/* Search Input */}
+        <div className="p-4 border-b border-white/10 flex items-center gap-3 bg-[#090d16]/80">
+          <Search className="w-5 h-5 text-[#7168ff] shrink-0" />
           <input
             ref={inputRef}
             type="text"
-            placeholder="Search records, switch workspaces, or run actions..."
+            placeholder="Type a command, search payment ID, order ref, UTR..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="flex-1 bg-transparent border-none text-xs text-slate-900 placeholder:text-slate-400 focus:outline-hidden"
+            className="w-full text-sm bg-transparent text-[#f7f8fc] placeholder:text-[#7d879b] focus:outline-hidden"
+            aria-label="Command search"
           />
-          <span className="text-[10px] font-mono text-slate-500 bg-slate-200/80 px-1.5 py-0.5 rounded ml-2 font-semibold">
+          <kbd className="text-[10px] font-mono bg-[#0c101a] border border-white/10 rounded px-1.5 py-0.5 text-[#7d879b] shrink-0 font-semibold">
             ESC
-          </span>
+          </kbd>
         </div>
 
-        {/* Results List */}
-        <div className="p-2.5 overflow-y-auto space-y-3 text-xs custom-scrollbar">
-          {/* Matched Records if query present */}
-          {matchedRecords.length > 0 && (
+        {/* Action List */}
+        <div className="p-3 space-y-4 overflow-y-auto flex-1 text-xs custom-scrollbar">
+          {/* Direct Record Matches (if query active) */}
+          {filteredRecords.length > 0 && (
             <div>
-              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-2 py-1 font-mono">
-                Matching Records
+              <div className="text-[10px] font-bold text-[#7d879b] uppercase tracking-wider px-2 py-1 font-mono">
+                Matching Transaction Records
               </div>
               <div className="space-y-1">
-                {matchedRecords.map((rec) => (
+                {filteredRecords.map((r) => (
                   <button
-                    key={rec.recordId}
+                    key={r.recordId}
                     onClick={() => {
-                      onSelectRecord(rec);
+                      onSelectRecord(r);
                       onClose();
                     }}
-                    className="w-full text-left px-3 py-2 rounded-xl hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 flex items-center justify-between transition-colors cursor-pointer"
+                    className="w-full text-left px-3 py-2 rounded-xl hover:bg-white/5 text-[#f7f8fc] flex items-center justify-between transition-colors cursor-pointer group border border-transparent hover:border-white/10"
                   >
-                    <div>
-                      <span className="font-mono font-bold text-slate-900">
-                        {rec.payment.paymentId}
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono font-bold text-[#7168ff] group-hover:text-[#5687ff]">
+                        {r.payment.paymentId}
                       </span>
-                      <span className="text-slate-400 ml-2 font-mono">({rec.payment.orderId})</span>
-                      <span className="ml-2 text-[10px] text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded font-mono">
-                        {rec.exceptionType}
-                      </span>
+                      <span className="text-[#a7afc0]">({r.payment.orderId})</span>
                     </div>
-                    <div className="font-mono font-bold text-slate-900 tabular-nums">
-                      {formatINR(rec.payment.grossAmount)}
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono text-[#a7afc0]">{formatINR(r.payment.grossAmount)}</span>
+                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-white/10 text-[#a7afc0] font-mono">
+                        {r.status}
+                      </span>
                     </div>
                   </button>
                 ))}
@@ -160,30 +161,30 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
 
           {/* Quick Actions */}
           <div>
-            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-2 py-1 font-mono">
-              Quick Actions
+            <div className="text-[10px] font-bold text-[#7d879b] uppercase tracking-wider px-2 py-1 font-mono">
+              Quick Operations
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
-              <button
-                onClick={() => {
-                  onStartTour();
-                  onClose();
-                }}
-                className="text-left px-3 py-2 rounded-xl hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 flex items-center gap-2 transition-colors cursor-pointer font-medium"
-              >
-                <Sparkles className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
-                <span>Start Guided Demo Tour</span>
-              </button>
-
+            <div className="space-y-1">
               <button
                 onClick={() => {
                   onLoadDemo();
                   onClose();
                 }}
-                className="text-left px-3 py-2 rounded-xl hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 flex items-center gap-2 transition-colors cursor-pointer font-medium"
+                className="w-full text-left px-3 py-2 rounded-xl hover:bg-[#7168ff]/15 text-[#f7f8fc] flex items-center gap-2 transition-colors cursor-pointer font-medium"
               >
-                <Play className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
-                <span>Reload Demo (180 Records)</span>
+                <Play className="w-3.5 h-3.5 text-[#7168ff] shrink-0" />
+                <span>Run Demo Batch (180 Synthetic Records)</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  onStartTour();
+                  onClose();
+                }}
+                className="w-full text-left px-3 py-2 rounded-xl hover:bg-[#7168ff]/15 text-[#f7f8fc] flex items-center gap-2 transition-colors cursor-pointer font-medium"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-[#7168ff] shrink-0" />
+                <span>Start 5-Minute Guided Evaluation Tour</span>
               </button>
 
               <button
@@ -191,10 +192,10 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
                   onOpenUpload();
                   onClose();
                 }}
-                className="text-left px-3 py-2 rounded-xl hover:bg-slate-100 text-slate-700 flex items-center gap-2 transition-colors cursor-pointer font-medium"
+                className="w-full text-left px-3 py-2 rounded-xl hover:bg-white/5 text-[#a7afc0] hover:text-white flex items-center gap-2 transition-colors cursor-pointer font-medium"
               >
-                <Upload className="w-3.5 h-3.5 text-slate-500 shrink-0" />
-                <span>Upload Custom CSVs</span>
+                <Upload className="w-3.5 h-3.5 text-[#7d879b] shrink-0" />
+                <span>Upload Custom 3-Way CSV Statements</span>
               </button>
 
               <button
@@ -202,9 +203,9 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
                   onExportReports();
                   onClose();
                 }}
-                className="text-left px-3 py-2 rounded-xl hover:bg-slate-100 text-slate-700 flex items-center gap-2 transition-colors cursor-pointer font-medium"
+                className="w-full text-left px-3 py-2 rounded-xl hover:bg-white/5 text-[#a7afc0] hover:text-white flex items-center gap-2 transition-colors cursor-pointer font-medium"
               >
-                <Download className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+                <Download className="w-3.5 h-3.5 text-[#7d879b] shrink-0" />
                 <span>Export Audit &amp; Reconciliation Reports</span>
               </button>
 
@@ -213,9 +214,9 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
                   onToggleDryRun();
                   onClose();
                 }}
-                className="text-left px-3 py-2 rounded-xl hover:bg-amber-50 text-slate-700 hover:text-amber-800 flex items-center gap-2 transition-colors cursor-pointer font-medium"
+                className="w-full text-left px-3 py-2 rounded-xl hover:bg-[#f5b942]/15 text-[#a7afc0] hover:text-[#f5b942] flex items-center gap-2 transition-colors cursor-pointer font-medium"
               >
-                <ToggleRight className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                <ToggleRight className="w-3.5 h-3.5 text-[#f5b942] shrink-0" />
                 <span>Toggle Dry-Run Mode</span>
               </button>
             </div>
@@ -223,7 +224,7 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
 
           {/* Navigation Workspaces */}
           <div>
-            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-2 py-1 font-mono">
+            <div className="text-[10px] font-bold text-[#7d879b] uppercase tracking-wider px-2 py-1 font-mono">
               Workspaces
             </div>
             <div className="space-y-1">
@@ -232,14 +233,14 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
                   onSelectTab('control_center');
                   onClose();
                 }}
-                className="w-full text-left px-3 py-2 rounded-xl hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 flex items-center justify-between transition-colors cursor-pointer group"
+                className="w-full text-left px-3 py-2 rounded-xl hover:bg-white/5 text-[#a7afc0] hover:text-white flex items-center justify-between transition-colors cursor-pointer group"
               >
                 <div className="flex items-center gap-2.5">
-                  <LayoutDashboard className="w-3.5 h-3.5 text-indigo-600" />
-                  <span className="font-semibold text-slate-800 group-hover:text-indigo-700">Control Center</span>
-                  <span className="text-slate-400 text-[11px]">Executive overview &amp; funnel</span>
+                  <LayoutDashboard className="w-3.5 h-3.5 text-[#7168ff]" />
+                  <span className="font-semibold text-[#f7f8fc] group-hover:text-[#7168ff]">Control Center</span>
+                  <span className="text-[#7d879b] text-[11px]">Executive overview &amp; funnel</span>
                 </div>
-                <ArrowRight className="w-3 h-3 text-slate-300 group-hover:text-indigo-500" />
+                <ArrowRight className="w-3 h-3 text-[#7d879b] group-hover:text-[#7168ff]" />
               </button>
 
               <button
@@ -247,14 +248,14 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
                   onSelectTab('reconciliation');
                   onClose();
                 }}
-                className="w-full text-left px-3 py-2 rounded-xl hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 flex items-center justify-between transition-colors cursor-pointer group"
+                className="w-full text-left px-3 py-2 rounded-xl hover:bg-white/5 text-[#a7afc0] hover:text-white flex items-center justify-between transition-colors cursor-pointer group"
               >
                 <div className="flex items-center gap-2.5">
-                  <Layers className="w-3.5 h-3.5 text-slate-600 group-hover:text-indigo-600" />
-                  <span className="font-semibold text-slate-800 group-hover:text-indigo-700">Reconciliation Workspace</span>
-                  <span className="text-slate-400 text-[11px]">3-way data grid &amp; filters</span>
+                  <Layers className="w-3.5 h-3.5 text-[#7d879b] group-hover:text-[#7168ff]" />
+                  <span className="font-semibold text-[#f7f8fc] group-hover:text-[#7168ff]">Reconciliation Workspace</span>
+                  <span className="text-[#7d879b] text-[11px]">3-way data grid &amp; filters</span>
                 </div>
-                <ArrowRight className="w-3 h-3 text-slate-300 group-hover:text-indigo-500" />
+                <ArrowRight className="w-3 h-3 text-[#7d879b] group-hover:text-[#7168ff]" />
               </button>
 
               <button
@@ -262,14 +263,14 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
                   onSelectTab('exceptions');
                   onClose();
                 }}
-                className="w-full text-left px-3 py-2 rounded-xl hover:bg-rose-50 text-slate-700 hover:text-rose-700 flex items-center justify-between transition-colors cursor-pointer group"
+                className="w-full text-left px-3 py-2 rounded-xl hover:bg-[#ff6577]/15 text-[#a7afc0] hover:text-[#ff6577] flex items-center justify-between transition-colors cursor-pointer group"
               >
                 <div className="flex items-center gap-2.5">
-                  <AlertTriangle className="w-3.5 h-3.5 text-rose-600" />
-                  <span className="font-semibold text-slate-800 group-hover:text-rose-700">Exception Command Center</span>
-                  <span className="text-slate-400 text-[11px]">Triage &amp; Gemini advisory</span>
+                  <AlertTriangle className="w-3.5 h-3.5 text-[#ff6577]" />
+                  <span className="font-semibold text-[#f7f8fc] group-hover:text-[#ff6577]">Exception Command Center</span>
+                  <span className="text-[#7d879b] text-[11px]">Triage &amp; Gemini advisory</span>
                 </div>
-                <ArrowRight className="w-3 h-3 text-slate-300 group-hover:text-rose-500" />
+                <ArrowRight className="w-3 h-3 text-[#7d879b] group-hover:text-[#ff6577]" />
               </button>
 
               <button
@@ -277,14 +278,14 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
                   onSelectTab('audit');
                   onClose();
                 }}
-                className="w-full text-left px-3 py-2 rounded-xl hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 flex items-center justify-between transition-colors cursor-pointer group"
+                className="w-full text-left px-3 py-2 rounded-xl hover:bg-white/5 text-[#a7afc0] hover:text-white flex items-center justify-between transition-colors cursor-pointer group"
               >
                 <div className="flex items-center gap-2.5">
-                  <History className="w-3.5 h-3.5 text-slate-600 group-hover:text-indigo-600" />
-                  <span className="font-semibold text-slate-800 group-hover:text-indigo-700">Audit Trail</span>
-                  <span className="text-slate-400 text-[11px]">Append-only timeline</span>
+                  <History className="w-3.5 h-3.5 text-[#7d879b] group-hover:text-[#7168ff]" />
+                  <span className="font-semibold text-[#f7f8fc] group-hover:text-[#7168ff]">Audit Trail</span>
+                  <span className="text-[#7d879b] text-[11px]">Append-only timeline</span>
                 </div>
-                <ArrowRight className="w-3 h-3 text-slate-300 group-hover:text-indigo-500" />
+                <ArrowRight className="w-3 h-3 text-[#7d879b] group-hover:text-[#7168ff]" />
               </button>
 
               <button
@@ -292,14 +293,14 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
                   onSelectTab('evaluation');
                   onClose();
                 }}
-                className="w-full text-left px-3 py-2 rounded-xl hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 flex items-center justify-between transition-colors cursor-pointer group"
+                className="w-full text-left px-3 py-2 rounded-xl hover:bg-white/5 text-[#a7afc0] hover:text-white flex items-center justify-between transition-colors cursor-pointer group"
               >
                 <div className="flex items-center gap-2.5">
-                  <Scale className="w-3.5 h-3.5 text-indigo-600" />
-                  <span className="font-semibold text-slate-800 group-hover:text-indigo-700">Evaluation Lab</span>
-                  <span className="text-slate-400 text-[11px]">Honest benchmark &amp; simulator</span>
+                  <Scale className="w-3.5 h-3.5 text-[#7168ff]" />
+                  <span className="font-semibold text-[#f7f8fc] group-hover:text-[#7168ff]">Evaluation Lab</span>
+                  <span className="text-[#7d879b] text-[11px]">Honest benchmark &amp; simulator</span>
                 </div>
-                <ArrowRight className="w-3 h-3 text-slate-300 group-hover:text-indigo-500" />
+                <ArrowRight className="w-3 h-3 text-[#7d879b] group-hover:text-[#7168ff]" />
               </button>
 
               <button
@@ -307,14 +308,14 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
                   onSelectTab('methodology');
                   onClose();
                 }}
-                className="w-full text-left px-3 py-2 rounded-xl hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 flex items-center justify-between transition-colors cursor-pointer group"
+                className="w-full text-left px-3 py-2 rounded-xl hover:bg-white/5 text-[#a7afc0] hover:text-white flex items-center justify-between transition-colors cursor-pointer group"
               >
                 <div className="flex items-center gap-2.5">
-                  <BookOpen className="w-3.5 h-3.5 text-slate-600 group-hover:text-indigo-600" />
-                  <span className="font-semibold text-slate-800 group-hover:text-indigo-700">Methodology &amp; Safety</span>
-                  <span className="text-slate-400 text-[11px]">Architecture &amp; math rules</span>
+                  <BookOpen className="w-3.5 h-3.5 text-[#7d879b] group-hover:text-[#7168ff]" />
+                  <span className="font-semibold text-[#f7f8fc] group-hover:text-[#7168ff]">Methodology &amp; Safety</span>
+                  <span className="text-[#7d879b] text-[11px]">Architecture &amp; math rules</span>
                 </div>
-                <ArrowRight className="w-3 h-3 text-slate-300 group-hover:text-indigo-500" />
+                <ArrowRight className="w-3 h-3 text-[#7d879b] group-hover:text-[#7168ff]" />
               </button>
 
               <button
@@ -322,14 +323,14 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
                   onSelectTab('help');
                   onClose();
                 }}
-                className="w-full text-left px-3 py-2 rounded-xl hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 flex items-center justify-between transition-colors cursor-pointer group"
+                className="w-full text-left px-3 py-2 rounded-xl hover:bg-white/5 text-[#a7afc0] hover:text-white flex items-center justify-between transition-colors cursor-pointer group"
               >
                 <div className="flex items-center gap-2.5">
-                  <BookOpen className="w-3.5 h-3.5 text-emerald-600" />
-                  <span className="font-semibold text-slate-800 group-hover:text-indigo-700">Help &amp; Guide (Judge Onboarding)</span>
-                  <span className="text-slate-400 text-[11px]">FAQs &amp; glossary</span>
+                  <BookOpen className="w-3.5 h-3.5 text-[#2dd4bf]" />
+                  <span className="font-semibold text-[#f7f8fc] group-hover:text-[#2dd4bf]">Help &amp; Guide (Judge Onboarding)</span>
+                  <span className="text-[#7d879b] text-[11px]">FAQs &amp; glossary</span>
                 </div>
-                <ArrowRight className="w-3 h-3 text-slate-300 group-hover:text-indigo-500" />
+                <ArrowRight className="w-3 h-3 text-[#7d879b] group-hover:text-[#2dd4bf]" />
               </button>
             </div>
           </div>

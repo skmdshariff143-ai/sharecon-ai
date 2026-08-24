@@ -126,7 +126,6 @@ export const GuidedDemoTour: React.FC<GuidedDemoTourProps> = ({
     }
   }, [currentStep, onNavigateTab]);
 
-  // Keyboard navigation handler
   React.useEffect(() => {
     if (!isOpen) return;
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -152,24 +151,24 @@ export const GuidedDemoTour: React.FC<GuidedDemoTourProps> = ({
       aria-modal="true"
       className="fixed bottom-6 left-6 z-50 max-w-md w-full animate-in slide-in-from-bottom-4 duration-200"
     >
-      <div className="bg-[#0c1220] text-white border border-slate-700/80 rounded-2xl p-5 shadow-2xl space-y-3 relative overflow-hidden">
+      <div className="bg-[#111620] text-[#f7f8fc] border border-white/15 rounded-2xl p-5 shadow-2xl space-y-3 relative overflow-hidden">
         {/* Top Glow Bar */}
-        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 via-violet-500 to-emerald-500"></div>
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#7168ff] via-[#a78bfa] to-[#2dd4bf]"></div>
 
         {/* Step Header */}
         <div className="flex items-center justify-between pt-1">
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-bold uppercase tracking-wider bg-violet-900/80 text-violet-300 border border-violet-700/60 px-2 py-0.5 rounded-full font-mono">
+            <span className="text-[10px] font-bold uppercase tracking-wider bg-[#a78bfa]/20 text-[#c4b5fd] border border-[#a78bfa]/40 px-2 py-0.5 rounded-full font-mono">
               {step.badge}
             </span>
-            <span className="text-xs text-slate-400 font-mono">
+            <span className="text-xs text-[#7d879b] font-mono">
               Step {currentStep + 1} of {TOUR_STEPS.length}
             </span>
           </div>
 
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-200 transition-colors p-1 rounded-lg cursor-pointer hover:bg-slate-800/60"
+            className="text-[#7d879b] hover:text-white transition-colors p-1 rounded-lg cursor-pointer hover:bg-white/10"
             aria-label="Close guided demo"
           >
             <X className="w-4 h-4" />
@@ -178,34 +177,34 @@ export const GuidedDemoTour: React.FC<GuidedDemoTourProps> = ({
 
         {/* Title & Body */}
         <div>
-          <h4 className="text-sm font-extrabold text-white leading-tight font-mono">
+          <h4 className="text-sm font-extrabold text-[#f7f8fc] leading-tight font-mono">
             {step.title}
           </h4>
-          <p className="text-xs text-slate-300 mt-2 leading-relaxed font-sans">
+          <p className="text-xs text-[#a7afc0] mt-2 leading-relaxed font-sans">
             {step.content}
           </p>
         </div>
 
         {/* Highlight Callout */}
-        <div className="bg-slate-800/80 rounded-xl p-2.5 border border-slate-700/50 flex items-start gap-2 text-[11px] text-emerald-300">
-          <ShieldCheck className="w-4 h-4 shrink-0 text-emerald-400 mt-0.5" />
-          <span className="leading-snug">{step.targetExplanation}</span>
+        <div className="bg-[#0c101a] rounded-xl p-2.5 border border-white/10 flex items-start gap-2 text-[11px] text-[#2dd4bf]">
+          <ShieldCheck className="w-4 h-4 shrink-0 text-[#2dd4bf] mt-0.5" />
+          <span className="leading-snug font-sans">{step.targetExplanation}</span>
         </div>
 
         {/* Controls */}
-        <div className="flex items-center justify-between pt-2 border-t border-slate-800/80">
+        <div className="flex items-center justify-between pt-2 border-t border-white/10">
           <div className="flex items-center gap-2">
             <button
               onClick={handlePrev}
               disabled={currentStep === 0}
-              className="text-xs text-slate-400 hover:text-slate-200 disabled:opacity-30 flex items-center gap-1 cursor-pointer transition-colors"
+              className="text-xs text-[#a7afc0] hover:text-white disabled:opacity-30 flex items-center gap-1 cursor-pointer transition-colors"
             >
               <ChevronLeft className="w-4 h-4" /> Back
             </button>
             {currentStep > 0 && (
               <button
                 onClick={handleRestart}
-                className="text-[11px] text-slate-500 hover:text-slate-300 transition-colors cursor-pointer"
+                className="text-[11px] text-[#7d879b] hover:text-[#f7f8fc] transition-colors cursor-pointer"
                 title="Restart walkthrough from beginning"
               >
                 Restart
@@ -218,7 +217,7 @@ export const GuidedDemoTour: React.FC<GuidedDemoTourProps> = ({
               <span
                 key={i}
                 className={`w-1.5 h-1.5 rounded-full transition-all ${
-                  i === currentStep ? 'bg-indigo-400 w-3' : 'bg-slate-700'
+                  i === currentStep ? 'bg-[#7168ff] w-3' : 'bg-[#1c2433]'
                 }`}
               />
             ))}
@@ -226,7 +225,7 @@ export const GuidedDemoTour: React.FC<GuidedDemoTourProps> = ({
 
           <button
             onClick={handleNext}
-            className="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold flex items-center gap-1 transition-colors shadow-xs cursor-pointer min-h-[34px]"
+            className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-[#7168ff] to-[#5687ff] hover:from-[#5d53ea] hover:to-[#4375ea] text-white text-xs font-semibold flex items-center gap-1 transition-all shadow-[0_0_10px_rgba(113,104,255,0.4)] cursor-pointer min-h-[34px]"
           >
             <span>{currentStep === TOUR_STEPS.length - 1 ? 'Finish Tour' : 'Next Step'}</span>
             <ChevronRight className="w-3.5 h-3.5" />

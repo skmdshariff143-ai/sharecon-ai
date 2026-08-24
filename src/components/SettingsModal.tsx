@@ -52,26 +52,26 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
       role="dialog"
       aria-modal="true"
       aria-labelledby="settings-modal-title"
-      className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs animate-in fade-in duration-150"
+      className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 bg-[#070a10]/85 backdrop-blur-md animate-in fade-in duration-150"
     >
-      <div className="surface-modal max-w-lg w-full p-6 shadow-2xl">
-        <div className="flex items-center justify-between pb-4 border-b border-slate-200">
+      <div className="modal-surface max-w-lg w-full p-6 shadow-2xl bg-[#111620] border border-white/15 rounded-2xl animate-in zoom-in-95 duration-150">
+        <div className="flex items-center justify-between pb-4 border-b border-white/10">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 bg-indigo-50 text-indigo-600 rounded-xl border border-indigo-200">
+            <div className="p-2 bg-[#7168ff]/20 text-[#7168ff] rounded-xl border border-[#7168ff]/40 shadow-[0_0_8px_rgba(113,104,255,0.3)]">
               <Sliders className="w-5 h-5" />
             </div>
             <div>
-              <h3 id="settings-modal-title" className="text-base font-extrabold text-slate-900 font-mono">
+              <h3 id="settings-modal-title" className="text-base font-extrabold text-[#f7f8fc] font-mono">
                 Reconciliation Engine Settings
               </h3>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-[#a7afc0] font-sans">
                 Calibrate thresholds and automated matching safety gates.
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg cursor-pointer transition-colors"
+            className="p-1.5 text-[#7d879b] hover:text-white hover:bg-white/10 rounded-lg cursor-pointer transition-colors min-h-[36px] min-w-[36px] flex items-center justify-center"
           >
             <X className="w-5 h-5" />
           </button>
@@ -80,11 +80,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         <div className="space-y-4 py-4 text-xs">
           {/* High Confidence Threshold */}
           <div>
-            <div className="flex justify-between font-semibold text-slate-800 mb-1">
+            <div className="flex justify-between font-semibold text-[#f7f8fc] mb-1">
               <span>Auto-Reconcile Threshold (High Confidence)</span>
-              <span className="text-indigo-600 font-mono font-bold">{highThreshold}%</span>
+              <span className="text-[#7168ff] font-mono font-bold">{highThreshold}%</span>
             </div>
-            <p className="text-[11px] text-slate-500 mb-1.5">
+            <p className="text-[11px] text-[#a7afc0] mb-1.5 font-sans">
               Matches with confidence score ≥ this value are eligible for automatic reconciliation.
             </p>
             <input
@@ -94,120 +94,106 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               step="1"
               value={highThreshold}
               onChange={(e) => setHighThreshold(Number(e.target.value))}
-              className="w-full accent-indigo-600 cursor-pointer"
+              className="w-full accent-[#7168ff] cursor-pointer"
             />
           </div>
 
           {/* Medium Confidence Threshold */}
           <div>
-            <div className="flex justify-between font-semibold text-slate-800 mb-1">
-              <span>Human Review Escalation Threshold (Medium Confidence)</span>
-              <span className="text-amber-600 font-mono font-bold">{medThreshold}%</span>
+            <div className="flex justify-between font-semibold text-[#f7f8fc] mb-1">
+              <span>Human Review Threshold (Medium Confidence)</span>
+              <span className="text-[#f5b942] font-mono font-bold">{medThreshold}%</span>
             </div>
-            <p className="text-[11px] text-slate-500 mb-1.5">
-              Matches scored between {medThreshold}% and {highThreshold - 1}% are routed to the review queue.
+            <p className="text-[11px] text-[#a7afc0] mb-1.5 font-sans">
+              Matches with scores between this value and High Threshold route to human reviewer triage.
             </p>
             <input
               type="range"
-              min="40"
-              max="70"
+              min="30"
+              max="80"
               step="1"
               value={medThreshold}
               onChange={(e) => setMedThreshold(Number(e.target.value))}
-              className="w-full accent-amber-600 cursor-pointer"
+              className="w-full accent-[#f5b942] cursor-pointer"
             />
           </div>
 
-          {/* Fee Variance Tolerance */}
+          {/* Max Date Delta Window */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="font-semibold text-slate-800 block mb-1">
-                Fee Tolerance (₹)
-              </label>
-              <input
-                type="number"
-                min="0"
-                max="10"
-                step="0.5"
-                value={feeTolerance}
-                onChange={(e) => setFeeTolerance(Number(e.target.value))}
-                className="w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs focus:bg-white focus:outline-hidden focus:ring-1 focus:ring-indigo-500 transition-colors"
-              />
-              <span className="text-[10px] text-slate-400 mt-0.5 block font-mono">
-                Allowed rounding difference in paise.
-              </span>
-            </div>
-
-            <div>
-              <label className="font-semibold text-slate-800 block mb-1">
-                Max Date Window (Days)
-              </label>
+              <label className="font-semibold text-[#f7f8fc] block mb-1">Max Settlement Lag (Days)</label>
               <input
                 type="number"
                 min="1"
                 max="14"
                 value={maxDateDelta}
                 onChange={(e) => setMaxDateDelta(Number(e.target.value))}
-                className="w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs focus:bg-white focus:outline-hidden focus:ring-1 focus:ring-indigo-500 transition-colors"
+                className="w-full bg-[#0c101a] border border-white/10 rounded-xl p-2 font-mono text-[#f7f8fc] focus:outline-hidden focus:ring-1 focus:ring-[#7168ff]"
               />
-              <span className="text-[10px] text-slate-400 mt-0.5 block font-mono">
-                Candidate lookup proximity SLA.
-              </span>
+            </div>
+
+            <div>
+              <label className="font-semibold text-[#f7f8fc] block mb-1">Fee Variance Tolerance (INR)</label>
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value={feeTolerance}
+                onChange={(e) => setFeeTolerance(Number(e.target.value))}
+                className="w-full bg-[#0c101a] border border-white/10 rounded-xl p-2 font-mono text-[#f7f8fc] focus:outline-hidden focus:ring-1 focus:ring-[#7168ff]"
+              />
             </div>
           </div>
 
-          {/* Circuit Breaker Limit */}
+          {/* Circuit Breaker */}
           <div>
-            <div className="flex justify-between font-semibold text-slate-800 mb-1">
-              <span>Safety Circuit Breaker Anomaly Threshold</span>
-              <span className="text-rose-600 font-mono font-bold">{circuitBreaker}%</span>
+            <div className="flex justify-between font-semibold text-[#f7f8fc] mb-1">
+              <span>Safety Circuit Breaker (Batch Anomaly Limit)</span>
+              <span className="text-[#ff6577] font-mono font-bold">{circuitBreaker}%</span>
             </div>
-            <p className="text-[11px] text-slate-500 mb-1.5">
-              If batch anomaly rate exceeds this limit, automatic reconciliation halts immediately.
+            <p className="text-[11px] text-[#a7afc0] mb-1.5 font-sans">
+              Halts batch automation if exception rate exceeds this threshold.
             </p>
             <input
               type="range"
-              min="15"
-              max="50"
+              min="10"
+              max="60"
               step="5"
               value={circuitBreaker}
               onChange={(e) => setCircuitBreaker(Number(e.target.value))}
-              className="w-full accent-rose-600 cursor-pointer"
+              className="w-full accent-[#ff6577] cursor-pointer"
             />
           </div>
 
-          {/* Dry Run Toggle */}
-          <div className="p-3.5 surface-inset rounded-xl flex items-center justify-between">
+          {/* Dry-Run Mode Toggle */}
+          <div className="flex items-center justify-between p-3 rounded-xl bg-[#0c101a] border border-white/10">
             <div>
-              <span className="font-semibold text-slate-800 block">Dry-Run Simulation Mode</span>
-              <span className="text-[11px] text-slate-500">
-                Safely simulate decisions without finalizing live ledger state.
-              </span>
+              <div className="font-bold text-[#f7f8fc]">Dry-Run Simulation Mode</div>
+              <p className="text-[11px] text-[#a7afc0] font-sans">
+                Matches are simulated without emitting irreversible ledger write actions.
+              </p>
             </div>
-            <button
-              onClick={() => setDryRun(!dryRun)}
-              className={`w-11 h-6 flex items-center rounded-full p-1 transition-colors cursor-pointer ${
-                dryRun ? 'bg-indigo-600 justify-end' : 'bg-slate-300 justify-start'
-              }`}
-            >
-              <div className="bg-white w-4 h-4 rounded-full shadow-xs"></div>
-            </button>
+            <input
+              type="checkbox"
+              checked={dryRun}
+              onChange={(e) => setDryRun(e.target.checked)}
+              className="w-4 h-4 rounded text-[#7168ff] accent-[#7168ff] cursor-pointer"
+            />
           </div>
         </div>
 
-        {/* Modal Actions */}
-        <div className="pt-4 border-t border-slate-200 flex items-center justify-end gap-2">
+        <div className="flex items-center justify-end gap-2 pt-4 border-t border-white/10">
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer min-h-[36px]"
+            className="px-4 py-2 rounded-xl text-xs font-semibold text-[#a7afc0] hover:text-white hover:bg-white/10 border border-white/10 transition-colors cursor-pointer"
           >
             Cancel
           </button>
           <button
             onClick={handleSave}
-            className="px-4 py-2 rounded-xl text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white transition-colors shadow-xs cursor-pointer min-h-[36px]"
+            className="px-4 py-2 rounded-xl text-xs font-semibold text-white bg-gradient-to-r from-[#7168ff] to-[#5687ff] hover:from-[#5d53ea] hover:to-[#4375ea] transition-all shadow-[0_0_12px_rgba(113,104,255,0.4)] cursor-pointer"
           >
-            Save &amp; Re-Score Batch
+            Save Configuration
           </button>
         </div>
       </div>
