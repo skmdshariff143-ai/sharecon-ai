@@ -83,9 +83,9 @@ export const ControlCenterTab: React.FC<ControlCenterTabProps> = ({
 
   if (!batch || records.length === 0) {
     return (
-      <div className="surface-card p-12 text-center my-6">
-        <h3 className="text-base font-bold text-slate-800">No active reconciliation batch</h3>
-        <p className="text-xs text-slate-500 mt-1">
+      <div className="elevated-card p-12 text-center my-6 bg-[#111620] border-white/10">
+        <h3 className="text-base font-bold text-[#f7f8fc]">No active reconciliation batch</h3>
+        <p className="text-xs text-[#a7afc0] mt-1">
           Click &quot;Run Demo (180)&quot; in the command bar to process synthetic Razorpay records.
         </p>
       </div>
@@ -111,93 +111,95 @@ export const ControlCenterTab: React.FC<ControlCenterTabProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* SECTION B: Signature Reconciliation Health Hero */}
-      <div className="relative overflow-hidden rounded-2xl bg-[#0b1220] border border-slate-800 text-white shadow-xl">
-        {/* Subtle Ambient Radial Glow */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-[#635bff]/20 via-[#098f74]/10 to-transparent blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-1/3 w-64 h-64 bg-[#635bff]/10 blur-2xl pointer-events-none" />
+      {/* SECTION B: Signature Dark Ambient Hero */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#090d16] via-[#111620] to-[#090d16] border border-white/12 text-[#f7f8fc] shadow-2xl">
+        {/* Soft Ambient Cyan/Indigo Radial Glow */}
+        <div className="absolute -top-12 -left-12 w-80 h-80 bg-[#7168ff]/15 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-12 right-12 w-80 h-80 bg-[#2dd4bf]/12 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative p-6 sm:p-7 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           {/* Left Column: Command Plane Identity */}
           <div className="space-y-3 max-w-xl">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#635bff]/20 text-[#a5b4fc] border border-[#635bff]/40 text-[10px] font-bold uppercase tracking-wider font-mono">
-                <Activity className="w-3.5 h-3.5 text-[#818cf8]" />
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#7168ff]/15 text-[#c4b5fd] border border-[#7168ff]/35 text-[10px] font-bold uppercase tracking-wider font-mono">
+                <Activity className="w-3.5 h-3.5 text-[#7168ff]" />
                 Three-way reconciliation control plane
               </span>
-              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#098f74]/20 text-[#6ee7b7] border border-[#098f74]/40 text-[10px] font-semibold font-mono">
-                <CheckCircle className="w-3 h-3 text-[#34d399]" />
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#2dd4bf]/15 text-[#2dd4bf] border border-[#2dd4bf]/35 text-[10px] font-semibold font-mono">
+                <CheckCircle className="w-3 h-3 text-[#2dd4bf]" />
                 Dry-Run Safety Active
               </span>
             </div>
 
             <div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white leading-tight font-mono">
+              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#f7f8fc] leading-tight font-mono">
                 Every settlement accounted for.
               </h1>
-              <p className="text-xs sm:text-sm text-slate-300 mt-1.5 leading-relaxed font-sans">
+              <p className="text-xs sm:text-sm text-[#a7afc0] mt-1.5 leading-relaxed font-sans">
                 Continuous deterministic 3-way reconciliation connecting Razorpay captured payments, nodal gateway settlements, and merchant bank account credits.
               </p>
             </div>
 
-            <div className="flex flex-wrap items-center gap-3 pt-1 text-xs text-slate-400 font-mono">
+            <div className="flex flex-wrap items-center gap-3 pt-1 text-xs text-[#7d879b] font-mono">
               <span className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-[#10b981] animate-pulse"></span>
-                <span>Batch Sync: <strong>{records.length} Records</strong></span>
+                <span className="w-2 h-2 rounded-full bg-[#2dd4bf] shadow-[0_0_8px_rgba(45,212,191,0.8)]"></span>
+                <span className="text-[#a7afc0]">Batch Sync: <strong className="text-[#f7f8fc]">{records.length} Records</strong></span>
               </span>
               <span>•</span>
               <span className="flex items-center gap-1.5">
-                <Clock className="w-3.5 h-3.5 text-slate-400" />
-                <span>Engine Latency: <strong>~4.8ms</strong></span>
+                <Clock className="w-3.5 h-3.5 text-[#7d879b]" />
+                <span className="text-[#a7afc0]">Engine Latency: <strong className="text-[#f7f8fc]">~4.8ms</strong></span>
               </span>
+              <span>•</span>
+              <span className="text-[11px] text-[#7d879b]">Synthetic Verification</span>
             </div>
           </div>
 
           {/* Right Column: Transparent Reconciliation Health Visualization */}
-          <div className="bg-[#121c31]/90 border border-slate-700/70 rounded-xl p-4.5 sm:p-5 flex flex-col justify-between shrink-0 shadow-lg lg:w-84">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-700/60">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 font-mono">
+          <div className="glass-panel bg-[#151a25]/90 border border-white/15 rounded-2xl p-4.5 sm:p-5 flex flex-col justify-between shrink-0 shadow-2xl lg:w-84 backdrop-blur-md">
+            <div className="flex items-center justify-between pb-3 border-b border-white/10">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-[#a7afc0] font-mono">
                 Reconciliation Health
               </span>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#098f74]/20 text-[#34d399] border border-[#098f74]/40 font-mono">
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#2dd4bf]/20 text-[#2dd4bf] border border-[#2dd4bf]/40 font-mono shadow-[0_0_8px_rgba(45,212,191,0.3)]">
                 {resolutionPercentage}% Resolved
               </span>
             </div>
 
-            <div className="py-3 space-y-2">
+            <div className="py-3 space-y-2.5">
               <div className="flex items-baseline justify-between">
-                <span className="text-xs text-slate-300">Accounted Volume:</span>
-                <span className="text-lg font-bold text-white font-mono tabular-nums">
+                <span className="text-xs text-[#a7afc0]">Accounted Volume:</span>
+                <span className="text-lg font-bold text-[#f7f8fc] font-mono tabular-nums">
                   {formatINR(matchedAmount)}
                 </span>
               </div>
-              <div className="flex items-baseline justify-between text-xs text-slate-400">
+              <div className="flex items-baseline justify-between text-xs text-[#7d879b]">
                 <span>Total Batch Volume:</span>
-                <span className="font-mono tabular-nums">{formatINR(totalGrossAmount)}</span>
+                <span className="font-mono tabular-nums text-[#a7afc0]">{formatINR(totalGrossAmount)}</span>
               </div>
               {/* Mini Health Bar */}
-              <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden flex border border-slate-700">
+              <div className="w-full h-2 bg-[#0c101a] rounded-full overflow-hidden flex border border-white/10">
                 <div
                   style={{ width: `${(autoRecords.length / records.length) * 100}%` }}
-                  className="bg-[#098f74] h-full"
+                  className="bg-[#2dd4bf] h-full transition-all duration-500"
                   title={`Safely Resolved: ${autoRecords.length}`}
                 />
                 <div
                   style={{ width: `${(reviewRecords.length / records.length) * 100}%` }}
-                  className="bg-[#b76e00] h-full"
+                  className="bg-[#f5b942] h-full transition-all duration-500"
                   title={`Pending Review: ${reviewRecords.length}`}
                 />
                 <div
                   style={{ width: `${(exceptionRecords.length / records.length) * 100}%` }}
-                  className="bg-[#d64550] h-full"
+                  className="bg-[#ff6577] h-full transition-all duration-500"
                   title={`Unmatched Exceptions: ${exceptionRecords.length}`}
                 />
               </div>
             </div>
 
-            <div className="pt-2.5 border-t border-slate-700/60 flex items-center justify-between text-[11px] text-slate-400">
+            <div className="pt-2.5 border-t border-white/10 flex items-center justify-between text-[11px] text-[#7d879b]">
               <span>Attention Required:</span>
-              <span className="font-bold text-[#fde68a] font-mono">
+              <span className="font-bold text-[#f5b942] font-mono">
                 {reviewRecords.length + exceptionRecords.length} records
               </span>
             </div>
@@ -208,46 +210,46 @@ export const ControlCenterTab: React.FC<ControlCenterTabProps> = ({
       {/* SECTIONS C & D: Responsive 12-Column KPI Composition & Hierarchy */}
       <div className="grid grid-cols-1 md:grid-cols-12 gap-3.5">
         {/* Card 1: Total Volume (Desktop: span 3, Tablet: span 6, Mobile: full) */}
-        <div className="col-span-1 md:col-span-6 lg:col-span-3 surface-card p-4.5 flex flex-col justify-between border-t-2 border-t-slate-400">
-          <div className="flex items-center justify-between text-slate-500 mb-2">
-            <span className="metric-label text-slate-500">
+        <div className="col-span-1 md:col-span-6 lg:col-span-3 elevated-card p-4.5 flex flex-col justify-between border-t-2 border-t-[#7168ff] bg-[#111620]">
+          <div className="flex items-center justify-between text-[#7d879b] mb-2">
+            <span className="metric-label text-[#a7afc0]">
               Total Volume
             </span>
-            <div className="w-7 h-7 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center">
+            <div className="w-7 h-7 rounded-lg bg-[#7168ff]/15 text-[#7168ff] flex items-center justify-center border border-[#7168ff]/25">
               <Layers className="w-3.5 h-3.5" />
             </div>
           </div>
-          <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight metric-primary">
+          <div className="text-2xl sm:text-3xl font-extrabold text-[#f7f8fc] tracking-tight metric-primary">
             {formatINR(totalGrossAmount)}
           </div>
-          <div className="text-xs text-slate-500 mt-2 flex items-center justify-between pt-2 border-t border-slate-100 font-sans">
-            <span><strong className="text-slate-800 font-mono">{records.length}</strong> records processed</span>
-            <span className="text-slate-400 text-[11px] font-mono">100% Captured</span>
+          <div className="text-xs text-[#a7afc0] mt-2 flex items-center justify-between pt-2 border-t border-white/10 font-sans">
+            <span><strong className="text-[#f7f8fc] font-mono">{records.length}</strong> records processed</span>
+            <span className="text-[#7d879b] text-[11px] font-mono">100% Ingest</span>
           </div>
         </div>
 
         {/* Card 2: Auto-Reconciled (Desktop: span 3, Tablet: span 6, Mobile: full) */}
         <div
           onClick={() => onNavigateToTab('reconciliation')}
-          className="col-span-1 md:col-span-6 lg:col-span-3 surface-card-interactive p-4.5 flex flex-col justify-between border-t-2 border-t-[#098f74] hover:border-[#098f74] group"
+          className="col-span-1 md:col-span-6 lg:col-span-3 elevated-card-interactive p-4.5 flex flex-col justify-between border-t-2 border-t-[#2dd4bf] hover:border-[#2dd4bf] group bg-[#111620]"
           role="button"
           tabIndex={0}
           aria-label="Filter auto-reconciled records"
         >
-          <div className="flex items-center justify-between text-slate-500 mb-2">
-            <span className="metric-label text-[#098f74]">
+          <div className="flex items-center justify-between text-[#7d879b] mb-2">
+            <span className="metric-label text-[#2dd4bf]">
               Auto-Reconciled
             </span>
-            <div className="w-7 h-7 rounded-lg bg-[#ecfdf5] text-[#098f74] flex items-center justify-center group-hover:bg-[#d1fae5] transition-colors">
+            <div className="w-7 h-7 rounded-lg bg-[#2dd4bf]/15 text-[#2dd4bf] flex items-center justify-center group-hover:bg-[#2dd4bf]/25 transition-colors border border-[#2dd4bf]/25">
               <CheckCircle2 className="w-3.5 h-3.5" />
             </div>
           </div>
-          <div className="text-2xl sm:text-3xl font-extrabold text-[#098f74] tracking-tight metric-primary">
+          <div className="text-2xl sm:text-3xl font-extrabold text-[#2dd4bf] tracking-tight metric-primary">
             {formatINR(matchedAmount)}
           </div>
-          <div className="text-xs text-slate-500 mt-2 flex items-center justify-between pt-2 border-t border-slate-100 font-sans">
-            <span className="font-semibold text-emerald-800 font-mono">{autoRecords.length} records</span>
-            <span className="text-emerald-700 font-mono font-bold bg-[#ecfdf5] px-1.5 py-0.5 rounded text-[11px]">
+          <div className="text-xs text-[#a7afc0] mt-2 flex items-center justify-between pt-2 border-t border-white/10 font-sans">
+            <span className="font-semibold text-[#2dd4bf] font-mono">{autoRecords.length} records</span>
+            <span className="text-[#2dd4bf] font-mono font-bold bg-[#2dd4bf]/15 border border-[#2dd4bf]/30 px-1.5 py-0.5 rounded text-[11px]">
               {resolutionPercentage}%
             </span>
           </div>
@@ -256,77 +258,77 @@ export const ControlCenterTab: React.FC<ControlCenterTabProps> = ({
         {/* Card 3: Review Queue (Desktop: span 2, Tablet: span 4, Mobile: 2-col compact) */}
         <div
           onClick={() => onNavigateToTab('reconciliation')}
-          className="col-span-1 md:col-span-4 lg:col-span-2 surface-card-interactive p-4.5 flex flex-col justify-between border-t-2 border-t-[#b76e00] hover:border-[#b76e00] group"
+          className="col-span-1 md:col-span-4 lg:col-span-2 elevated-card-interactive p-4.5 flex flex-col justify-between border-t-2 border-t-[#f5b942] hover:border-[#f5b942] group bg-[#111620]"
           role="button"
           tabIndex={0}
           aria-label="Filter review queue cases"
         >
-          <div className="flex items-center justify-between text-slate-500 mb-2">
-            <span className="metric-label text-[#b76e00]">
+          <div className="flex items-center justify-between text-[#7d879b] mb-2">
+            <span className="metric-label text-[#f5b942]">
               Review Queue
             </span>
-            <div className="w-7 h-7 rounded-lg bg-[#fffbeb] text-[#b76e00] flex items-center justify-center group-hover:bg-[#fef3c7] transition-colors">
+            <div className="w-7 h-7 rounded-lg bg-[#f5b942]/15 text-[#f5b942] flex items-center justify-center group-hover:bg-[#f5b942]/25 transition-colors border border-[#f5b942]/25">
               <Clock className="w-3.5 h-3.5" />
             </div>
           </div>
-          <div className="text-2xl font-extrabold text-[#b76e00] tracking-tight metric-secondary">
+          <div className="text-2xl font-extrabold text-[#f5b942] tracking-tight metric-secondary">
             {reviewRecords.length} cases
           </div>
-          <div className="text-xs text-slate-500 mt-2 flex items-center justify-between pt-2 border-t border-slate-100 font-sans">
-            <span className="font-semibold text-amber-800 font-mono">
+          <div className="text-xs text-[#a7afc0] mt-2 flex items-center justify-between pt-2 border-t border-white/10 font-sans">
+            <span className="font-semibold text-[#f5b942] font-mono">
               {(((reviewRecords.length) / records.length) * 100).toFixed(1)}%
             </span>
-            <span className="text-slate-400 text-[11px]">triage</span>
+            <span className="text-[#7d879b] text-[11px]">triage</span>
           </div>
         </div>
 
         {/* Card 4: Financial Exposure (Desktop: span 2, Tablet: span 4, Mobile: 2-col compact) */}
         <div
           onClick={() => onNavigateToTab('exceptions')}
-          className="col-span-1 md:col-span-4 lg:col-span-2 surface-card-interactive p-4.5 flex flex-col justify-between border-t-2 border-t-[#d64550] hover:border-[#d64550] group"
+          className="col-span-1 md:col-span-4 lg:col-span-2 elevated-card-interactive p-4.5 flex flex-col justify-between border-t-2 border-t-[#ff6577] hover:border-[#ff6577] group bg-[#111620]"
           role="button"
           tabIndex={0}
           aria-label="Filter exception queue and financial exposure"
         >
-          <div className="flex items-center justify-between text-slate-500 mb-2">
-            <span className="metric-label text-[#d64550]">
+          <div className="flex items-center justify-between text-[#7d879b] mb-2">
+            <span className="metric-label text-[#ff6577]">
               Financial Exposure
             </span>
-            <div className="w-7 h-7 rounded-lg bg-[#fef2f2] text-[#d64550] flex items-center justify-center group-hover:bg-[#fee2e2] transition-colors">
+            <div className="w-7 h-7 rounded-lg bg-[#ff6577]/15 text-[#ff6577] flex items-center justify-center group-hover:bg-[#ff6577]/25 transition-colors border border-[#ff6577]/25">
               <AlertOctagon className="w-3.5 h-3.5" />
             </div>
           </div>
-          <div className="text-2xl font-extrabold text-[#d64550] tracking-tight metric-secondary">
+          <div className="text-2xl font-extrabold text-[#ff6577] tracking-tight metric-secondary">
             {formatINR(evaluation?.totalFinancialExposurePaise || 0)}
           </div>
-          <div className="text-xs text-slate-500 mt-2 flex items-center justify-between pt-2 border-t border-slate-100 font-sans">
-            <span className="font-semibold text-rose-800 font-mono">{exceptionRecords.length} exceptions</span>
-            <span className="text-slate-400 text-[11px]">uncredited</span>
+          <div className="text-xs text-[#a7afc0] mt-2 flex items-center justify-between pt-2 border-t border-white/10 font-sans">
+            <span className="font-semibold text-[#ff6577] font-mono">{exceptionRecords.length} exceptions</span>
+            <span className="text-[#7d879b] text-[11px]">uncredited</span>
           </div>
         </div>
 
         {/* Card 5: Auto-Resolution Precision (Desktop: span 2, Tablet: span 4, Mobile: full) */}
         <div
           onClick={() => onNavigateToTab('evaluation')}
-          className="col-span-1 md:col-span-4 lg:col-span-2 surface-card-interactive p-4.5 flex flex-col justify-between border-t-2 border-t-[#635bff] hover:border-[#635bff] group"
+          className="col-span-1 md:col-span-4 lg:col-span-2 elevated-card-interactive p-4.5 flex flex-col justify-between border-t-2 border-t-[#a78bfa] hover:border-[#a78bfa] group bg-[#111620]"
           role="button"
           tabIndex={0}
           aria-label="Inspect honest evaluation precision metrics"
         >
-          <div className="flex items-center justify-between text-slate-500 mb-2">
-            <span className="metric-label text-[#635bff]">
+          <div className="flex items-center justify-between text-[#7d879b] mb-2">
+            <span className="metric-label text-[#a78bfa]">
               Auto-Precision
             </span>
-            <div className="w-7 h-7 rounded-lg bg-[#f4f3ff] text-[#635bff] flex items-center justify-center group-hover:bg-[#ede9fe] transition-colors">
+            <div className="w-7 h-7 rounded-lg bg-[#a78bfa]/15 text-[#a78bfa] flex items-center justify-center group-hover:bg-[#a78bfa]/25 transition-colors border border-[#a78bfa]/25">
               <ShieldCheck className="w-3.5 h-3.5" />
             </div>
           </div>
-          <div className="text-2xl font-extrabold text-[#635bff] tracking-tight metric-secondary">
+          <div className="text-2xl font-extrabold text-[#a78bfa] tracking-tight metric-secondary">
             {evaluation ? (evaluation.autoResolutionPrecision * 100).toFixed(1) : '100.0'}%
           </div>
-          <div className="text-xs text-slate-500 mt-2 flex items-center justify-between pt-2 border-t border-slate-100 font-sans">
+          <div className="text-xs text-[#a7afc0] mt-2 flex items-center justify-between pt-2 border-t border-white/10 font-sans">
             <span>Exposure:</span>
-            <strong className="text-[#098f74] font-mono font-bold">
+            <strong className="text-[#2dd4bf] font-mono font-bold">
               {formatINR(evaluation?.falsePositiveExposurePaise || 0)}
             </strong>
           </div>
@@ -334,18 +336,18 @@ export const ControlCenterTab: React.FC<ControlCenterTabProps> = ({
       </div>
 
       {/* SECTION E: Three-Way Reconciliation Story Flow */}
-      <div className="surface-card p-5 sm:p-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 mb-5 border-b border-slate-100 gap-2">
+      <div className="elevated-card p-5 sm:p-6 bg-[#111620]">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 mb-5 border-b border-white/10 gap-2">
           <div>
-            <h3 className="text-base font-extrabold text-slate-900 flex items-center gap-2 font-mono">
-              <Building className="w-4 h-4 text-[#635bff]" />
+            <h3 className="text-base font-extrabold text-[#f7f8fc] flex items-center gap-2 font-mono">
+              <Building className="w-4 h-4 text-[#7168ff]" />
               <span>3-Way Transaction Reconciliation Lifecycle</span>
             </h3>
-            <p className="text-xs text-slate-500 mt-0.5 font-sans">
+            <p className="text-xs text-[#a7afc0] mt-0.5 font-sans">
               Trace transaction progression across merchant orders, gateway batch settlements, and merchant statement credits.
             </p>
           </div>
-          <span className="text-[11px] font-mono text-slate-600 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200 self-start sm:self-auto font-semibold">
+          <span className="text-[11px] font-mono text-[#a7afc0] bg-[#0c101a] px-2.5 py-1 rounded-md border border-white/10 self-start sm:self-auto font-semibold">
             Payments ➔ Settlements ➔ Bank Credits
           </span>
         </div>
@@ -353,67 +355,67 @@ export const ControlCenterTab: React.FC<ControlCenterTabProps> = ({
         {/* Directional Flow Stages */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 relative text-xs">
           {/* Leg 1: Captured Payments */}
-          <div className="bg-[#f4f3ff]/70 border border-[#d9d6fe] rounded-xl p-4.5 flex flex-col justify-between relative overflow-hidden shadow-xs">
-            <div className="flex items-center justify-between font-bold text-slate-900 mb-2">
-              <span className="flex items-center gap-1.5 font-mono text-xs text-indigo-950">
-                <CreditCard className="w-4 h-4 text-[#635bff]" />
+          <div className="bg-[#0c101a]/90 border border-[#7168ff]/30 rounded-xl p-4.5 flex flex-col justify-between relative overflow-hidden shadow-lg">
+            <div className="flex items-center justify-between font-bold text-[#f7f8fc] mb-2">
+              <span className="flex items-center gap-1.5 font-mono text-xs text-[#c4b5fd]">
+                <CreditCard className="w-4 h-4 text-[#7168ff]" />
                 Leg 1: Captured Payments
               </span>
-              <span className="font-mono bg-[#635bff]/15 text-[#4338ca] px-2 py-0.5 rounded text-[10px] font-bold">
+              <span className="font-mono bg-[#7168ff]/20 text-[#c4b5fd] border border-[#7168ff]/40 px-2 py-0.5 rounded text-[10px] font-bold">
                 100% INGEST
               </span>
             </div>
-            <div className="text-xl font-extrabold text-slate-900 mt-1 metric-primary">
+            <div className="text-xl font-extrabold text-[#f7f8fc] mt-1 metric-primary">
               {totalPayments} Records
             </div>
-            <div className="text-slate-600 font-mono mt-0.5 font-semibold">
+            <div className="text-[#a7afc0] font-mono mt-0.5 font-semibold">
               {formatINR(totalGrossAmount)} Gross
             </div>
-            <p className="text-[11px] text-slate-500 mt-3 pt-2 border-t border-[#d9d6fe]/60 leading-relaxed font-sans">
+            <p className="text-[11px] text-[#7d879b] mt-3 pt-2 border-t border-white/10 leading-relaxed font-sans">
               Merchant orders captured via Razorpay checkout awaiting batch payout.
             </p>
           </div>
 
           {/* Leg 2: Nodal Settlements */}
-          <div className="bg-[#fffbeb]/70 border border-[#fde68a] rounded-xl p-4.5 flex flex-col justify-between relative overflow-hidden shadow-xs">
-            <div className="flex items-center justify-between font-bold text-slate-900 mb-2">
-              <span className="flex items-center gap-1.5 font-mono text-xs text-amber-950">
-                <FileCheck className="w-4 h-4 text-[#b76e00]" />
+          <div className="bg-[#0c101a]/90 border border-[#f5b942]/30 rounded-xl p-4.5 flex flex-col justify-between relative overflow-hidden shadow-lg">
+            <div className="flex items-center justify-between font-bold text-[#f7f8fc] mb-2">
+              <span className="flex items-center gap-1.5 font-mono text-xs text-[#fde68a]">
+                <FileCheck className="w-4 h-4 text-[#f5b942]" />
                 Leg 2: Gateway Settlements
               </span>
-              <span className="font-mono bg-[#b76e00]/15 text-[#92400e] px-2 py-0.5 rounded text-[10px] font-bold">
+              <span className="font-mono bg-[#f5b942]/20 text-[#f5b942] border border-[#f5b942]/40 px-2 py-0.5 rounded text-[10px] font-bold">
                 {((totalSettlementsProcessed / totalPayments) * 100).toFixed(1)}%
               </span>
             </div>
-            <div className="text-xl font-extrabold text-slate-900 mt-1 metric-primary">
+            <div className="text-xl font-extrabold text-[#f7f8fc] mt-1 metric-primary">
               {totalSettlementsProcessed} Processed
             </div>
-            <div className="text-slate-600 font-mono mt-0.5 font-semibold">
+            <div className="text-[#a7afc0] font-mono mt-0.5 font-semibold">
               {totalPayments - totalSettlementsProcessed} Missing Advices
             </div>
-            <p className="text-[11px] text-slate-500 mt-3 pt-2 border-t border-[#fde68a]/60 leading-relaxed font-sans">
+            <p className="text-[11px] text-[#7d879b] mt-3 pt-2 border-t border-white/10 leading-relaxed font-sans">
               Nodal payout batches deducting 2.0% - 3.5% fee + 18% GST.
             </p>
           </div>
 
           {/* Leg 3: Bank Statement Credits */}
-          <div className="bg-[#ecfdf5]/70 border border-[#a7f3d0] rounded-xl p-4.5 flex flex-col justify-between relative overflow-hidden shadow-xs">
-            <div className="flex items-center justify-between font-bold text-slate-900 mb-2">
-              <span className="flex items-center gap-1.5 font-mono text-xs text-emerald-950">
-                <Landmark className="w-4 h-4 text-[#098f74]" />
+          <div className="bg-[#0c101a]/90 border border-[#2dd4bf]/30 rounded-xl p-4.5 flex flex-col justify-between relative overflow-hidden shadow-lg">
+            <div className="flex items-center justify-between font-bold text-[#f7f8fc] mb-2">
+              <span className="flex items-center gap-1.5 font-mono text-xs text-[#99f6e4]">
+                <Landmark className="w-4 h-4 text-[#2dd4bf]" />
                 Leg 3: Bank Account Credits
               </span>
-              <span className="font-mono bg-[#098f74]/15 text-[#065f46] px-2 py-0.5 rounded text-[10px] font-bold">
+              <span className="font-mono bg-[#2dd4bf]/20 text-[#2dd4bf] border border-[#2dd4bf]/40 px-2 py-0.5 rounded text-[10px] font-bold">
                 {((totalBankCreditsReceived / totalPayments) * 100).toFixed(1)}%
               </span>
             </div>
-            <div className="text-xl font-extrabold text-slate-900 mt-1 metric-primary">
+            <div className="text-xl font-extrabold text-[#f7f8fc] mt-1 metric-primary">
               {totalBankCreditsReceived} Credited
             </div>
-            <div className="text-slate-600 font-mono mt-0.5 font-semibold">
+            <div className="text-[#a7afc0] font-mono mt-0.5 font-semibold">
               {totalPayments - totalBankCreditsReceived} Uncredited Items
             </div>
-            <p className="text-[11px] text-slate-500 mt-3 pt-2 border-t border-[#a7f3d0]/60 leading-relaxed font-sans">
+            <p className="text-[11px] text-[#7d879b] mt-3 pt-2 border-t border-white/10 leading-relaxed font-sans">
               Verified statement credits confirmed with matching UTR.
             </p>
           </div>
@@ -423,13 +425,13 @@ export const ControlCenterTab: React.FC<ControlCenterTabProps> = ({
       {/* SECTION F: Operational Insight Grid (Two-Column) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Outcome Distribution Card */}
-        <div className="surface-card p-5 sm:p-6 flex flex-col justify-between" data-testid="outcome-distribution-card">
+        <div className="elevated-card p-5 sm:p-6 flex flex-col justify-between bg-[#111620]" data-testid="outcome-distribution-card">
           <div>
             <div className="flex items-center justify-between mb-1">
-              <h3 className="text-sm font-extrabold text-slate-900 font-mono">Outcome Distribution</h3>
-              <span className="text-xs font-semibold text-slate-500 font-mono tabular-nums">{records.length} Total</span>
+              <h3 className="text-sm font-extrabold text-[#f7f8fc] font-mono">Outcome Distribution</h3>
+              <span className="text-xs font-semibold text-[#7d879b] font-mono tabular-nums">{records.length} Total</span>
             </div>
-            <p className="text-xs text-slate-500 mb-3 font-sans">
+            <p className="text-xs text-[#a7afc0] mb-3 font-sans">
               Automated high-confidence routing vs human controller triage.
             </p>
 
@@ -450,7 +452,7 @@ export const ControlCenterTab: React.FC<ControlCenterTabProps> = ({
                     cy="70"
                     r="54"
                     fill="transparent"
-                    stroke="#f1f5f9"
+                    stroke="#1c2433"
                     strokeWidth="14"
                   />
                   {records.length > 0 && (
@@ -461,7 +463,7 @@ export const ControlCenterTab: React.FC<ControlCenterTabProps> = ({
                         cy="70"
                         r="54"
                         fill="transparent"
-                        stroke="#098f74"
+                        stroke="#2dd4bf"
                         strokeWidth="14"
                         strokeDasharray={`${(autoRecords.length / records.length) * 339.292} 339.292`}
                         strokeDashoffset="0"
@@ -474,7 +476,7 @@ export const ControlCenterTab: React.FC<ControlCenterTabProps> = ({
                         cy="70"
                         r="54"
                         fill="transparent"
-                        stroke="#b76e00"
+                        stroke="#f5b942"
                         strokeWidth="14"
                         strokeDasharray={`${(reviewRecords.length / records.length) * 339.292} 339.292`}
                         strokeDashoffset={`-${(autoRecords.length / records.length) * 339.292}`}
@@ -487,7 +489,7 @@ export const ControlCenterTab: React.FC<ControlCenterTabProps> = ({
                         cy="70"
                         r="54"
                         fill="transparent"
-                        stroke="#d64550"
+                        stroke="#ff6577"
                         strokeWidth="14"
                         strokeDasharray={`${(exceptionRecords.length / records.length) * 339.292} 339.292`}
                         strokeDashoffset={`-${((autoRecords.length + reviewRecords.length) / records.length) * 339.292}`}
@@ -500,10 +502,10 @@ export const ControlCenterTab: React.FC<ControlCenterTabProps> = ({
 
                 {/* Donut Center Content */}
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none">
-                  <span className="text-xl font-extrabold text-slate-900 font-mono tabular-nums leading-tight">
+                  <span className="text-xl font-extrabold text-[#f7f8fc] font-mono tabular-nums leading-tight">
                     {records.length}
                   </span>
-                  <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider font-mono">
+                  <span className="text-[10px] font-semibold text-[#7d879b] uppercase tracking-wider font-mono">
                     Records
                   </span>
                 </div>
@@ -511,122 +513,126 @@ export const ControlCenterTab: React.FC<ControlCenterTabProps> = ({
             </div>
 
             {/* Stacked Proportional Bar */}
-            <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden flex my-2 border border-slate-200">
+            <div className="w-full h-2.5 bg-[#0c101a] rounded-full overflow-hidden flex my-2 border border-white/10">
               {records.length > 0 ? (
                 <>
                   <div
                     style={{ width: `${(autoRecords.length / records.length) * 100}%` }}
-                    className="bg-[#098f74] h-full transition-all duration-300"
+                    className="bg-[#2dd4bf] h-full transition-all duration-300"
                     title={`Auto-Reconciled: ${autoRecords.length}`}
                   />
                   <div
                     style={{ width: `${(reviewRecords.length / records.length) * 100}%` }}
-                    className="bg-[#b76e00] h-full transition-all duration-300"
+                    className="bg-[#f5b942] h-full transition-all duration-300"
                     title={`Pending Review: ${reviewRecords.length}`}
                   />
                   <div
                     style={{ width: `${(exceptionRecords.length / records.length) * 100}%` }}
-                    className="bg-[#d64550] h-full transition-all duration-300"
+                    className="bg-[#ff6577] h-full transition-all duration-300"
                     title={`Unmatched Exceptions: ${exceptionRecords.length}`}
                   />
                 </>
               ) : (
-                <div className="w-full bg-slate-200 h-full" />
+                <div className="w-full bg-[#1c2433] h-full" />
               )}
             </div>
           </div>
 
           {/* Outcome Breakdown Legend & Counts */}
-          <div className="space-y-2 pt-3 border-t border-slate-100 text-xs font-sans">
+          <div className="space-y-2 pt-3 border-t border-white/10 text-xs font-sans">
             <div className="flex items-center justify-between">
-              <span className="flex items-center gap-2 text-slate-700 font-medium">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#098f74] shrink-0"></span> Auto-Reconciled
+              <span className="flex items-center gap-2 text-[#a7afc0] font-medium">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#2dd4bf] shrink-0 shadow-[0_0_6px_rgba(45,212,191,0.6)]"></span> Auto-Reconciled
               </span>
-              <strong className="text-slate-900 font-mono tabular-nums">
-                {autoRecords.length} <span className="text-slate-500 font-normal">({records.length > 0 ? ((autoRecords.length / records.length) * 100).toFixed(1) : 0}%)</span>
+              <strong className="text-[#f7f8fc] font-mono tabular-nums">
+                {autoRecords.length} <span className="text-[#7d879b] font-normal">({records.length > 0 ? ((autoRecords.length / records.length) * 100).toFixed(1) : 0}%)</span>
               </strong>
             </div>
             <div className="flex items-center justify-between">
-              <span className="flex items-center gap-2 text-slate-700 font-medium">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#b76e00] shrink-0"></span> Pending Review
+              <span className="flex items-center gap-2 text-[#a7afc0] font-medium">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#f5b942] shrink-0 shadow-[0_0_6px_rgba(245,185,66,0.6)]"></span> Pending Review
               </span>
-              <strong className="text-slate-900 font-mono tabular-nums">
-                {reviewRecords.length} <span className="text-slate-500 font-normal">({records.length > 0 ? ((reviewRecords.length / records.length) * 100).toFixed(1) : 0}%)</span>
+              <strong className="text-[#f7f8fc] font-mono tabular-nums">
+                {reviewRecords.length} <span className="text-[#7d879b] font-normal">({records.length > 0 ? ((reviewRecords.length / records.length) * 100).toFixed(1) : 0}%)</span>
               </strong>
             </div>
             <div className="flex items-center justify-between">
-              <span className="flex items-center gap-2 text-slate-700 font-medium">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#d64550] shrink-0"></span> Unmatched Exceptions
+              <span className="flex items-center gap-2 text-[#a7afc0] font-medium">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#ff6577] shrink-0 shadow-[0_0_6px_rgba(255,101,119,0.6)]"></span> Unmatched Exceptions
               </span>
-              <strong className="text-slate-900 font-mono tabular-nums">
-                {exceptionRecords.length} <span className="text-slate-500 font-normal">({records.length > 0 ? ((exceptionRecords.length / records.length) * 100).toFixed(1) : 0}%)</span>
+              <strong className="text-[#f7f8fc] font-mono tabular-nums">
+                {exceptionRecords.length} <span className="text-[#7d879b] font-normal">({records.length > 0 ? ((exceptionRecords.length / records.length) * 100).toFixed(1) : 0}%)</span>
               </strong>
             </div>
           </div>
         </div>
 
         {/* Anomaly Category Breakdown (Right: 2 cols on lg) */}
-        <div className="surface-card p-5 sm:p-6 lg:col-span-2 flex flex-col justify-between">
+        <div className="elevated-card p-5 sm:p-6 lg:col-span-2 flex flex-col justify-between bg-[#111620]">
           <div>
             <div className="flex items-center justify-between mb-1">
-              <h3 className="text-sm font-extrabold text-slate-900 font-mono">Exception Category Frequencies</h3>
+              <h3 className="text-sm font-extrabold text-[#f7f8fc] font-mono">Exception Category Frequencies</h3>
               <button
                 onClick={() => onNavigateToTab('exceptions')}
-                className="text-xs text-[#635bff] font-semibold hover:underline flex items-center gap-1 cursor-pointer"
+                className="text-xs text-[#7168ff] hover:text-[#5687ff] font-semibold hover:underline flex items-center gap-1 cursor-pointer"
               >
                 View Exception Queue <ArrowUpRight className="w-3.5 h-3.5" />
               </button>
             </div>
-            <p className="text-xs text-slate-500 mb-3 font-sans">
+            <p className="text-xs text-[#a7afc0] mb-3 font-sans">
               Distribution of financial discrepancies detected across statement inputs.
             </p>
 
             <div className="h-44 w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={exceptionCategoryCounts} layout="vertical" margin={{ left: 40, right: 20 }}>
-                  <XAxis type="number" allowDecimals={false} tick={{ fontSize: 10 }} stroke="#94a3b8" />
-                  <YAxis type="category" dataKey="name" width={140} tick={{ fontSize: 10 }} stroke="#94a3b8" />
-                  <Tooltip formatter={(val) => [`${val ?? 0} records`, 'Occurrences']} />
-                  <Bar dataKey="count" fill="#635bff" radius={[0, 4, 4, 0]} />
+                  <XAxis type="number" allowDecimals={false} tick={{ fontSize: 10, fill: '#7d879b' }} stroke="#2b364c" />
+                  <YAxis type="category" dataKey="name" width={140} tick={{ fontSize: 10, fill: '#a7afc0' }} stroke="#2b364c" />
+                  <Tooltip
+                    formatter={(val) => [`${val ?? 0} records`, 'Occurrences']}
+                    contentStyle={{ backgroundColor: '#151a25', borderColor: 'rgba(255,255,255,0.15)', color: '#f7f8fc', borderRadius: '0.5rem' }}
+                    itemStyle={{ color: '#c4b5fd' }}
+                  />
+                  <Bar dataKey="count" fill="#7168ff" radius={[0, 4, 4, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
           </div>
 
-          <div className="flex items-center justify-between text-xs text-slate-500 pt-3 border-t border-slate-100 font-sans">
+          <div className="flex items-center justify-between text-xs text-[#7d879b] pt-3 border-t border-white/10 font-sans">
             <span>
-              Total Discrepancies: <strong className="text-slate-800 font-mono">{records.length - autoRecords.length}</strong>
+              Total Discrepancies: <strong className="text-[#f7f8fc] font-mono">{records.length - autoRecords.length}</strong>
             </span>
             <span>
-              Financial Exposure: <strong className="text-[#d64550] font-mono font-bold">{formatINR(evaluation?.totalFinancialExposurePaise || 0)}</strong>
+              Financial Exposure: <strong className="text-[#ff6577] font-mono font-bold">{formatINR(evaluation?.totalFinancialExposurePaise || 0)}</strong>
             </span>
           </div>
         </div>
       </div>
 
       {/* SECTION G: High-Exposure Action Queue ("Needs Attention") */}
-      <div className="surface-card p-5 sm:p-6">
+      <div className="elevated-card p-5 sm:p-6 bg-[#111620]">
         <div className="flex items-center justify-between mb-2">
           <div>
-            <h3 className="text-sm font-extrabold text-slate-900 flex items-center gap-2 font-mono">
-              <AlertTriangle className="w-4 h-4 text-[#b76e00]" />
+            <h3 className="text-sm font-extrabold text-[#f7f8fc] flex items-center gap-2 font-mono">
+              <AlertTriangle className="w-4 h-4 text-[#f5b942]" />
               <span>Needs Attention — High-Exposure Queue</span>
             </h3>
-            <p className="text-xs text-slate-500 mt-0.5 font-sans">
+            <p className="text-xs text-[#a7afc0] mt-0.5 font-sans">
               Prioritized by potential monetary exposure to optimize human triage efficiency.
             </p>
           </div>
           <button
             onClick={() => onNavigateToTab('exceptions')}
-            className="text-xs font-semibold text-[#635bff] hover:text-[#5147e8] flex items-center gap-1 cursor-pointer font-sans"
+            className="text-xs font-semibold text-[#7168ff] hover:text-[#5687ff] flex items-center gap-1 cursor-pointer font-sans"
           >
             Full Queue ({highExposureCases.length}) <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>
 
-        <div className="overflow-x-auto mt-3 border border-slate-200 rounded-xl">
-          <table className="min-w-full text-xs text-left divide-y divide-slate-200">
-            <thead className="bg-slate-50/80 text-slate-600 font-semibold uppercase text-[10px] font-mono">
+        <div className="overflow-x-auto mt-3 border border-white/10 rounded-xl bg-[#0c101a]">
+          <table className="min-w-full text-xs text-left divide-y divide-white/10">
+            <thead className="bg-[#090d16] text-[#7d879b] font-semibold uppercase text-[10px] font-mono">
               <tr>
                 <th className="py-2.5 px-3">Payment ID</th>
                 <th className="py-2.5 px-3">Order Ref</th>
@@ -637,29 +643,29 @@ export const ControlCenterTab: React.FC<ControlCenterTabProps> = ({
                 <th className="py-2.5 px-3 text-right">Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 font-mono">
+            <tbody className="divide-y divide-white/5 font-mono">
               {highExposureCases.map((rec) => (
-                <tr key={rec.recordId} className="hover:bg-slate-50/80 transition-colors">
-                  <td className="py-2.5 px-3 font-semibold text-slate-900">{rec.payment.paymentId}</td>
-                  <td className="py-2.5 px-3 text-slate-600">{rec.payment.orderId}</td>
-                  <td className="py-2.5 px-3 text-right font-semibold text-slate-800 tabular-nums">
+                <tr key={rec.recordId} className="hover:bg-white/5 transition-colors">
+                  <td className="py-2.5 px-3 font-semibold text-[#f7f8fc]">{rec.payment.paymentId}</td>
+                  <td className="py-2.5 px-3 text-[#a7afc0]">{rec.payment.orderId}</td>
+                  <td className="py-2.5 px-3 text-right font-semibold text-[#f7f8fc] tabular-nums">
                     {formatINR(rec.payment.grossAmount)}
                   </td>
-                  <td className="py-2.5 px-3 text-right font-bold text-[#d64550] tabular-nums">
+                  <td className="py-2.5 px-3 text-right font-bold text-[#ff6577] tabular-nums">
                     {formatINR(rec.financialExposurePaise)}
                   </td>
                   <td className="py-2.5 px-3 font-sans">
-                    <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-[#fffbeb] text-[#b76e00] border border-[#fde68a]">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-[#f5b942]/15 text-[#f5b942] border border-[#f5b942]/35">
                       {rec.exceptionType.replace(/_/g, ' ')}
                     </span>
                   </td>
                   <td className="py-2.5 px-3 text-center">
-                    <span className="font-bold text-slate-700">{rec.confidence}%</span>
+                    <span className="font-bold text-[#a7afc0]">{rec.confidence}%</span>
                   </td>
                   <td className="py-2.5 px-3 text-right font-sans">
                     <button
                       onClick={() => onSelectRecord(rec)}
-                      className="px-2.5 py-1 rounded-lg text-xs font-semibold text-[#635bff] hover:bg-[#f4f3ff] border border-[#d9d6fe] transition-colors cursor-pointer"
+                      className="px-2.5 py-1 rounded-lg text-xs font-semibold text-[#7168ff] hover:bg-[#7168ff]/15 border border-[#7168ff]/30 transition-colors cursor-pointer"
                     >
                       Inspect Evidence
                     </button>
@@ -676,23 +682,23 @@ export const ControlCenterTab: React.FC<ControlCenterTabProps> = ({
 
       {/* Live Reconciliation Runner Trigger Card */}
       {onOpenLiveRunner && (
-        <div className="surface-card bg-gradient-to-r from-[#0b1220] via-[#121c31] to-[#0b1220] border border-slate-800 text-white p-6 sm:p-7 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xl">
+        <div className="elevated-card bg-gradient-to-r from-[#090d16] via-[#111620] to-[#090d16] border border-white/15 text-[#f7f8fc] p-6 sm:p-7 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-2xl">
           <div className="space-y-1">
-            <div className="flex items-center gap-2 text-[#a5b4fc] text-xs font-bold uppercase tracking-wider font-mono">
-              <Zap className="w-4 h-4 text-[#818cf8]" />
+            <div className="flex items-center gap-2 text-[#7168ff] text-xs font-bold uppercase tracking-wider font-mono">
+              <Zap className="w-4 h-4 text-[#7168ff]" />
               <span>Deterministic Execution Inspector</span>
             </div>
-            <h3 className="text-base font-bold text-white font-mono">
+            <h3 className="text-base font-bold text-[#f7f8fc] font-mono">
               Launch Live 8-Stage Reconciliation Runner
             </h3>
-            <p className="text-xs text-slate-300 max-w-xl leading-relaxed font-sans">
+            <p className="text-xs text-[#a7afc0] max-w-xl leading-relaxed font-sans">
               Observe every step of the real engine calculation in slow motion: file schema validation, integer-paise normalization, 4-factor scoring graph, collision prevention solver, and audit trail emission.
             </p>
           </div>
 
           <button
             onClick={onOpenLiveRunner}
-            className="px-5 py-2.5 rounded-xl bg-[#635bff] hover:bg-[#5147e8] text-white text-xs font-semibold flex items-center gap-2 transition-colors shrink-0 shadow-md cursor-pointer min-h-[40px]"
+            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#7168ff] to-[#5687ff] hover:from-[#5d53ea] hover:to-[#4375ea] text-white text-xs font-semibold flex items-center gap-2 transition-all shrink-0 shadow-[0_0_15px_rgba(113,104,255,0.4)] cursor-pointer min-h-[40px]"
           >
             <Zap className="w-4 h-4" />
             <span>Launch Live Runner</span>
