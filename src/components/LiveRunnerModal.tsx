@@ -98,103 +98,100 @@ export const LiveRunnerModal: React.FC<LiveRunnerModalProps> = ({
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   const records = batch?.records || [];
-  const total = records.length || 180;
-
-  // Derive staged progressive counts based on current stage index
-  const stageProgress = (currentStageIdx + 1) / RUNNER_STAGES.length;
-  const processedCount = Math.min(total, Math.round(total * stageProgress));
-  const autoCount = Math.round(records.filter((r) => r.status === 'AUTO_RECONCILED').length * stageProgress);
-  const reviewCount = Math.round(records.filter((r) => r.status === 'PENDING_REVIEW' || r.status === 'MANUALLY_APPROVED').length * stageProgress);
-  const exceptionCount = Math.round(records.filter((r) => r.status === 'UNMATCHED_EXCEPTION' || r.status === 'MANUALLY_REJECTED').length * stageProgress);
-
-  const handleClose = () => {
-    setCurrentStageIdx(0);
-    setIsPlaying(true);
-    onClose();
-  };
+  const autoReconciledCount = records.filter((r) => r.status === 'AUTO_RECONCILED').length;
+  const reviewCount = records.filter((r) => r.status === 'PENDING_REVIEW').length;
+  const exceptionCount = records.filter((r) => r.status === 'UNMATCHED_EXCEPTION').length;
 
   useEffect(() => {
-    if (!isOpen) return;
-
-    if (isPlaying) {
-      timerRef.current = setTimeout(() => {
-        setCurrentStageIdx((prev) => {
-          if (prev < RUNNER_STAGES.length - 1) {
-            return prev + 1;
-          }
-          setIsPlaying(false);
-          return prev;
-        });
-      }, speedMs);
+    if (!isOpen) {
+      setCurrentStageIdx(0);
+      setIsPlaying(true);
+      return;
     }
 
+    if (!isPlaying) {
+      if (timerRef.current) clearInterval(timerRef.current);
+      return;
+    }
+
+    timerRef.current = setInterval(() => {
+      setCurrentStageIdx((prev) => {
+        if (prev < RUNNER_STAGES.length - 1) {
+          return prev + 1;
+        } else {
+          if (timerRef.current) clearInterval(timerRef.current);
+          setIsPlaying(false);
+          return prev;
+        }
+      });
+    }, speedMs);
+
     return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
+      if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [isOpen, isPlaying, currentStageIdx, speedMs]);
+  }, [isOpen, isPlaying, speedMs]);
 
   if (!isOpen) return null;
 
   const currentStage = RUNNER_STAGES[currentStageIdx];
-  const isFinished = currentStageIdx === RUNNER_STAGES.length - 1;
-
-  const handleSkip = () => {
-    setCurrentStageIdx(RUNNER_STAGES.length - 1);
-    setIsPlaying(false);
-  };
+  const isFinished = currentStageIdx >= RUNNER_STAGES.length - 1;
+  const stageProgress = (currentStageIdx + 1) / RUNNER_STAGES.length;
 
   const handleRestart = () => {
     setCurrentStageIdx(0);
     setIsPlaying(true);
   };
 
+  const handleSkip = () => {
+    setCurrentStageIdx(RUNNER_STAGES.length - 1);
+    setIsPlaying(false);
+  };
+
+  const handleClose = () => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    onClose();
+  };
+
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="live-runner-title"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs animate-in fade-in duration-150"
-    >
-      <div className="bg-white border border-slate-200 rounded-3xl max-w-2xl w-full shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs animate-in fade-in duration-150">
+      <div className="surface-modal w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh] shadow-2xl">
         {/* Header */}
-        <div className="bg-slate-900 text-white p-5 flex items-center justify-between border-b border-slate-800">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-blue-600/30 border border-blue-500/50 flex items-center justify-center text-blue-400">
-              <Zap className="w-5 h-5" />
+        <div className="px-6 py-4 border-b border-slate-200 bg-slate-50/80 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-xs">
+              <Zap className="w-4 h-4" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] font-bold uppercase tracking-wider bg-blue-900/80 text-blue-300 border border-blue-700/60 px-2 py-0.5 rounded-full font-mono">
-                  Real Engine Execution
+              <h3 className="text-sm font-extrabold text-slate-900 flex items-center gap-2 font-mono">
+                <span>Deterministic 3-Way Reconciliation Pipeline</span>
+                <span className="text-[10px] bg-indigo-100 text-indigo-800 font-bold px-2 py-0.5 rounded font-mono">
+                  8-Stage Engine
                 </span>
-                <span className="text-xs text-slate-400 font-mono">
-                  Stage {currentStageIdx + 1} of {RUNNER_STAGES.length}
-                </span>
-              </div>
-              <h3 id="live-runner-title" className="text-base font-bold text-white mt-0.5">
-                Live 3-Way Reconciliation Runner
               </h3>
+              <p className="text-xs text-slate-500">
+                Observable transaction state execution &amp; 1-to-1 graph resolution
+              </p>
             </div>
           </div>
 
           <button
             onClick={handleClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
-            aria-label="Close runner"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200 transition-colors cursor-pointer"
+            aria-label="Close runner modal"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Live Metrics Row */}
-        <div className="bg-slate-50 border-b border-slate-200 px-6 py-3 grid grid-cols-4 gap-2 text-center text-xs font-mono">
+        {/* Live Counters Banner */}
+        <div className="px-6 py-2.5 bg-slate-100/80 border-b border-slate-200 grid grid-cols-4 gap-2 text-center text-xs font-mono">
           <div className="bg-white border border-slate-200/80 rounded-xl p-2">
-            <div className="text-[10px] uppercase font-semibold text-slate-400 font-sans">Processed</div>
-            <div className="text-sm font-bold text-slate-900 tabular-nums">{processedCount} / {total}</div>
+            <div className="text-[10px] uppercase font-semibold text-slate-500 font-sans">Processed</div>
+            <div className="text-sm font-bold text-slate-900 tabular-nums">{records.length || 180}</div>
           </div>
           <div className="bg-white border border-slate-200/80 rounded-xl p-2">
             <div className="text-[10px] uppercase font-semibold text-emerald-600 font-sans">Auto-Reconciled</div>
-            <div className="text-sm font-bold text-emerald-700 tabular-nums">{autoCount}</div>
+            <div className="text-sm font-bold text-emerald-700 tabular-nums">{autoReconciledCount}</div>
           </div>
           <div className="bg-white border border-slate-200/80 rounded-xl p-2">
             <div className="text-[10px] uppercase font-semibold text-amber-600 font-sans">Pending Review</div>
@@ -207,32 +204,32 @@ export const LiveRunnerModal: React.FC<LiveRunnerModalProps> = ({
         </div>
 
         {/* Body: Stage Stepper & Active Stage Visualizer */}
-        <div className="p-6 space-y-5 overflow-y-auto flex-1">
+        <div className="p-6 space-y-5 overflow-y-auto flex-1 custom-scrollbar">
           {/* Progress Bar */}
           <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
             <div
-              className="bg-blue-600 h-full transition-all duration-300 rounded-full"
+              className="bg-indigo-600 h-full transition-all duration-300 rounded-full shadow-xs"
               style={{ width: `${stageProgress * 100}%` }}
             />
           </div>
 
           {/* Active Stage Callout Box */}
-          <div className="bg-blue-50/80 border border-blue-200 rounded-2xl p-4.5 space-y-2">
+          <div className="bg-indigo-50/80 border border-indigo-200 rounded-2xl p-4.5 space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-bold uppercase tracking-wider bg-blue-100 text-blue-800 px-2 py-0.5 rounded font-mono">
+              <span className="text-[10px] font-bold uppercase tracking-wider bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded font-mono">
                 {currentStage.badge}
               </span>
-              <span className="text-xs font-semibold text-blue-700 font-mono">
+              <span className="text-xs font-semibold text-indigo-700 font-mono">
                 {Math.round(stageProgress * 100)}% Completed
               </span>
             </div>
             <h4 className="text-sm font-bold text-slate-900">
               {currentStage.name}
             </h4>
-            <p className="text-xs text-slate-700 leading-relaxed">
+            <p className="text-xs text-slate-700 leading-relaxed font-sans">
               {currentStage.description}
             </p>
-            <div className="text-[11px] font-mono text-blue-900 bg-white/80 p-2.5 rounded-xl border border-blue-200/60 leading-snug">
+            <div className="text-[11px] font-mono text-indigo-950 bg-white/90 p-2.5 rounded-xl border border-indigo-200/60 leading-snug">
               ▶ {currentStage.detail}
             </div>
           </div>
@@ -251,7 +248,7 @@ export const LiveRunnerModal: React.FC<LiveRunnerModalProps> = ({
                   key={stage.id}
                   className={`px-3 py-2 rounded-xl text-xs flex items-center justify-between border transition-colors ${
                     isCurrent
-                      ? 'bg-blue-50/50 border-blue-300 text-slate-900 font-semibold shadow-2xs'
+                      ? 'bg-indigo-50/60 border-indigo-300 text-slate-900 font-semibold shadow-2xs'
                       : isPast
                       ? 'bg-slate-50 border-slate-200 text-slate-700'
                       : 'border-transparent text-slate-400'
@@ -261,7 +258,7 @@ export const LiveRunnerModal: React.FC<LiveRunnerModalProps> = ({
                     {isPast ? (
                       <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
                     ) : isCurrent ? (
-                      <div className="w-4 h-4 rounded-full border-2 border-blue-600 border-t-transparent animate-spin shrink-0" />
+                      <div className="w-4 h-4 rounded-full border-2 border-indigo-600 border-t-transparent animate-spin shrink-0" />
                     ) : (
                       <div className="w-4 h-4 rounded-full border border-slate-300 shrink-0" />
                     )}
@@ -282,7 +279,7 @@ export const LiveRunnerModal: React.FC<LiveRunnerModalProps> = ({
             <button
               onClick={() => setIsPlaying(!isPlaying)}
               disabled={isFinished}
-              className="px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold flex items-center gap-1.5 transition-colors disabled:opacity-40 cursor-pointer"
+              className="px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold flex items-center gap-1.5 transition-colors disabled:opacity-40 cursor-pointer min-h-[34px]"
             >
               {isPlaying ? (
                 <>
@@ -307,7 +304,7 @@ export const LiveRunnerModal: React.FC<LiveRunnerModalProps> = ({
             <button
               onClick={handleSkip}
               disabled={isFinished}
-              className="px-3 py-1.5 rounded-xl text-slate-600 hover:bg-slate-200 text-xs font-semibold transition-colors disabled:opacity-40 cursor-pointer"
+              className="px-3 py-1.5 rounded-xl text-slate-600 hover:bg-slate-200 text-xs font-semibold transition-colors disabled:opacity-40 cursor-pointer min-h-[34px]"
             >
               Skip to End
             </button>
@@ -338,7 +335,7 @@ export const LiveRunnerModal: React.FC<LiveRunnerModalProps> = ({
                 handleClose();
                 onComplete();
               }}
-              className="px-4 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-xs cursor-pointer"
+              className="px-4 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-xs cursor-pointer min-h-[34px]"
             >
               <span>{isFinished ? 'View Reconciled Results' : 'Close Runner'}</span>
               <ArrowRight className="w-3.5 h-3.5" />

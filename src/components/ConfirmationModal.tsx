@@ -52,11 +52,11 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-title"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs animate-in fade-in duration-150"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs animate-in fade-in duration-150"
     >
       <div
         ref={modalRef}
-        className="bg-white border border-slate-200 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4"
+        className="surface-modal max-w-md w-full p-6 shadow-2xl space-y-4"
       >
         {/* Header */}
         <div className="flex items-start gap-3.5">
@@ -68,7 +68,7 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
                 ? 'bg-rose-50 text-rose-600 border border-rose-200'
                 : actionType === 'FLAG'
                 ? 'bg-amber-50 text-amber-600 border border-amber-200'
-                : 'bg-blue-50 text-blue-600 border border-blue-200'
+                : 'bg-indigo-50 text-indigo-600 border border-indigo-200'
             }`}
           >
             {actionType === 'APPROVE' && <CheckCircle2 className="w-5 h-5" />}
@@ -82,11 +82,11 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
           <div className="flex-1">
             <h3
               id="modal-title"
-              className="text-base font-bold text-slate-900 leading-tight"
+              className="text-base font-extrabold text-slate-900 leading-tight font-mono"
             >
               {title}
             </h3>
-            <p className="text-xs text-slate-600 mt-1 leading-relaxed">
+            <p className="text-xs text-slate-600 mt-1 leading-relaxed font-sans">
               {description}
             </p>
           </div>
@@ -105,7 +105,7 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
           <button
             onClick={onClose}
             disabled={isLoading}
-            className="px-3.5 py-2 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors cursor-pointer"
+            className="px-3.5 py-2 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors cursor-pointer min-h-[36px]"
           >
             {cancelLabel}
           </button>
@@ -114,14 +114,14 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
             ref={confirmBtnRef}
             onClick={onConfirm}
             disabled={isLoading}
-            className={`px-4 py-2 text-xs font-semibold text-white rounded-lg transition-colors shadow-xs cursor-pointer flex items-center gap-1.5 ${
+            className={`px-4 py-2 text-xs font-semibold text-white rounded-xl transition-colors shadow-xs cursor-pointer flex items-center gap-1.5 min-h-[36px] ${
               actionType === 'APPROVE'
                 ? 'bg-emerald-600 hover:bg-emerald-700'
                 : actionType === 'REJECT' || actionType === 'DANGER'
                 ? 'bg-rose-600 hover:bg-rose-700'
                 : actionType === 'FLAG'
                 ? 'bg-amber-600 hover:bg-amber-700'
-                : 'bg-blue-600 hover:bg-blue-700'
+                : 'bg-indigo-600 hover:bg-indigo-700'
             }`}
           >
             {confirmLabel}

@@ -74,7 +74,7 @@ export const MatchDetailDrawer: React.FC<MatchDetailDrawerProps> = ({
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 z-40 bg-slate-950/40 backdrop-blur-2xs transition-opacity"
+        className="fixed inset-0 z-40 bg-slate-950/60 backdrop-blur-xs transition-opacity"
         onClick={onClose}
       />
 
@@ -86,30 +86,30 @@ export const MatchDetailDrawer: React.FC<MatchDetailDrawerProps> = ({
         className="fixed top-0 bottom-0 right-0 z-50 w-full max-w-2xl bg-white border-l border-slate-200 shadow-2xl flex flex-col animate-in slide-in-from-right duration-200"
       >
         {/* Drawer Header */}
-        <div className="px-6 py-4 border-b border-slate-200 bg-slate-50/70 flex items-center justify-between shrink-0">
+        <div className="px-6 py-4 border-b border-slate-200 bg-slate-50/80 flex items-center justify-between shrink-0">
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-[11px] font-mono font-bold text-slate-500 uppercase tracking-wider">
+              <span className="text-[10px] font-mono font-bold text-slate-500 uppercase tracking-wider">
                 3-Way Trace Inspector
               </span>
               <span
-                className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold ${
+                className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold font-mono ${
                   status === 'AUTO_RECONCILED'
-                    ? 'bg-emerald-100 text-emerald-800'
+                    ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
                     : status === 'MANUALLY_APPROVED'
-                    ? 'bg-blue-100 text-blue-800'
+                    ? 'bg-indigo-100 text-indigo-800 border border-indigo-200'
                     : status === 'MANUALLY_REJECTED' || status === 'UNMATCHED_EXCEPTION'
-                    ? 'bg-rose-100 text-rose-800'
-                    : 'bg-amber-100 text-amber-800'
+                    ? 'bg-rose-100 text-rose-800 border border-rose-200'
+                    : 'bg-amber-100 text-amber-800 border border-amber-200'
                 }`}
               >
                 {status.replace(/_/g, ' ')}
               </span>
-              <span className="text-[11px] font-semibold text-slate-500 bg-slate-200/80 px-2 py-0.5 rounded">
+              <span className="text-[10px] font-semibold text-slate-600 bg-slate-200/80 px-2 py-0.5 rounded-md font-mono">
                 {exceptionType.replace(/_/g, ' ')}
               </span>
             </div>
-            <h2 className="text-base font-bold text-slate-900 font-mono mt-0.5">
+            <h2 className="text-base font-extrabold text-slate-900 font-mono mt-0.5">
               {payment.paymentId}
             </h2>
           </div>
@@ -124,20 +124,20 @@ export const MatchDetailDrawer: React.FC<MatchDetailDrawerProps> = ({
         </div>
 
         {/* Scrollable Content */}
-        <div className="flex-1 p-6 overflow-y-auto space-y-6 text-xs">
+        <div className="flex-1 p-6 overflow-y-auto space-y-6 text-xs custom-scrollbar">
           {/* Key Metrics Bar */}
           <div className="grid grid-cols-3 gap-3">
-            <div className="bg-slate-50 p-3 rounded-xl border border-slate-200">
-              <span className="text-[10px] uppercase font-bold text-slate-400">Gross Amount</span>
-              <div className="text-sm font-bold text-slate-900 font-mono mt-0.5">
+            <div className="surface-inset p-3.5 rounded-xl">
+              <span className="text-[10px] uppercase font-bold text-slate-400 font-mono">Gross Amount</span>
+              <div className="text-sm font-extrabold text-slate-900 font-mono mt-0.5 metric-value">
                 {formatINR(payment.grossAmount)}
               </div>
             </div>
 
-            <div className="bg-slate-50 p-3 rounded-xl border border-slate-200">
-              <span className="text-[10px] uppercase font-bold text-slate-400">Match Confidence</span>
+            <div className="surface-inset p-3.5 rounded-xl">
+              <span className="text-[10px] uppercase font-bold text-slate-400 font-mono">Match Confidence</span>
               <div
-                className={`text-sm font-bold font-mono mt-0.5 ${
+                className={`text-sm font-extrabold font-mono mt-0.5 tabular-nums ${
                   confidence >= 85
                     ? 'text-emerald-700'
                     : confidence >= 50
@@ -149,9 +149,9 @@ export const MatchDetailDrawer: React.FC<MatchDetailDrawerProps> = ({
               </div>
             </div>
 
-            <div className="bg-slate-50 p-3 rounded-xl border border-slate-200">
-              <span className="text-[10px] uppercase font-bold text-slate-400">Financial Exposure</span>
-              <div className="text-sm font-bold text-rose-700 font-mono mt-0.5">
+            <div className="surface-inset p-3.5 rounded-xl">
+              <span className="text-[10px] uppercase font-bold text-slate-400 font-mono">Financial Exposure</span>
+              <div className="text-sm font-extrabold text-rose-700 font-mono mt-0.5 tabular-nums metric-value">
                 {formatINR(financialExposurePaise)}
               </div>
             </div>
@@ -159,68 +159,68 @@ export const MatchDetailDrawer: React.FC<MatchDetailDrawerProps> = ({
 
           {/* 3-Way Trace Lineage Map */}
           <div className="space-y-3">
-            <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
-              <Building className="w-4 h-4 text-blue-600" />
+            <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5 font-mono">
+              <Building className="w-4 h-4 text-indigo-600" />
               Three-Source Transaction Lineage
             </h3>
 
             {/* Leg 1: Payment Ledger */}
-            <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2">
+            <div className="surface-inset p-4 rounded-xl space-y-2 border-l-3 border-l-indigo-500">
               <div className="flex items-center justify-between font-bold text-slate-900">
                 <span className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
+                  <span className="w-2.5 h-2.5 rounded-full bg-indigo-500"></span>
                   Leg 1: Razorpay Payment Order
                 </span>
-                <span className="font-mono text-slate-600">{payment.paymentId}</span>
+                <span className="font-mono text-slate-600 text-[11px]">{payment.paymentId}</span>
               </div>
-              <div className="grid grid-cols-2 gap-2 text-slate-600 font-mono text-[11px] pt-1 border-t border-slate-200/60">
+              <div className="grid grid-cols-2 gap-2 text-slate-600 font-mono text-[11px] pt-1.5 border-t border-slate-200/60">
                 <div>Order Ref: <strong className="text-slate-800">{payment.orderId}</strong></div>
                 <div>Created: <strong className="text-slate-800">{new Date(payment.createdAt).toLocaleDateString()}</strong></div>
                 <div>Fee (2%): <strong className="text-slate-800">{formatINR(payment.fee)}</strong></div>
                 <div>GST (18%): <strong className="text-slate-800">{formatINR(payment.tax)}</strong></div>
                 <div className="col-span-2">
-                  Expected Net Settlement: <strong className="text-blue-700">{formatINR(payment.expectedNetAmount)}</strong>
+                  Expected Net Settlement: <strong className="text-indigo-700">{formatINR(payment.expectedNetAmount)}</strong>
                 </div>
               </div>
             </div>
 
             {/* Leg 2: Nodal Settlement Advice */}
-            <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2">
+            <div className="surface-inset p-4 rounded-xl space-y-2 border-l-3 border-l-amber-500">
               <div className="flex items-center justify-between font-bold text-slate-900">
                 <span className="flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
                   Leg 2: Gateway Settlement Advice
                 </span>
-                <span className="font-mono text-slate-600">
+                <span className="font-mono text-slate-600 text-[11px]">
                   {matchedSettlement ? matchedSettlement.settlementId : 'MISSING SETTLEMENT'}
                 </span>
               </div>
               {matchedSettlement ? (
-                <div className="grid grid-cols-2 gap-2 text-slate-600 font-mono text-[11px] pt-1 border-t border-slate-200/60">
+                <div className="grid grid-cols-2 gap-2 text-slate-600 font-mono text-[11px] pt-1.5 border-t border-slate-200/60">
                   <div>Settled Amount: <strong className="text-slate-800">{formatINR(matchedSettlement.settledAmount)}</strong></div>
                   <div>Settled Date: <strong className="text-slate-800">{new Date(matchedSettlement.settledAt).toLocaleDateString()}</strong></div>
                   <div className="col-span-2">Gateway UTR: <strong className="text-slate-900 font-bold">{matchedSettlement.utr}</strong></div>
                 </div>
               ) : (
-                <div className="text-rose-600 text-[11px] font-semibold pt-1 border-t border-slate-200/60">
+                <div className="text-rose-600 text-[11px] font-semibold pt-1.5 border-t border-slate-200/60">
                   No gateway settlement advice found matching this payment.
                 </div>
               )}
             </div>
 
             {/* Leg 3: Bank Statement Credit */}
-            <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2">
+            <div className="surface-inset p-4 rounded-xl space-y-2 border-l-3 border-l-emerald-500">
               <div className="flex items-center justify-between font-bold text-slate-900">
                 <span className="flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
                   Leg 3: Bank Statement Credit Line
                 </span>
-                <span className="font-mono text-slate-600">
+                <span className="font-mono text-slate-600 text-[11px]">
                   {matchedBankTransaction ? matchedBankTransaction.bankTransactionId : 'MISSING BANK CREDIT'}
                 </span>
               </div>
               {matchedBankTransaction ? (
-                <div className="grid grid-cols-2 gap-2 text-slate-600 font-mono text-[11px] pt-1 border-t border-slate-200/60">
+                <div className="grid grid-cols-2 gap-2 text-slate-600 font-mono text-[11px] pt-1.5 border-t border-slate-200/60">
                   <div>Credit Amount: <strong className="text-slate-800">{formatINR(matchedBankTransaction.creditAmount)}</strong></div>
                   <div>Credited Date: <strong className="text-slate-800">{new Date(matchedBankTransaction.creditedAt).toLocaleDateString()}</strong></div>
                   <div className="col-span-2 text-slate-500 font-sans truncate">
@@ -228,7 +228,7 @@ export const MatchDetailDrawer: React.FC<MatchDetailDrawerProps> = ({
                   </div>
                 </div>
               ) : (
-                <div className="text-rose-600 text-[11px] font-semibold pt-1 border-t border-slate-200/60">
+                <div className="text-rose-600 text-[11px] font-semibold pt-1.5 border-t border-slate-200/60">
                   No merchant bank credit deposit recorded for this transaction.
                 </div>
               )}
@@ -237,7 +237,7 @@ export const MatchDetailDrawer: React.FC<MatchDetailDrawerProps> = ({
 
           {/* 4-Factor Evidence Points Breakdown */}
           <div className="space-y-3">
-            <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+            <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5 font-mono">
               <ShieldCheck className="w-4 h-4 text-emerald-600" />
               4-Factor Evidence Score Contribution
             </h3>
@@ -247,11 +247,11 @@ export const MatchDetailDrawer: React.FC<MatchDetailDrawerProps> = ({
               <div>
                 <div className="flex justify-between font-semibold mb-1">
                   <span className="text-slate-700">Reference Match (Exact / Partial)</span>
-                  <span className="font-mono font-bold text-slate-900">{evidence.referenceScore} / 40 pts</span>
+                  <span className="font-mono font-bold text-slate-900 tabular-nums">{evidence.referenceScore} / 40 pts</span>
                 </div>
                 <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
                   <div
-                    className="bg-blue-600 h-1.5 rounded-full"
+                    className="bg-indigo-600 h-1.5 rounded-full"
                     style={{ width: `${(evidence.referenceScore / 40) * 100}%` }}
                   />
                 </div>
@@ -261,11 +261,11 @@ export const MatchDetailDrawer: React.FC<MatchDetailDrawerProps> = ({
               <div>
                 <div className="flex justify-between font-semibold mb-1">
                   <span className="text-slate-700">Amount Compatibility</span>
-                  <span className="font-mono font-bold text-slate-900">{evidence.amountScore} / 35 pts</span>
+                  <span className="font-mono font-bold text-slate-900 tabular-nums">{evidence.amountScore} / 35 pts</span>
                 </div>
                 <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
                   <div
-                    className="bg-blue-600 h-1.5 rounded-full"
+                    className="bg-indigo-600 h-1.5 rounded-full"
                     style={{ width: `${(evidence.amountScore / 35) * 100}%` }}
                   />
                 </div>
@@ -275,11 +275,11 @@ export const MatchDetailDrawer: React.FC<MatchDetailDrawerProps> = ({
               <div>
                 <div className="flex justify-between font-semibold mb-1">
                   <span className="text-slate-700">Date Window Proximity</span>
-                  <span className="font-mono font-bold text-slate-900">{evidence.dateScore} / 15 pts</span>
+                  <span className="font-mono font-bold text-slate-900 tabular-nums">{evidence.dateScore} / 15 pts</span>
                 </div>
                 <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
                   <div
-                    className="bg-blue-600 h-1.5 rounded-full"
+                    className="bg-indigo-600 h-1.5 rounded-full"
                     style={{ width: `${(evidence.dateScore / 15) * 100}%` }}
                   />
                 </div>
@@ -289,18 +289,18 @@ export const MatchDetailDrawer: React.FC<MatchDetailDrawerProps> = ({
               <div>
                 <div className="flex justify-between font-semibold mb-1">
                   <span className="text-slate-700">UTR &amp; Statement Description Similarity</span>
-                  <span className="font-mono font-bold text-slate-900">{evidence.descriptionScore} / 10 pts</span>
+                  <span className="font-mono font-bold text-slate-900 tabular-nums">{evidence.descriptionScore} / 10 pts</span>
                 </div>
                 <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
                   <div
-                    className="bg-blue-600 h-1.5 rounded-full"
+                    className="bg-indigo-600 h-1.5 rounded-full"
                     style={{ width: `${(evidence.descriptionScore / 10) * 100}%` }}
                   />
                 </div>
               </div>
 
               {/* Justification Quote */}
-              <div className="p-3 bg-blue-50/60 rounded-lg border border-blue-100 text-[11px] text-blue-900 leading-relaxed mt-2">
+              <div className="p-3 bg-indigo-50/60 rounded-lg border border-indigo-100 text-[11px] text-indigo-950 leading-relaxed mt-2 font-sans">
                 <strong>Audit Explanation:</strong> {explanation}
               </div>
             </div>
@@ -310,7 +310,7 @@ export const MatchDetailDrawer: React.FC<MatchDetailDrawerProps> = ({
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5 font-mono">
-                <Layers className="w-4 h-4 text-blue-600" />
+                <Layers className="w-4 h-4 text-indigo-600" />
                 Candidate Match Explorer &amp; Pair Ranking
               </h3>
               <span className="text-[10px] font-mono bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-semibold">
@@ -318,24 +318,24 @@ export const MatchDetailDrawer: React.FC<MatchDetailDrawerProps> = ({
               </span>
             </div>
 
-            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-3 text-xs">
+            <div className="surface-inset p-4 rounded-2xl space-y-3 text-xs">
               <div className="text-slate-600 text-[11px] leading-relaxed">
                 Evaluating candidate pairs for <strong className="text-slate-900 font-mono">{payment.paymentId}</strong>. The 1-to-1 constraint solver prioritizes highest global confidence while preventing collision.
               </div>
 
               <div className="space-y-2">
                 {/* Candidate 1: Selected Match */}
-                <div className="p-3 bg-white border border-emerald-300 rounded-xl shadow-2xs space-y-1.5">
+                <div className="p-3.5 bg-white border border-emerald-300 rounded-xl shadow-xs space-y-1.5">
                   <div className="flex items-center justify-between">
                     <span className="font-bold text-emerald-800 flex items-center gap-1.5">
                       <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
                       Rank #1 — Primary Proposed Match (Confidence: {confidence}%)
                     </span>
-                    <span className="text-[10px] uppercase font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded font-mono">
+                    <span className="text-[10px] uppercase font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded font-mono border border-emerald-200">
                       Selected
                     </span>
                   </div>
-                  <div className="grid grid-cols-2 gap-1 text-[11px] font-mono text-slate-700">
+                  <div className="grid grid-cols-2 gap-1 text-[11px] font-mono text-slate-700 pt-1">
                     <div>Settlement: <strong>{matchedSettlement ? matchedSettlement.settlementId : 'None'}</strong></div>
                     <div>Bank UTR: <strong>{matchedBankTransaction ? matchedBankTransaction.utr : 'None'}</strong></div>
                     <div>Ref Score: <strong>{evidence.referenceScore}/40</strong></div>
@@ -344,12 +344,12 @@ export const MatchDetailDrawer: React.FC<MatchDetailDrawerProps> = ({
                 </div>
 
                 {/* Candidate 2: Alternative Candidate (Simulation of graph runner) */}
-                <div className="p-3 bg-white/70 border border-slate-200 rounded-xl space-y-1.5 text-slate-600">
+                <div className="p-3.5 bg-white/80 border border-slate-200 rounded-xl space-y-1.5 text-slate-600">
                   <div className="flex items-center justify-between">
                     <span className="font-semibold text-slate-800">
                       Rank #2 — Alternative Candidate (Simulated Graph Tie)
                     </span>
-                    <span className="text-[10px] uppercase font-semibold text-slate-500 bg-slate-100 px-1.5 py-0.2 rounded font-mono">
+                    <span className="text-[10px] uppercase font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded font-mono">
                       Unselected
                     </span>
                   </div>
@@ -364,7 +364,7 @@ export const MatchDetailDrawer: React.FC<MatchDetailDrawerProps> = ({
           {/* Grounded AI Exception Analysis */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+              <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5 font-mono">
                 <Bot className="w-4 h-4 text-violet-600" />
                 Grounded Exception Analyst (Advisory)
               </h3>
@@ -376,11 +376,11 @@ export const MatchDetailDrawer: React.FC<MatchDetailDrawerProps> = ({
                 >
                   {isAnalyzingAi ? (
                     <>
-                      <Loader2 className="w-3 h-3 animate-spin" /> Analyzing...
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" /> Analyzing...
                     </>
                   ) : (
                     <>
-                      <Sparkles className="w-3 h-3 text-violet-600" /> Analyze with Gemini
+                      <Sparkles className="w-3.5 h-3.5 text-violet-600" /> Analyze with Gemini
                     </>
                   )}
                 </button>
@@ -388,14 +388,14 @@ export const MatchDetailDrawer: React.FC<MatchDetailDrawerProps> = ({
             </div>
 
             {aiAnalysis ? (
-              <div className="bg-violet-50/40 border border-violet-200 rounded-xl p-4 space-y-2 text-xs">
+              <div className="bg-violet-50/60 border border-violet-200 rounded-xl p-4 space-y-2 text-xs">
                 <div className="flex items-center justify-between">
                   <span className="font-bold text-violet-950">Diagnosis:</span>
                   <span className="text-[10px] font-mono px-2 py-0.5 bg-violet-100 text-violet-800 rounded font-semibold">
                     [{aiAnalysis.modelUsed}]
                   </span>
                 </div>
-                <p className="text-slate-700">{aiAnalysis.summary}</p>
+                <p className="text-slate-700 leading-relaxed">{aiAnalysis.summary}</p>
                 <div className="pt-2 border-t border-violet-200/60">
                   <strong className="text-violet-900">Recommended Next Action:</strong>
                   <p className="text-slate-700 mt-0.5">{aiAnalysis.recommendedAction}</p>
@@ -420,10 +420,10 @@ export const MatchDetailDrawer: React.FC<MatchDetailDrawerProps> = ({
 
           {/* Existing Reviewer Decision if any */}
           {reviewerDecision && (
-            <div className="p-4 bg-blue-50/60 border border-blue-200 rounded-xl space-y-1">
-              <div className="flex items-center justify-between text-blue-900 font-bold">
+            <div className="p-4 bg-indigo-50/60 border border-indigo-200 rounded-xl space-y-1">
+              <div className="flex items-center justify-between text-indigo-950 font-bold">
                 <span>Decision: {reviewerDecision.action}</span>
-                <span className="font-mono text-[10px] text-blue-700">
+                <span className="font-mono text-[10px] text-indigo-700">
                   {new Date(reviewerDecision.reviewedAt).toLocaleString()}
                 </span>
               </div>
@@ -434,7 +434,7 @@ export const MatchDetailDrawer: React.FC<MatchDetailDrawerProps> = ({
 
           {/* Reviewer Action Controls */}
           <div className="pt-4 border-t border-slate-200 space-y-3">
-            <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+            <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5 font-mono">
               <UserCheck className="w-4 h-4 text-slate-600" />
               Finance Controller Decision
             </h3>
@@ -443,28 +443,28 @@ export const MatchDetailDrawer: React.FC<MatchDetailDrawerProps> = ({
               placeholder="Enter auditor note explaining review approval or rejection rationale..."
               value={reviewerNote}
               onChange={(e) => setReviewerNote(e.target.value)}
-              className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder:text-slate-400 focus:outline-hidden focus:ring-1 focus:ring-blue-500"
+              className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder:text-slate-400 focus:outline-hidden focus:ring-1 focus:ring-indigo-500 transition-colors"
               rows={2}
             />
 
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setConfirmAction('APPROVED')}
-                className="flex-1 py-2.5 rounded-xl text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 transition-colors flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
+                className="flex-1 py-2.5 rounded-xl text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 transition-colors flex items-center justify-center gap-1.5 shadow-xs cursor-pointer min-h-[38px]"
               >
                 <CheckCircle2 className="w-4 h-4" /> Approve Match
               </button>
 
               <button
                 onClick={() => setConfirmAction('REJECTED')}
-                className="flex-1 py-2.5 rounded-xl text-xs font-semibold text-white bg-rose-600 hover:bg-rose-700 transition-colors flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
+                className="flex-1 py-2.5 rounded-xl text-xs font-semibold text-white bg-rose-600 hover:bg-rose-700 transition-colors flex items-center justify-center gap-1.5 shadow-xs cursor-pointer min-h-[38px]"
               >
                 <Ban className="w-4 h-4" /> Reject Match
               </button>
 
               <button
                 onClick={() => setConfirmAction('FLAGGED')}
-                className="py-2.5 px-3 rounded-xl text-xs font-semibold text-amber-800 bg-amber-100 hover:bg-amber-200 border border-amber-200 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                className="py-2.5 px-3.5 rounded-xl text-xs font-semibold text-amber-800 bg-amber-100 hover:bg-amber-200 border border-amber-200 transition-colors flex items-center justify-center gap-1.5 cursor-pointer min-h-[38px]"
                 title="Flag for treasury inquiry"
               >
                 <Flag className="w-4 h-4" /> Flag

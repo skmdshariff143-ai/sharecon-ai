@@ -312,7 +312,7 @@ function DashboardContent() {
     : 0;
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans antialiased flex flex-col overflow-x-hidden max-w-full">
+    <div className="min-h-screen app-canvas text-slate-900 font-sans antialiased flex flex-col overflow-x-hidden max-w-full">
       {/* Left Navigation Rail (Desktop & Mobile Drawer) */}
       <NavigationRail
         activeTab={activeTab}

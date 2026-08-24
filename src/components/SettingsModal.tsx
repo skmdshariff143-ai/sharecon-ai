@@ -52,16 +52,16 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
       role="dialog"
       aria-modal="true"
       aria-labelledby="settings-modal-title"
-      className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs animate-in fade-in"
+      className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs animate-in fade-in duration-150"
     >
-      <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200">
+      <div className="surface-modal max-w-lg w-full p-6 shadow-2xl">
         <div className="flex items-center justify-between pb-4 border-b border-slate-200">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
+            <div className="p-2 bg-indigo-50 text-indigo-600 rounded-xl border border-indigo-200">
               <Sliders className="w-5 h-5" />
             </div>
             <div>
-              <h3 id="settings-modal-title" className="text-base font-bold text-slate-900">
+              <h3 id="settings-modal-title" className="text-base font-extrabold text-slate-900 font-mono">
                 Reconciliation Engine Settings
               </h3>
               <p className="text-xs text-slate-500">
@@ -71,7 +71,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg cursor-pointer"
+            className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg cursor-pointer transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -82,7 +82,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           <div>
             <div className="flex justify-between font-semibold text-slate-800 mb-1">
               <span>Auto-Reconcile Threshold (High Confidence)</span>
-              <span className="text-blue-600">{highThreshold}%</span>
+              <span className="text-indigo-600 font-mono font-bold">{highThreshold}%</span>
             </div>
             <p className="text-[11px] text-slate-500 mb-1.5">
               Matches with confidence score ≥ this value are eligible for automatic reconciliation.
@@ -94,7 +94,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               step="1"
               value={highThreshold}
               onChange={(e) => setHighThreshold(Number(e.target.value))}
-              className="w-full accent-blue-600 cursor-pointer"
+              className="w-full accent-indigo-600 cursor-pointer"
             />
           </div>
 
@@ -102,7 +102,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           <div>
             <div className="flex justify-between font-semibold text-slate-800 mb-1">
               <span>Human Review Escalation Threshold (Medium Confidence)</span>
-              <span className="text-amber-600">{medThreshold}%</span>
+              <span className="text-amber-600 font-mono font-bold">{medThreshold}%</span>
             </div>
             <p className="text-[11px] text-slate-500 mb-1.5">
               Matches scored between {medThreshold}% and {highThreshold - 1}% are routed to the review queue.
@@ -131,9 +131,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 step="0.5"
                 value={feeTolerance}
                 onChange={(e) => setFeeTolerance(Number(e.target.value))}
-                className="w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                className="w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs focus:bg-white focus:outline-hidden focus:ring-1 focus:ring-indigo-500 transition-colors"
               />
-              <span className="text-[10px] text-slate-400 mt-0.5 block">
+              <span className="text-[10px] text-slate-400 mt-0.5 block font-mono">
                 Allowed rounding difference in paise.
               </span>
             </div>
@@ -148,9 +148,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 max="14"
                 value={maxDateDelta}
                 onChange={(e) => setMaxDateDelta(Number(e.target.value))}
-                className="w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                className="w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs focus:bg-white focus:outline-hidden focus:ring-1 focus:ring-indigo-500 transition-colors"
               />
-              <span className="text-[10px] text-slate-400 mt-0.5 block">
+              <span className="text-[10px] text-slate-400 mt-0.5 block font-mono">
                 Candidate lookup proximity SLA.
               </span>
             </div>
@@ -160,7 +160,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           <div>
             <div className="flex justify-between font-semibold text-slate-800 mb-1">
               <span>Safety Circuit Breaker Anomaly Threshold</span>
-              <span className="text-rose-600">{circuitBreaker}%</span>
+              <span className="text-rose-600 font-mono font-bold">{circuitBreaker}%</span>
             </div>
             <p className="text-[11px] text-slate-500 mb-1.5">
               If batch anomaly rate exceeds this limit, automatic reconciliation halts immediately.
@@ -177,7 +177,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           </div>
 
           {/* Dry Run Toggle */}
-          <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between">
+          <div className="p-3.5 surface-inset rounded-xl flex items-center justify-between">
             <div>
               <span className="font-semibold text-slate-800 block">Dry-Run Simulation Mode</span>
               <span className="text-[11px] text-slate-500">
@@ -187,7 +187,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             <button
               onClick={() => setDryRun(!dryRun)}
               className={`w-11 h-6 flex items-center rounded-full p-1 transition-colors cursor-pointer ${
-                dryRun ? 'bg-blue-600 justify-end' : 'bg-slate-300 justify-start'
+                dryRun ? 'bg-indigo-600 justify-end' : 'bg-slate-300 justify-start'
               }`}
             >
               <div className="bg-white w-4 h-4 rounded-full shadow-xs"></div>
@@ -199,15 +199,15 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         <div className="pt-4 border-t border-slate-200 flex items-center justify-end gap-2">
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
+            className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer min-h-[36px]"
           >
             Cancel
           </button>
           <button
             onClick={handleSave}
-            className="px-4 py-2 rounded-lg text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white transition-colors shadow-xs cursor-pointer"
+            className="px-4 py-2 rounded-xl text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white transition-colors shadow-xs cursor-pointer min-h-[36px]"
           >
-            Save & Re-Score Batch
+            Save &amp; Re-Score Batch
           </button>
         </div>
       </div>
