@@ -123,7 +123,7 @@ export const NavigationRail: React.FC<NavigationRailProps> = ({
 
       {/* Rail Container */}
       <aside
-        className={`fixed top-0 bottom-0 left-0 z-40 bg-[#090d16] text-[#a7afc0] flex flex-col transition-all duration-200 ease-in-out border-r border-white/10 shadow-2xl ${
+        className={`fixed top-0 bottom-0 left-0 z-50 bg-[#090d16] text-[#a7afc0] flex flex-col transition-all duration-200 ease-in-out border-r border-white/10 shadow-2xl ${
           isCollapsed ? 'w-18' : 'w-64'
         } ${
           isMobileOpen

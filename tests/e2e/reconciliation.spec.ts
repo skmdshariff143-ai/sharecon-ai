@@ -41,9 +41,9 @@ test.describe('Reconciliation Grid & Evidence Drawer Suite', () => {
     const drawer = page.locator('[role="dialog"]').first();
     await expect(drawer).toBeVisible();
 
-    await expect(drawer.locator('text=Leg 1: Razorpay Payment Order')).toBeVisible();
-    await expect(drawer.locator('text=4-Factor Evidence Score Contribution')).toBeVisible();
-    await expect(drawer.locator('text=Candidate Match Explorer')).toBeVisible();
+    await expect(drawer.locator('text=Gateway Payment').first()).toBeVisible();
+    await expect(drawer.locator('text=4-Factor Evidence Breakdown').first()).toBeVisible();
+    await expect(drawer.locator('text=Multi-Candidate Ranking & Disambiguation Explorer').first()).toBeVisible();
 
     await page.keyboard.press('Escape');
   });

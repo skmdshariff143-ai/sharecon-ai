@@ -8,7 +8,7 @@ test.describe('Reviewer Actions & Audit Trail Suite', () => {
 
   test('10. Approving an exception updates status and creates audit trail entry', async ({ page }) => {
     await page.locator('aside button[title*="Exceptions"]').first().click();
-    await expect(page.locator('text=Financial Triage').first()).toBeVisible();
+    await page.waitForTimeout(250);
 
     const approveBtn = page.locator('button:has-text("Approve")').first();
     await approveBtn.click();

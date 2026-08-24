@@ -26,8 +26,15 @@ test.describe('Screenshot Capture Suite', () => {
     await saveScreenshots(page, 'desktop_control_center.png');
   });
 
-  test('Capture Desktop Control Center (1280x800)', async ({ page }) => {
-    await page.setViewportSize({ width: 1280, height: 800 });
+  test('Capture Laptop Control Center (1366x768)', async ({ page }) => {
+    await page.setViewportSize({ width: 1366, height: 768 });
+    await page.goto('/');
+    await page.waitForLoadState('networkidle');
+    await saveScreenshots(page, 'desktop_control_center_1366.png');
+  });
+
+  test('Capture Compact Desktop Control Center (1280x720)', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 720 });
     await page.goto('/');
     await page.waitForLoadState('networkidle');
     await saveScreenshots(page, 'desktop_control_center_1280.png');

@@ -6,6 +6,8 @@ import {
   Ban,
   Loader2,
   ArrowUpDown,
+  Bot,
+  Info,
 } from 'lucide-react';
 import { ReconciliationRecord, ExceptionType } from '@/types/reconciliation';
 import { formatINR } from '@/lib/money';
@@ -78,105 +80,100 @@ export const ExceptionsTab: React.FC<ExceptionsTabProps> = ({
       });
   }, [exceptionRecords, selectedCategory, severityFilter, sortByExposure]);
 
-  const totalExposurePaise = useMemo(() => {
-    return filtered.reduce((acc, r) => acc + r.financialExposurePaise, 0);
-  }, [filtered]);
-
   return (
-    <div className="space-y-5">
-      {/* Exposure Header Banner */}
-      <div className="elevated-card bg-gradient-to-r from-[#090d16] via-[#111620] to-[#090d16] border border-white/12 text-[#f7f8fc] p-6 shadow-2xl flex flex-wrap items-center justify-between gap-4">
+    <div className="space-y-6">
+      {/* Header Banner */}
+      <div className="elevated-card p-5 bg-[#111620] border-l-4 border-l-[#ff6577] border-white/10 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <div className="flex items-center gap-2 text-[#ff6577] text-xs font-bold uppercase tracking-wider mb-1 font-mono">
-            <ShieldAlert className="w-4 h-4 text-[#ff6577]" />
-            Financial Triage &amp; Exception Command Center
+          <div className="flex items-center gap-2">
+            <h2 className="text-base font-bold text-[#f7f8fc] font-mono flex items-center gap-2">
+              <ShieldAlert className="w-5 h-5 text-[#ff6577]" aria-hidden="true" />
+              <span>Financial Triage & Exception Command Center</span>
+            </h2>
+            <span className="status-badge bg-[#ff6577]/15 text-[#ff6577] border border-[#ff6577]/35">
+              Action Required
+            </span>
           </div>
-          <h2 className="text-xl font-extrabold tracking-tight text-[#f7f8fc] font-mono">
-            {filtered.length} Discrepancies Requiring Finance Controller Attention
-          </h2>
-          <p className="text-xs text-[#a7afc0] mt-1 max-w-xl font-sans leading-relaxed">
-            Grounded Gemini advisory explainability paired with deterministic 1-to-1 candidate constraint triage.
+          <p className="text-xs text-[#a7afc0] mt-1 font-sans">
+            Review, diagnose, approve, or reject multi-leg anomalies with complete 4-factor evidence and grounded Gemini AI advisory notes.
           </p>
         </div>
 
-        <div className="bg-[#0c101a]/90 border border-white/10 rounded-xl px-5 py-3 text-right shadow-inner">
-          <div className="text-[10px] text-[#7d879b] font-bold uppercase tracking-wider font-mono">
-            Total Financial Exposure
-          </div>
-          <div className="text-2xl font-extrabold text-[#ff6577] font-mono mt-0.5 tabular-nums metric-value">
-            {formatINR(totalExposurePaise)}
-          </div>
+        <div className="text-xs text-[#a7afc0] bg-[#0c101a] border border-white/10 rounded-lg px-3 py-1.5 font-mono">
+          Active Exceptions: <strong className="text-[#ff6577]">{exceptionRecords.length}</strong> | Total Exposure:{' '}
+          <strong className="text-[#ff6577]">
+            {formatINR(exceptionRecords.reduce((acc, r) => acc + r.financialExposurePaise, 0))}
+          </strong>
         </div>
       </div>
 
-      {/* Filter Category & Severity Toolbar */}
-      <div className="elevated-card p-4 space-y-3 bg-[#111620] border-white/10">
-        <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
-          {/* Category Filter Pills (Scrollable with smooth touch scrolling) */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs max-w-full custom-scrollbar">
+      {/* Top Filter Bar */}
+      <div className="elevated-card p-4 sm:p-5 flex flex-wrap items-center justify-between gap-4 bg-[#111620] border-white/10">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-xs font-bold text-[#7d879b] uppercase tracking-wider font-mono mr-1">
+            Severity:
+          </span>
+          {(['ALL', 'CRITICAL', 'WARNING', 'ADVISORY'] as const).map((sev) => (
             <button
-              onClick={() => setSelectedCategory('ALL')}
-              className={`px-3 py-1.5 rounded-xl font-bold transition-all shrink-0 cursor-pointer min-h-[36px] flex items-center ${
-                selectedCategory === 'ALL'
-                  ? 'bg-[#7168ff] text-white shadow-[0_0_10px_rgba(113,104,255,0.4)]'
-                  : 'bg-[#0c101a] text-[#a7afc0] hover:bg-white/5 hover:text-white border border-white/10'
+              key={sev}
+              onClick={() => setSeverityFilter(sev)}
+              className={`px-3 py-1.5 rounded-xl text-xs font-mono font-semibold transition-all cursor-pointer ${
+                severityFilter === sev
+                  ? sev === 'CRITICAL'
+                    ? 'bg-[#ff6577] text-white shadow-xs shadow-[#ff6577]/30'
+                    : sev === 'WARNING'
+                    ? 'bg-[#f5b942] text-black shadow-xs shadow-[#f5b942]/30'
+                    : 'bg-[#7168ff] text-white shadow-xs shadow-[#7168ff]/30'
+                  : 'bg-[#0c101a] text-[#a7afc0] hover:text-white border border-white/10'
               }`}
             >
-              All Types ({exceptionRecords.length})
+              {sev}
             </button>
+          ))}
+        </div>
 
+        <div className="flex items-center gap-2">
+          {/* Category Dropdown */}
+          <select
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+            className="p-2 bg-[#0c101a] border border-white/10 rounded-xl text-xs text-[#f7f8fc] focus:outline-hidden font-mono"
+            aria-label="Filter by Exception Category"
+          >
+            <option value="ALL">All Categories ({exceptionRecords.length})</option>
             {categories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setSelectedCategory(cat)}
-                className={`px-3 py-1.5 rounded-xl font-medium transition-all shrink-0 cursor-pointer min-h-[36px] flex items-center ${
-                  selectedCategory === cat
-                    ? 'bg-[#7168ff] text-white shadow-[0_0_10px_rgba(113,104,255,0.4)] font-bold'
-                    : 'bg-[#0c101a] text-[#a7afc0] hover:bg-white/5 hover:text-white border border-white/10'
-                }`}
-              >
+              <option key={cat} value={cat}>
                 {cat.replace(/_/g, ' ')}
-              </button>
+              </option>
             ))}
-          </div>
+          </select>
 
-          {/* Severity & Sort Toggle */}
-          <div className="flex flex-wrap items-center gap-2 shrink-0">
-            <select
-              value={severityFilter}
-              onChange={(e) => setSeverityFilter(e.target.value as 'ALL' | 'CRITICAL' | 'WARNING' | 'ADVISORY')}
-              className="px-3 py-2 bg-[#0c101a] border border-white/10 rounded-xl text-xs font-semibold text-[#a7afc0] cursor-pointer min-h-[36px] hover:bg-white/5 transition-colors"
-              aria-label="Filter by exception severity"
-            >
-              <option value="ALL">All Severities</option>
-              <option value="CRITICAL">Critical Severity</option>
-              <option value="WARNING">Warning Severity</option>
-              <option value="ADVISORY">Advisory Severity</option>
-            </select>
-
-            <button
-              onClick={() => setSortByExposure(!sortByExposure)}
-              className="px-3 py-2 bg-white/5 hover:bg-white/10 text-[#a7afc0] hover:text-white border border-white/10 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer min-h-[36px]"
-              aria-label="Toggle sort order"
-            >
-              <ArrowUpDown className="w-3.5 h-3.5 text-[#7d879b]" />
-              <span>{sortByExposure ? 'Exposure (High ➔ Low)' : 'Date'}</span>
-            </button>
-          </div>
+          {/* Sort Button */}
+          <button
+            onClick={() => setSortByExposure((prev) => !prev)}
+            className="p-2 rounded-xl text-xs font-medium text-[#a7afc0] bg-[#0c101a] border border-white/10 hover:text-white transition-colors cursor-pointer flex items-center gap-1.5"
+            title="Toggle sort order"
+            aria-label="Sort by financial exposure"
+          >
+            <ArrowUpDown className="w-3.5 h-3.5 text-[#7d879b]" aria-hidden="true" />
+            <span className="hidden sm:inline font-mono">
+              {sortByExposure ? 'By Exposure' : 'By Date'}
+            </span>
+          </button>
         </div>
       </div>
 
-      {/* Exception Cards Grid */}
+      {/* Exceptions Grid */}
       {filtered.length === 0 ? (
-        <div className="elevated-card p-12 text-center bg-[#111620] border-white/10">
-          <CheckCircle2 className="w-8 h-8 text-[#2dd4bf] mx-auto mb-2" />
-          <h3 className="text-base font-bold text-[#f7f8fc]">No unresolved exceptions</h3>
-          <p className="text-xs text-[#a7afc0] mt-1">
-            All transaction discrepancies have been reviewed or resolved.
+        <div className="elevated-card p-12 text-center my-6 bg-[#111620] border-white/10">
+          <ShieldAlert className="w-8 h-8 text-[#2dd4bf] mx-auto mb-2 opacity-80" aria-hidden="true" />
+          <h3 className="text-base font-bold text-[#f7f8fc]">Zero Exceptions In Current Filter</h3>
+          <p className="text-xs text-[#a7afc0] mt-1 font-sans">
+            All records in this view are reconciled or no matching exceptions match the selected filter criteria.
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {filtered.map((record) => {
             const severity = getSeverity(record.exceptionType);
 
@@ -228,16 +225,42 @@ export const ExceptionsTab: React.FC<ExceptionsTabProps> = ({
                     {record.explanation}
                   </p>
 
-                  {/* Gemini AI Advisory analysis card if already analyzed */}
+                  {/* Gemini AI Advisory Analysis Card with Full Provenance */}
                   {record.aiAnalysis && (
-                    <div className="mt-3 bg-[#a78bfa]/10 border border-[#a78bfa]/30 rounded-xl p-3.5 text-xs space-y-1.5">
-                      <div className="flex items-center gap-1.5 text-[#c4b5fd] font-bold">
-                        <Sparkles className="w-3.5 h-3.5 text-[#a78bfa]" />
-                        <span>AI Advisory Diagnosis: {record.aiAnalysis.exceptionCategory.replace(/_/g, ' ')}</span>
+                    <div className="mt-3 bg-[#a78bfa]/10 border border-[#a78bfa]/30 rounded-xl p-3.5 text-xs space-y-2">
+                      <div className="flex flex-wrap items-center justify-between gap-1.5">
+                        <div className="flex items-center gap-1.5 text-[#c4b5fd] font-bold">
+                          <Bot className="w-4 h-4 text-[#a78bfa]" aria-hidden="true" />
+                          <span>AI Advisory Diagnosis: {record.aiAnalysis.exceptionCategory.replace(/_/g, ' ')}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-[#a78bfa]/20 text-[#c4b5fd] border border-[#a78bfa]/30 font-bold uppercase">
+                            Advisory Only
+                          </span>
+                          <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-black/40 text-[#a7afc0] border border-white/10">
+                            {record.aiAnalysis.isFallback ? 'Offline Fallback' : record.aiAnalysis.modelUsed}
+                          </span>
+                        </div>
                       </div>
-                      <p className="text-[#a7afc0] leading-relaxed font-sans">{record.aiAnalysis.summary}</p>
-                      <div className="text-[11px] text-[#c4b5fd] font-semibold pt-1.5 border-t border-[#a78bfa]/20 font-mono">
+
+                      <p className="text-[#f7f8fc] leading-relaxed font-sans">{record.aiAnalysis.summary}</p>
+                      
+                      <div className="text-[11px] text-[#c4b5fd] font-semibold pt-1 border-t border-[#a78bfa]/20 font-mono">
                         Action: {record.aiAnalysis.recommendedAction}
+                      </div>
+
+                      {/* Explicit Transaction Evidence Input Provenance Box */}
+                      <div className="bg-[#090d16] border border-white/10 rounded-lg p-2 text-[10px] font-mono text-[#a7afc0] space-y-0.5">
+                        <div className="text-[9px] uppercase font-bold text-[#7d879b]">Evidence Inputs Provided to Model:</div>
+                        <div>Payment: {record.payment.paymentId} ({formatINR(record.payment.grossAmount)} gross, expected {formatINR(record.payment.expectedNetAmount)} net)</div>
+                        <div>Settlement: {record.matchedSettlement ? `${record.matchedSettlement.settlementId} (${formatINR(record.matchedSettlement.settledAmount)})` : 'None'}</div>
+                        <div>Bank Credit: {record.matchedBankTransaction ? `${record.matchedBankTransaction.bankTransactionId} (${formatINR(record.matchedBankTransaction.creditAmount)}, UTR: ${record.matchedBankTransaction.utr})` : 'None'}</div>
+                      </div>
+
+                      {/* Disclaimer */}
+                      <div className="text-[10px] text-[#7d879b] font-sans italic flex items-center gap-1">
+                        <Info className="w-3 h-3 text-[#7d879b] shrink-0" aria-hidden="true" />
+                        <span>AI advisory outputs cannot alter reconciliation confidence scores, override policy gates, or move funds.</span>
                       </div>
                     </div>
                   )}
@@ -251,14 +274,15 @@ export const ExceptionsTab: React.FC<ExceptionsTabProps> = ({
                         onClick={() => onAnalyzeException(record)}
                         disabled={isAnalyzingAi}
                         className="px-3 py-2 rounded-xl text-xs font-semibold text-[#a78bfa] bg-[#a78bfa]/15 hover:bg-[#a78bfa]/25 border border-[#a78bfa]/30 transition-colors flex items-center gap-1.5 cursor-pointer min-h-[36px]"
+                        aria-label={`Generate AI advisory diagnosis for ${record.payment.paymentId}`}
                       >
                         {isAnalyzingAi ? (
                           <>
-                            <Loader2 className="w-3.5 h-3.5 animate-spin" /> Analyzing...
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" aria-hidden="true" /> Analyzing...
                           </>
                         ) : (
                           <>
-                            <Sparkles className="w-3.5 h-3.5 text-[#a78bfa]" /> Advisory Diagnosis
+                            <Sparkles className="w-3.5 h-3.5 text-[#a78bfa]" aria-hidden="true" /> Advisory Diagnosis
                           </>
                         )}
                       </button>
@@ -269,20 +293,23 @@ export const ExceptionsTab: React.FC<ExceptionsTabProps> = ({
                     <button
                       onClick={() => onSelectRecord(record)}
                       className="px-3 py-2 rounded-xl text-xs font-semibold text-[#a7afc0] bg-white/5 hover:bg-white/10 hover:text-white border border-white/10 transition-colors cursor-pointer min-h-[36px]"
+                      aria-label={`Open 3-way trace for ${record.payment.paymentId}`}
                     >
                       3-Way Trace
                     </button>
                     <button
                       onClick={() => onQuickApprove(record.recordId)}
                       className="px-3 py-2 rounded-xl text-xs font-semibold text-white bg-[#2dd4bf]/25 hover:bg-[#2dd4bf]/35 text-[#2dd4bf] border border-[#2dd4bf]/40 transition-colors cursor-pointer flex items-center gap-1 min-h-[36px]"
+                      aria-label={`Approve exception ${record.payment.paymentId}`}
                     >
-                      <CheckCircle2 className="w-3.5 h-3.5" /> Approve
+                      <CheckCircle2 className="w-3.5 h-3.5" aria-hidden="true" /> Approve
                     </button>
                     <button
                       onClick={() => onQuickReject(record.recordId)}
                       className="px-3 py-2 rounded-xl text-xs font-semibold text-[#ff6577] bg-[#ff6577]/15 hover:bg-[#ff6577]/25 border border-[#ff6577]/35 transition-colors cursor-pointer flex items-center gap-1 min-h-[36px]"
+                      aria-label={`Reject exception ${record.payment.paymentId}`}
                     >
-                      <Ban className="w-3.5 h-3.5" /> Reject
+                      <Ban className="w-3.5 h-3.5" aria-hidden="true" /> Reject
                     </button>
                   </div>
                 </div>

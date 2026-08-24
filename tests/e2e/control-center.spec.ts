@@ -41,7 +41,7 @@ test.describe('Control Center & Navigation Suite', () => {
   });
 
   test('3. Command palette opens via ⌘K or button and closes on Escape', async ({ page }) => {
-    const cmdButton = page.locator('button:has-text("Quick jump"), button:has-text("Search / Commands")').first();
+    const cmdButton = page.locator('button[aria-label="Open Command Palette"], button:has-text("Search"), button:has-text("Quick Jump")').first();
     if (await cmdButton.isVisible()) {
       await cmdButton.click();
     } else {
