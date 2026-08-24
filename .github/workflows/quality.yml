@@ -1,0 +1,68 @@
+name: Quality Gates & Verification
+
+on:
+  push:
+    branches: [main, 'fix/*']
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality-gate:
+    name: Build, Lint, Test & E2E Verification
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js runtime
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+
+      - name: Clean install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Run TypeScript type-check
+        run: npm run type-check
+
+      - name: Run Vitest unit & adversarial tests
+        run: npm run test
+
+      - name: Generate canonical benchmark artifacts
+        run: npm run generate:benchmark
+
+      - name: Generate held-out adversarial artifacts
+        run: npm run generate:heldout
+
+      - name: Verify zero git diff on generated artifacts
+        run: npm run verify:artifacts
+
+      - name: Build Next.js production bundle
+        run: npm run build
+
+      - name: Install Playwright Chromium with system dependencies
+        run: npx playwright install --with-deps chromium
+
+      - name: Run Playwright End-to-End Suite
+        run: npm run test:e2e
+
+      - name: Upload Playwright artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-failure-artifacts
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
