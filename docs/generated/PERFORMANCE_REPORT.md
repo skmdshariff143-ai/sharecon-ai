@@ -1,7 +1,7 @@
 # ShaRecon AI — Engine Performance Benchmark Report
 
 > **Disclaimer**: *Performance measurements are environment-specific and are not production guarantees.*  
-> **Benchmark Timestamp**: `2026-08-24T17:03:23.497Z`  
+> **Benchmark Timestamp**: `2026-08-25T00:50:32.679Z`  
 > **Runtime**: Node.js `v24.16.0` (Windows_NT 10.0.26200, x64)  
 > **CPU**: 13th Gen Intel(R) Core(TM) i5-1335U (12 cores)  
 > **Methodology**: Evaluates pure in-memory deterministic 3-way matching execution time (`reconcileBatch`) separated from disk I/O, report compilation, and UI rendering.
@@ -12,8 +12,8 @@
 
 | Benchmark Dataset | Total Records | Warm-Up Runs | Measured Runs | Min Latency | Median (p50) | p95 Latency | Max Latency | Throughput (Rec/sec) |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Synthetic Multi-Leg (Seed 42)** | 180 | 25 | 100 | 8.278 ms | **9.979 ms** | **21.882 ms** | 39.669 ms | **18,038 rec/sec** |
-| **Held-Out Adversarial Fixture** | 80 | 25 | 100 | 3.35 ms | **4.179 ms** | **7.452 ms** | 11.839 ms | **19,143 rec/sec** |
+| **Synthetic Multi-Leg (Seed 42)** | 180 | 25 | 100 | 8.379 ms | **11.001 ms** | **20.885 ms** | 32.446 ms | **16,362 rec/sec** |
+| **Held-Out Adversarial Fixture** | 80 | 25 | 100 | 3.383 ms | **6.793 ms** | **18.855 ms** | 31.077 ms | **11,777 rec/sec** |
 
 ---
 

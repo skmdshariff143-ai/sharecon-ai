@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "benchmarkTimestamp": "2026-08-24T17:03:23.497Z",
+    "benchmarkTimestamp": "2026-08-25T00:50:32.679Z",
     "nodeVersion": "v24.16.0",
     "platform": "Windows_NT 10.0.26200",
     "arch": "x64",
@@ -13,25 +13,25 @@
     "measuredIterations": 100,
     "totalRecords": 180,
     "durationsMs": {
-      "min": 8.278,
-      "median": 9.979,
-      "p95": 21.882,
-      "max": 39.669,
-      "mean": 11.802
+      "min": 8.379,
+      "median": 11.001,
+      "p95": 20.885,
+      "max": 32.446,
+      "mean": 12.57
     },
-    "throughputRecordsPerSec": 18038
+    "throughputRecordsPerSec": 16362
   },
   "heldOutBenchmark80": {
     "warmupIterations": 25,
     "measuredIterations": 100,
     "totalRecords": 80,
     "durationsMs": {
-      "min": 3.35,
-      "median": 4.179,
-      "p95": 7.452,
-      "max": 11.839,
-      "mean": 4.789
+      "min": 3.383,
+      "median": 6.793,
+      "p95": 18.855,
+      "max": 31.077,
+      "mean": 8.283
     },
-    "throughputRecordsPerSec": 19143
+    "throughputRecordsPerSec": 11777
   }
 }
