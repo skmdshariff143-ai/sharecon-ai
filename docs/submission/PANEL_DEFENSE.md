@@ -2,7 +2,7 @@
 
 ### Q1: "Why did you choose a deterministic 4-factor scoring engine over an end-to-end LLM matcher?"
 > **Defense**: Financial ledger reconciliation requires strict mathematical determinism, exact integer-paise arithmetic, and low latency. Passing tabular ledger data to a generative LLM introduces non-deterministic outputs, hallucination risks, latency overhead, and floating-point unpredictability.  
-> ShaRecon AI implements a strict architectural separation: our deterministic engine handles 1-to-1 bipartite matching and integer-paise calculations across four audited factors (Reference: 40 pts, Amount: 35 pts, Date: 15 pts, Description/UTR: 10 pts), while Gemini 2.5 Flash operates strictly as an advisory copilot on exception records without money movement authority.
+> ShaRecon AI implements a strict architectural separation: our deterministic engine handles 1-to-1 bipartite matching and integer-paise calculations across four audited factors (Reference: 40 pts, Amount: 35 pts, Date: 15 pts, Description/UTR: 10 pts), while Gemini 2.5 Flash operates strictly as an advisory copilot on exception records without ledger mutation authority.
 
 ---
 
@@ -10,7 +10,7 @@
 > **Defense**: In financial engineering, overfitting matching thresholds to a specific evaluation fixture creates fragile, false confidence on unseen data. The 7 held-out errors represent authentic structural edge cases:
 > 1. *Reference Truncation / Order-Only Reference* (3 records: `ho_pay_trunc_031`, `ho_pay_trunc_033`, `ho_pay_trunc_035` = ₹11,600.00 exposure)
 > 2. *Wrong Payment ID in Bank Narration / Inconsistent Description* (4 records: `ho_pay_wrongnar_045`, `ho_pay_wrongnar_046`, `ho_pay_wrongnar_047`, `ho_pay_wrongnar_048` = ₹16,500.00 exposure)  
-> Rather than artificially tweaking weights to achieve an artificial 100% score, we openly surface these 7 cases in our in-app Error Inspector and provide operators with structured triage workflows.
+> Rather than artificially tweaking weights to achieve an artificial 100% score, I openly surface these 7 cases in our in-app Error Inspector and provide operators with structured triage workflows.
 
 ---
 
@@ -30,3 +30,4 @@
 > 2. **Integer Arithmetic**: Processing all currency amounts as integer-paise removes floating-point CPU overhead.
 > 3. **Distributed Execution**: The deterministic matching stage is stateless and horizontally scalable across worker partitions.
 > 4. **Asynchronous Advisory Enrichment**: AI exception explanations run out-of-band only on the exception review queue, isolating LLM token costs.
+> 5. **Durable Ledger Storage**: Production will connect the append-only session audit trail to an immutable database ledger.

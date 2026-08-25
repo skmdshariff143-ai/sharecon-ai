@@ -25,15 +25,12 @@
 
 - **Workflow File**: `.github/workflows/quality.yml`
 - **CI Workflow Badge**: [![Quality Gates](https://github.com/skmdshariff143-ai/sharecon-ai/actions/workflows/quality.yml/badge.svg)](https://github.com/skmdshariff143-ai/sharecon-ai/actions/workflows/quality.yml)
-- **Verified Feature CI Run**: https://github.com/skmdshariff143-ai/sharecon-ai/actions/runs/32795471794 (SUCCESS)
-- **Verified PR #1 CI Run**: https://github.com/skmdshariff143-ai/sharecon-ai/actions/runs/32795680903 (SUCCESS)
-- **Verified Main Release CI Run**: https://github.com/skmdshariff143-ai/sharecon-ai/actions/runs/32795939667 (SUCCESS)
 
 ### Automated Gates Run in CI:
 1. `npm ci` (Deterministic clean install on Node 20 runtime per `.nvmrc`)
 2. `npm run lint` (ESLint: 0 errors, 0 warnings)
 3. `npm run type-check` (TypeScript strict check: 0 errors)
-4. `npm run test` (Vitest: 48/48 unit, immutability, and multi-seed tests passing)
+4. `npm run test` (Vitest: 48 automated unit, integrity and adversarial tests passing)
 5. `npm run generate:benchmark` (Canonical benchmark generator)
 6. `npm run generate:heldout` (Held-out adversarial report generator)
 7. `npm run verify:artifacts` (`git diff --exit-code HEAD` asserting zero artifact deviation)
@@ -62,6 +59,7 @@ Artifact: `docs/generated/benchmark.json`
 - **False-Positive Count**: 0
 - **False-Positive Exposure**: ₹0.00
 - **Multi-Seed Stability**: Verified across Seeds 42, 101, 777, 2024, 9999 with consistent 100% precision and ₹0.00 false-positive exposure.
+- *Notice: This synthetic benchmark evaluates deterministic distribution stability and does not represent live production merchant performance.*
 
 ### B. Held-Out Adversarial Fixture (80 Curated Real-World Failure Records)
 Artifact: `docs/evaluation/HELD_OUT_REPORT.md`
@@ -96,4 +94,4 @@ Artifact: `docs/generated/PERFORMANCE_REPORT.md`
 | **Verified Exception ID** | `pay_0110_razor` (₹50,000.00 gross, ₹48,820.00 exposure, Missing Bank Credit) | Exceptions Tab / `MISSING_BANK_CREDIT` | Preview UI & Dataset Generator |
 | **Held-Out Dataset Size** | 80 payments, 80 settlements, 76 bank transactions | `docs/evaluation/HELD_OUT_REPORT.md:L6` | `src/lib/dataset/held_out_dataset.ts` |
 | **Held-Out False Positives** | 7 records (₹28,100.00 Exposure) across 2 failure classes | `docs/evaluation/HELD_OUT_REPORT.md:L65-L74` | In-app Error Inspector table |
-| **Testing Coverage** | 48 Vitest unit tests + 40 Playwright E2E browser tests | `.github/workflows/quality.yml` | Remote GitHub Actions CI run |
+| **Testing Coverage** | 48 automated unit, integrity and adversarial tests + 40 Playwright E2E browser tests | `.github/workflows/quality.yml` | Remote GitHub Actions CI run |

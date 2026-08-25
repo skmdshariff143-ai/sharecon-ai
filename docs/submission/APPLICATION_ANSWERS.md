@@ -36,8 +36,9 @@ ShaRecon AI strictly separates deterministic calculation from advisory generativ
    - **Tested Financial Safety Invariant**: Gemini has zero authority to mutate matching scores, alter record statuses, or execute fund movements.
    - **Deterministic Offline Fallback**: If the Gemini API is unreachable or credentials are absent, an in-app deterministic rule analyzer provides structured operational triage.
 
-3. **Human Governance & Immutable Audit Trail**:
-   - Every human controller intervention (approval, rejection, or manual assignment) is permanently logged with timestamps, user IDs, and justification notes.
+3. **Human Governance & Append-Only Audit Trail**:
+   - Every controller action (approval, rejection, or manual assignment) is recorded in an append-only session history during the active browser lifecycle.
+   - *Production Architecture Notice*: A production enterprise deployment would persist this append-only stream into durable, tamper-evident ledger storage.
 
 ---
 
@@ -51,6 +52,7 @@ ShaRecon AI strictly separates deterministic calculation from advisory generativ
   - Exception Classification Accuracy: **90.6%** (163/180 records)
   - False-Positive Count: **0** (₹0.00 False-Positive Exposure)
   - Multi-Seed Stability: Verified across 5 independent PRNG seeds (42, 101, 777, 2024, 9999) with 100% precision and ₹0.00 false-positive exposure.
+  - *Disclaimer*: This synthetic benchmark evaluates engine distribution stability and does not represent live merchant account performance.
 
 - **Held-Out Adversarial Fixture (80 Curated Real-World Failures)**:
   - A manually curated adversarial fixture constructed independently of generator logic.
@@ -71,11 +73,10 @@ ShaRecon AI strictly separates deterministic calculation from advisory generativ
 
 ---
 
-### 4. What Broke and How We Recovered
-During continuous development and architecture verification, three significant defects were diagnosed and resolved:
-1. **Simulator Input Reconstruction Flaw**: The policy simulator previously reconstructed statement inputs from matched output records, dropping distractors and uncredited bank transactions and blinding the collision solver. We corrected this by refactoring the simulator to re-run the full 4-factor bipartite engine over immutable raw feeds.
-2. **Cross-Platform Dependency Incompatibilities**: Experimental testing tools triggered native binding resolution errors on Linux CI runners. We pinned stable LTS dependencies matching Node 20.18.3, enabling clean, unforced `npm ci` execution.
-3. **Viewport Congestion & Chart Fragility**: Canvas/container charts failed to initialize dimensions in compact viewports. We engineered pure SVG donut geometry and responsive command bar overflow menus, verified by 40 Playwright E2E browser tests across 7 viewports.
+### 4. What Broke and How I Recovered
+During development, I found that the baseline and policy simulator disagreed under identical thresholds. The baseline produced 111 safe auto-reconciliations with zero false-positive exposure, while the simulator produced 118 and approximately 1.42 lakh rupees of exposure. I traced this to the simulator rebuilding its input from already-matched outputs, which removed distractor and uncredited bank records and blinded collision detection. I preserved the complete raw feeds, reran every policy through the canonical engine, and added parity and adversarial regression tests. The default simulation now exactly reproduces the baseline.
+
+In addition, I pinned stable LTS dependencies matching our Node 20 runtime and replaced fragile canvas charts with pure SVG donut geometry, passing 40 automated Playwright tests across seven viewports.
 
 ---
 
@@ -90,4 +91,4 @@ During continuous development and architecture verification, three significant d
 | **Verified Exception ID** | `pay_0110_razor` (₹50,000.00 gross, ₹48,820.00 exposure, Missing Bank Credit) | Exceptions Tab / `MISSING_BANK_CREDIT` | Preview UI & Dataset Generator |
 | **Held-Out Dataset Size** | 80 payments, 80 settlements, 76 bank transactions | `docs/evaluation/HELD_OUT_REPORT.md:L6` | `src/lib/dataset/held_out_dataset.ts` |
 | **Held-Out False Positives** | 7 records (₹28,100.00 Exposure) across 2 failure classes | `docs/evaluation/HELD_OUT_REPORT.md:L65-L74` | In-app Error Inspector table |
-| **Testing Coverage** | 48 Vitest unit tests + 40 Playwright E2E browser tests | `.github/workflows/quality.yml` | Remote GitHub Actions CI run |
+| **Testing Coverage** | 48 automated unit, integrity and adversarial tests + 40 Playwright E2E browser tests | `.github/workflows/quality.yml` | Remote GitHub Actions CI run |
