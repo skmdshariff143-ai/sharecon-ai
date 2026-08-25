@@ -4,7 +4,8 @@
     "totalPayments": 80,
     "totalSettlements": 80,
     "totalBankTransactions": 76,
-    "generatedAt": "2026-08-24T15:41:12.886Z",
+    "benchmarkAsOf": "2026-08-24",
+    "artifactVersion": 1,
     "disclaimer": "Curated test dataset. Does not represent production volume or live transaction traffic."
   },
   "payments": [

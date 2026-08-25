@@ -1,6 +1,6 @@
 # ShaRecon AI — Verified Canonical Benchmark Artifacts
 
-> Generated on `2026-08-24T15:41:11.115Z` directly from the canonical evaluation engine.
+> **Benchmark Baseline As Of**: `2026-08-24` | **Artifact Version**: `1`
 
 ## 1. Immutable Baseline Benchmark (Seed 42)
 
@@ -17,7 +17,7 @@
 | **Auto-Resolution Recall** | 100.0% | Safe Auto / Total GT Safe |
 | **Review-Routing Accuracy** | 83.0% | Correct Review Routed / Expected GT Review |
 | **Exception Classification Acc** | 90.6% | Correct Exception Type / Total Records |
-| **False-Positive Exposure** | ₹0.00 | Sum of Unsafe Auto Gross Paie |
+| **False-Positive Exposure** | ₹0.00 | Sum of gross amount in paise for unsafe auto-reconciled records |
 
 ## 2. Multi-Policy Simulation Trade-Off Matrix (Seed 42)
 

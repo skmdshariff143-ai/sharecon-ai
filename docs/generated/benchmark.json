@@ -1,6 +1,7 @@
 {
   "metadata": {
-    "generatedAt": "2026-08-24T15:41:11.115Z",
+    "benchmarkAsOf": "2026-08-24",
+    "artifactVersion": 1,
     "engineVersion": "0.1.0",
     "totalBenchmarkSeeds": 5,
     "defaultSeed": 42,
@@ -24,7 +25,6 @@
     "reviewRoutingAccuracy": 0.8297872340425532,
     "exceptionDetectionAccuracy": 0.9055555555555556,
     "falsePositiveExposurePaise": 0,
-    "processingDurationMs": 28.75,
     "errorCount": 8
   },
   "policySimulationMatrix": [
@@ -117,8 +117,7 @@
       "reviewRoutingAccuracy": 0.8297872340425532,
       "exceptionAccuracy": 0.9055555555555556,
       "autoReconciliationRate": 0.6166666666666667,
-      "falsePositiveExposurePaise": 0,
-      "processingDurationMs": 9.233000000000004
+      "falsePositiveExposurePaise": 0
     },
     {
       "seed": 101,
@@ -131,8 +130,7 @@
       "reviewRoutingAccuracy": 0.8723404255319149,
       "exceptionAccuracy": 0.9055555555555556,
       "autoReconciliationRate": 0.6166666666666667,
-      "falsePositiveExposurePaise": 0,
-      "processingDurationMs": 9.97369999999998
+      "falsePositiveExposurePaise": 0
     },
     {
       "seed": 777,
@@ -145,8 +143,7 @@
       "reviewRoutingAccuracy": 0.8723404255319149,
       "exceptionAccuracy": 0.9055555555555556,
       "autoReconciliationRate": 0.6166666666666667,
-      "falsePositiveExposurePaise": 0,
-      "processingDurationMs": 14.227599999999995
+      "falsePositiveExposurePaise": 0
     },
     {
       "seed": 2024,
@@ -159,8 +156,7 @@
       "reviewRoutingAccuracy": 0.7872340425531915,
       "exceptionAccuracy": 0.9055555555555556,
       "autoReconciliationRate": 0.6166666666666667,
-      "falsePositiveExposurePaise": 0,
-      "processingDurationMs": 7.483499999999992
+      "falsePositiveExposurePaise": 0
     },
     {
       "seed": 9999,
@@ -173,8 +169,7 @@
       "reviewRoutingAccuracy": 0.8085106382978723,
       "exceptionAccuracy": 0.9055555555555556,
       "autoReconciliationRate": 0.6166666666666667,
-      "falsePositiveExposurePaise": 0,
-      "processingDurationMs": 9.651700000000005
+      "falsePositiveExposurePaise": 0
     }
   ]
 }

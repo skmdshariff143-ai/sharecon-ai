@@ -13,13 +13,15 @@
     "test:e2e": "playwright test",
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:report": "playwright show-report",
-    "generate:benchmark": "npx tsx scripts/generate-benchmark-artifacts.ts",
-    "generate:heldout": "npx tsx scripts/generate-held-out-artifacts.ts",
-    "verify": "npm run lint && npm run type-check && npm run test && npm run generate:benchmark && npm run generate:heldout && npm run build && npm run test:e2e"
+    "generate:benchmark": "tsx scripts/generate-benchmark-artifacts.ts",
+    "generate:heldout": "tsx scripts/generate-held-out-artifacts.ts",
+    "benchmark:performance": "tsx scripts/measure-performance.ts",
+    "verify:artifacts": "git diff --exit-code HEAD -- docs/generated/benchmark.json docs/generated/benchmark.md docs/evaluation",
+    "verify": "npm run lint && npm run type-check && npm run test && npm run generate:benchmark && npm run generate:heldout && npm run verify:artifacts && npm run build && npm run test:e2e"
   },
   "engines": {
-    "node": ">=20.0.0",
-    "npm": ">=10.0.0"
+    "node": "20.x",
+    "npm": "10.x"
   },
   "volta": {
     "node": "20.18.3",
@@ -40,19 +42,20 @@
   "devDependencies": {
     "@playwright/test": "^1.62.1",
     "@tailwindcss/postcss": "^4",
-    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.2",
     "@types/node": "^20",
     "@types/papaparse": "^5.5.2",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@vitejs/plugin-react": "^6.1.0",
+    "@vitejs/plugin-react": "^4.3.4",
     "eslint": "^9",
     "eslint-config-next": "16.3.2",
-    "jsdom": "^30.0.1",
+    "jsdom": "^26.0.0",
     "playwright": "^1.62.1",
     "tailwindcss": "^4",
+    "tsx": "^4.23.12",
     "typescript": "^5",
-    "vitest": "^4.1.11"
+    "vitest": "^3.0.7"
   }
 }

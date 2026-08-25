@@ -1,16 +1,16 @@
 # ShaRecon AI — Held-Out Adversarial Evaluation Report
 
-> **Evaluation Classification**: Independent Held-Out Benchmark  
-> **Evaluation Date**: 2026-08-24  
+> **Evaluation Classification**: Manually Curated Held-Out Adversarial Fixture  
+> **Benchmark Baseline As Of**: 2026-08-24 | **Artifact Version**: 1  
 > **Evaluation Model**: Un-Tuned Baseline Engine (85% High / 50% Medium Threshold)  
 > **Total Held-Out Records**: 80 payments, 80 settlements, 76 bank statement credits  
-> **Production Notice**: *This benchmark is evaluated on manually curated adversarial test cases and deterministic synthetic generators. Neither benchmark represents live production financial performance or real merchant account data.*
+> **Production Notice**: *This benchmark is evaluated on manually curated adversarial test cases and deterministic synthetic generators. Neither benchmark represents live production financial performance, external third-party certification, or real merchant account data.*
 
 ---
 
 ## 1. Executive Summary & Honest Evaluation Objective
 
-To prevent circular evaluation (where a synthetic generator and reconciliation engine are designed to mirror each other's assumptions), ShaRecon AI maintains a **manually curated, independently labeled held-out adversarial dataset**.
+To prevent circular evaluation (where a synthetic generator and reconciliation engine are designed to mirror each other's assumptions), ShaRecon AI maintains a **manually curated held-out adversarial fixture** created within the project without reusing `generator.ts` logic.
 
 ### Evaluation Constraints Enforced:
 1. **Zero Generator Helper Logic**: The held-out dataset was hand-constructed without relying on `generator.ts` logic.
@@ -33,7 +33,6 @@ To prevent circular evaluation (where a synthetic generator and reconciliation e
 | **Financial Exposure**| **False-Positive Count** | **7** | **$0$** | Number of non-matching or unsafe records falsely auto-reconciled. |
 | **Financial Exposure**| **False-Positive Exposure** | **₹28,100.00** | **₹0.00** | Rupee value exposed to improper auto-clearance. |
 | **Operational Yield**| **Automation Rate** | **52.5%** | $40\% - 60\%$ | 42 of 80 records safely processed hands-free. |
-| **Performance** | **Execution Latency** | **24.38 ms** | $< 25\text{ ms}$ | High-throughput sub-10ms deterministic execution. |
 
 ---
 

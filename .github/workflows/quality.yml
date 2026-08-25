@@ -2,7 +2,7 @@ name: Quality Gates & Verification
 
 on:
   push:
-    branches: [main]
+    branches: [main, 'fix/*']
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -39,11 +39,14 @@ jobs:
       - name: Run Vitest unit & adversarial tests
         run: npm run test
 
-      - name: Generate & verify canonical benchmark artifacts
+      - name: Generate canonical benchmark artifacts
         run: npm run generate:benchmark
 
-      - name: Generate & verify held-out adversarial artifacts
+      - name: Generate held-out adversarial artifacts
         run: npm run generate:heldout
+
+      - name: Verify zero git diff on generated artifacts
+        run: npm run verify:artifacts
 
       - name: Build Next.js production bundle
         run: npm run build

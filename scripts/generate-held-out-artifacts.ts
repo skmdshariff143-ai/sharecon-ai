@@ -27,7 +27,8 @@ function run() {
       totalPayments: HELD_OUT_DATASET.payments.length,
       totalSettlements: HELD_OUT_DATASET.settlements.length,
       totalBankTransactions: HELD_OUT_DATASET.bankTransactions.length,
-      generatedAt: new Date().toISOString(),
+      benchmarkAsOf: '2026-08-24',
+      artifactVersion: 1,
       disclaimer: 'Curated test dataset. Does not represent production volume or live transaction traffic.',
     },
     payments: HELD_OUT_DATASET.payments,
@@ -43,7 +44,8 @@ function run() {
     metadata: {
       title: 'ShaRecon AI — Held-Out Ground Truth Labels',
       totalGroundTruthRecords: HELD_OUT_DATASET.groundTruth.length,
-      generatedAt: new Date().toISOString(),
+      benchmarkAsOf: '2026-08-24',
+      artifactVersion: 1,
       disclaimer: 'Ground truth labels stored independently. Never accessed by the matching engine.',
     },
     groundTruth: HELD_OUT_DATASET.groundTruth,
@@ -53,7 +55,7 @@ function run() {
 
   // 3. Execute un-tuned evaluation
   const benchmarkResult = evaluateHeldOutBenchmark();
-  const { evaluation, processingDurationMs } = benchmarkResult;
+  const { evaluation } = benchmarkResult;
 
   // Format percentages helper
   const pct = (num: number) => `${(num * 100).toFixed(1)}%`;
@@ -67,17 +69,17 @@ function run() {
 
   const markdownContent = `# ShaRecon AI — Held-Out Adversarial Evaluation Report
 
-> **Evaluation Classification**: Independent Held-Out Benchmark  
-> **Evaluation Date**: ${new Date().toISOString().split('T')[0]}  
+> **Evaluation Classification**: Manually Curated Held-Out Adversarial Fixture  
+> **Benchmark Baseline As Of**: 2026-08-24 | **Artifact Version**: 1  
 > **Evaluation Model**: Un-Tuned Baseline Engine (85% High / 50% Medium Threshold)  
 > **Total Held-Out Records**: ${evaluation.totalRecordsProcessed} payments, ${HELD_OUT_DATASET.settlements.length} settlements, ${HELD_OUT_DATASET.bankTransactions.length} bank statement credits  
-> **Production Notice**: *This benchmark is evaluated on manually curated adversarial test cases and deterministic synthetic generators. Neither benchmark represents live production financial performance or real merchant account data.*
+> **Production Notice**: *This benchmark is evaluated on manually curated adversarial test cases and deterministic synthetic generators. Neither benchmark represents live production financial performance, external third-party certification, or real merchant account data.*
 
 ---
 
 ## 1. Executive Summary & Honest Evaluation Objective
 
-To prevent circular evaluation (where a synthetic generator and reconciliation engine are designed to mirror each other's assumptions), ShaRecon AI maintains a **manually curated, independently labeled held-out adversarial dataset**.
+To prevent circular evaluation (where a synthetic generator and reconciliation engine are designed to mirror each other's assumptions), ShaRecon AI maintains a **manually curated held-out adversarial fixture** created within the project without reusing \`generator.ts\` logic.
 
 ### Evaluation Constraints Enforced:
 1. **Zero Generator Helper Logic**: The held-out dataset was hand-constructed without relying on \`generator.ts\` logic.
@@ -100,7 +102,6 @@ To prevent circular evaluation (where a synthetic generator and reconciliation e
 | **Financial Exposure**| **False-Positive Count** | **${evaluation.falsePositiveCount}** | **$0$** | Number of non-matching or unsafe records falsely auto-reconciled. |
 | **Financial Exposure**| **False-Positive Exposure** | **${formatINR(evaluation.falsePositiveExposurePaise)}** | **₹0.00** | Rupee value exposed to improper auto-clearance. |
 | **Operational Yield**| **Automation Rate** | **${pct(evaluation.autoReconciliationRate)}** | $40\\% - 60\\%$ | ${evaluation.autoReconciledCount} of ${evaluation.totalRecordsProcessed} records safely processed hands-free. |
-| **Performance** | **Execution Latency** | **${processingDurationMs.toFixed(2)} ms** | $< 25\\text{ ms}$ | High-throughput sub-10ms deterministic execution. |
 
 ---
 
@@ -185,7 +186,6 @@ npm test src/lib/__tests__/held_out.test.ts
   console.log(`False-Positive Count: ${evaluation.falsePositiveCount}`);
   console.log(`False-Positive Exposure: ${formatINR(evaluation.falsePositiveExposurePaise)}`);
   console.log(`Total Errors in Inspector: ${evaluation.errors.length}`);
-  console.log(`Latency: ${processingDurationMs.toFixed(2)} ms`);
 }
 
 run();
