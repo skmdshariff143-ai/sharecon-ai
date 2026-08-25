@@ -6,7 +6,7 @@
 
 ### 🔗 Project Links
 
-- **Active Verification Target (Vercel Preview)**: [https://sharecon-iy4yi0u8j-shaik-mahammad-shariff-s-projects.vercel.app](https://sharecon-iy4yi0u8j-shaik-mahammad-shariff-s-projects.vercel.app)
+- **Active Verification Target (Vercel Preview)**: [https://sharecon-nkyuu7koj-shaik-mahammad-shariff-s-projects.vercel.app](https://sharecon-nkyuu7koj-shaik-mahammad-shariff-s-projects.vercel.app)
 - **Production Baseline (`main` — Pending Approval)**: [https://sharecon-ai.vercel.app](https://sharecon-ai.vercel.app)
 - **Five-Minute Walkthrough Video Script**: [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md) *(In-app interactive tour available via **Guided Demo**)*
 - **GitHub Repository**: [https://github.com/skmdshariff143-ai/sharecon-ai](https://github.com/skmdshariff143-ai/sharecon-ai)

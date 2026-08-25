@@ -89,7 +89,7 @@
 
 ### 7. Submission Completeness
 - **Public GitHub Repository**: [https://github.com/skmdshariff143-ai/sharecon-ai](https://github.com/skmdshariff143-ai/sharecon-ai)
-- **Vercel Preview URL**: Verified on active feature branch.
+- **Vercel Preview URL**: [https://sharecon-nkyuu7koj-shaik-mahammad-shariff-s-projects.vercel.app](https://sharecon-nkyuu7koj-shaik-mahammad-shariff-s-projects.vercel.app)
 - **5-Minute Pitch Script**: Detailed in [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md) with exact timestamps and panel Q&A.
 - **Post-Mortem Documentation**: Detailed in [`docs/WHAT_BROKE.md`](docs/WHAT_BROKE.md).
 
