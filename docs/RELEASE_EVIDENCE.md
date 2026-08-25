@@ -44,7 +44,7 @@
 
 ## 3. Verified Deployments
 
-- **Verified Vercel Preview Deployment**: https://sharecon-a1nmspda5-shaik-mahammad-shariff-s-projects.vercel.app
+- **Verified Vercel Preview Deployment**: https://sharecon-3464ih2vi-shaik-mahammad-shariff-s-projects.vercel.app
 - **Production Baseline URL**: https://sharecon-ai.vercel.app
 - **HTTP Health**: Returns `HTTP 200 OK`
 

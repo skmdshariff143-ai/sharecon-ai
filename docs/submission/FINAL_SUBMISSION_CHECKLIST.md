@@ -10,7 +10,7 @@
 | **Browser E2E Tests** | 40/40 Playwright tests passing across 7 viewports | **COMPLETE** | `npm run test:e2e` / CI quality.yml |
 | **Deterministic Artifacts**| Zero git diff on generated benchmark/evaluation | **COMPLETE** | `npm run verify:artifacts` |
 | **Remote CI Workflow** | Remote GitHub Actions workflow green | **COMPLETE** | .github/workflows/quality.yml |
-| **Vercel Preview** | Verified preview deployment returning HTTP 200 | **COMPLETE** | https://sharecon-a1nmspda5-shaik-mahammad-shariff-s-projects.vercel.app |
+| **Vercel Preview** | Verified preview deployment returning HTTP 200 | **COMPLETE** | https://sharecon-3464ih2vi-shaik-mahammad-shariff-s-projects.vercel.app |
 | **Adversarial Evaluation**| 80-case held-out fixture with 7 disclosed errors | **COMPLETE** | docs/evaluation/HELD_OUT_REPORT.md |
 | **Pitch Video Script** | 5-minute technical demo script (644 words) | **COMPLETE** | docs/submission/FIVE_MINUTE_SCRIPT.md |
 | **Recording Shot List** | Frame-by-frame screen capture plan | **COMPLETE** | docs/submission/RECORDING_SHOT_LIST.md |
