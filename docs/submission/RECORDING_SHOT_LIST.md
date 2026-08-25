@@ -1,12 +1,13 @@
 # ShaRecon AI — 5-Minute Pitch Video Recording Shot List
 
-| Shot # | Timestamp | Workspace View | Action on Screen | Key Voiceover Point |
+| Shot # | Timestamp | Workspace View | Screen Interaction & Visual Focus | Spoken Topic & Audio Sync |
 | :---: | :---: | :--- | :--- | :--- |
-| **1** | 0:00 - 0:30 | Control Center | Show full dashboard, 5 summary KPI cards, and 3-Way Funnel diagram. | Explain the 3-ledger merchant problem: Orders, Gateway Settlements, Bank Credits. |
-| **2** | 0:30 - 0:50 | Control Center | Scroll to Outcome Donut and High-Exposure Queue. | Highlight operational risk of trapped working capital and silent fee leakage. |
-| **3** | 0:50 - 1:40 | Live Runner | Click "Start Live Run" and step through Stages 1–8. | Explain 4-factor scoring math (integer-paise arithmetic) and 1-to-1 bipartite collision prevention. |
-| **4** | 1:40 - 2:30 | Reconciliation Grid | Filter by "Auto-Reconciled", click pay_0001, open Evidence Drawer. | Demonstrate 3-leg alignment (Order, Razorpay settlement, Bank credit) and 4-factor score breakdown. |
-| **5** | 2:30 - 3:30 | Exceptions Workspace | Select high-exposure exception, click "Analyze with Gemini", show advisory checklist. | Show AI advisory synthesis and emphasize safety: AI cannot change scores or move money. |
-| **6** | 3:30 - 4:20 | Evaluation Lab | Show 5-Policy Matrix and open Held-Out Error Inspector (7 errors, ₹28,100 exposure). | Present honest multi-seed verification and transparent held-out edge case analysis. |
-| **7** | 4:20 - 4:45 | Help & Guide / Audit | Open Help FAQ and Audit Trail with reviewer actions. | Show complete regulatory audit logging and operator onboarding tools. |
-| **8** | 4:45 - 5:00 | Command Palette & Close | Press ⌘K, navigate back to Control Center, conclude. | Reiterate verification: 48 Vitest tests, 40 Playwright E2E tests, verified CI and Vercel preview. |
+| **1** | 0:00 - 0:35 | Control Center | Display full dashboard, 5 KPI cards, and 3-Way Funnel diagram (Orders, Gateway Settlements, Bank Credits). | Explain the 3-ledger reconciliation problem, reference truncation, MDR fee/GST deductions, and operational delays. |
+| **2** | 0:35 - 1:10 | Live Runner | Click "Start Live Run" and step through Stages 1 through 8. Highlight in-memory integer-paise processing. | Explain deterministic 4-factor scoring (Reference: 40, Amount: 35, Date: 15, UTR/Description: 10) and 1-to-1 bipartite collision prevention. |
+| **3** | 1:10 - 1:55 | Reconciliation Grid | Filter by "Auto-Reconciled", select `pay_0001_razor`, and open Evidence Drawer showing all 3 transaction legs. | Show exact 3-way alignment: ₹999.00 gross order, ₹975.42 net settlement, ₹975.42 bank credit, and 100/100 score breakdown. |
+| **4** | 1:55 - 2:40 | Exceptions Workspace | Select `pay_0110_razor` (Missing Bank Credit, ₹48,820.00 exposure). Click "Analyze with Gemini". | Show AI advisory synthesis and triage checklist. Emphasize bounded AI safety: AI cannot alter scores or mutate ledgers. |
+| **5** | 2:40 - 3:05 | Audit Trail | Scroll through chronological audit entries showing approvals, rejections, and reviewer metadata. | Highlight human controller governance, append-only session logging, and note durable storage for production. |
+| **6** | 3:05 - 3:35 | Control Center / Safety | Open Methodology & Safety view. Show architectural separation diagram. | Reiterate strict separation: deterministic core for financial calculations vs. advisory perimeter for generative AI. |
+| **7** | 3:35 - 4:15 | Evaluation Lab | Show 5-Policy Comparative Matrix. Open Held-Out Adversarial Error Inspector table. | Present honest metrics: 61.7% auto-rate, 100% precision, 39/47 review-routing; open disclosure of 7 held-out errors (₹28,100 exposure). |
+| **8** | 4:15 - 4:45 | Evaluation Lab / Simulator | Interact with Policy Simulator threshold sliders. Show real-time re-simulation over raw feeds. | Explain what broke: simulator reconstructed inputs from matched outputs; recovery through complete raw feed preservation and regression tests. |
+| **9** | 4:45 - 5:00 | Command Palette & Close | Open Command Palette (`⌘K`), navigate back to Control Center, summarize. | Conclude with verified release evidence: 48 automated tests, 40 Playwright tests, green GitHub Actions CI, and live Vercel deployment. |

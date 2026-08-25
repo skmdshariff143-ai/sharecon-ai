@@ -6,15 +6,15 @@
 
 ### 🔗 Project Links
 
-- **Active Verification Target (Vercel Preview)**: [https://sharecon-nkyuu7koj-shaik-mahammad-shariff-s-projects.vercel.app](https://sharecon-nkyuu7koj-shaik-mahammad-shariff-s-projects.vercel.app)
+- **Active Verification Target (Vercel Preview)**: [https://sharecon-3464ih2vi-shaik-mahammad-shariff-s-projects.vercel.app](https://sharecon-3464ih2vi-shaik-mahammad-shariff-s-projects.vercel.app)
 - **Production Baseline (`main` — Pending Approval)**: [https://sharecon-ai.vercel.app](https://sharecon-ai.vercel.app)
-- **Five-Minute Walkthrough Video Script**: [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md) *(In-app interactive tour available via **Guided Demo**)*
+- **Five-Minute Walkthrough Video Script**: [`docs/submission/FIVE_MINUTE_SCRIPT.md`](docs/submission/FIVE_MINUTE_SCRIPT.md) *(In-app interactive tour available via **Guided Demo**)*
 - **GitHub Repository**: [https://github.com/skmdshariff143-ai/sharecon-ai](https://github.com/skmdshariff143-ai/sharecon-ai)
 - **Track**: Razorpay AI Buildathon — *AI Finance Controller*
 
 [![Quality Gates](https://github.com/skmdshariff143-ai/sharecon-ai/actions/workflows/quality.yml/badge.svg)](https://github.com/skmdshariff143-ai/sharecon-ai/actions/workflows/quality.yml)
 [![Node.js Runtime](https://img.shields.io/badge/Node.js-v20.18.3%20(Pinned)-brightgreen.svg)](https://nodejs.org)
-[![Vitest Unit Tests](https://img.shields.io/badge/Unit%20Tests-48%2F48%20Passed-blue)](https://github.com/skmdshariff143-ai/sharecon-ai)
+[![Automated Tests](https://img.shields.io/badge/Automated%20Tests-48%2F48%20Passed-blue)](https://github.com/skmdshariff143-ai/sharecon-ai)
 [![Playwright E2E](https://img.shields.io/badge/Playwright%20E2E-40%2F40%20Passed-violet)](https://github.com/skmdshariff143-ai/sharecon-ai)
 [![Zero Horizontal Overflow](https://img.shields.io/badge/Responsive-1440%20%7C%201366%20%7C%201280%20%7C%201024%20%7C%20390-success)](https://sharecon-ai.vercel.app)
 [![Zero Live Money Movement](https://img.shields.io/badge/Safety-Zero%20Live%20Money%20Movement-amber)](https://sharecon-ai.vercel.app)
@@ -61,7 +61,7 @@ ShaRecon AI provides an explainable financial operations control center built ar
 3. **3-Way Trace Inspector (`MatchDetailDrawer`)**: Inspect the full 4-factor scoring breakdown (Reference Match, Amount Compatibility, Date Window SLA, UTR Similarity) and explore alternative candidate ties.
 4. **Financial Triage & Exception Command Center (`ExceptionsTab`)**: Prioritize anomalies by monetary exposure and severity (`CRITICAL`, `WARNING`, `ADVISORY`). Review grounded AI advisory notes with full transaction evidence and execute 1-click approvals or rejections.
 5. **Dual-Track Evaluation Lab & Policy Simulator (`EvaluationLabTab`)**: Validate matching accuracy across 5 deterministic PRNG seeds or test the engine against an 80-record hand-curated held-out adversarial suite with a real-time policy threshold simulator.
-6. **Immutable Append-Only Audit Trail (`AuditTab`)**: Maintain complete governance with timestamped records of every automated match, manual approval, rejection, and policy adjustment, exportable to CSV and JSON.
+6. **Append-Only Session Audit Trail (`AuditTab`)**: Maintain governance with timestamped records of every automated match, manual approval, rejection, and policy adjustment during the session, exportable to CSV and JSON (production will connect to durable ledger storage).
 
 | 3-Way Evidence Inspector Drawer | Financial Triage & AI Advisory |
 | :---: | :---: |
@@ -273,7 +273,7 @@ npm run verify
 ├───────────────────────────────┬────────────────────────────────────────┤
 │ 1. npm run lint               │ ESLint clean (0 errors, 0 warnings)    │
 │ 2. npm run type-check         │ Strict TypeScript 5 check (0 errors)   │
-│ 3. npm run test               │ 48 Vitest unit & immutability tests    │
+│ 3. npm run test               │ 48 automated unit & integrity tests    │
 │ 4. npm run generate:benchmark │ Compile canonical benchmark.json/.md   │
 │ 5. npm run generate:heldout   │ Compile held-out report & JSON data    │
 │ 6. npm run verify:artifacts   │ Assert zero git diff on generated data │
