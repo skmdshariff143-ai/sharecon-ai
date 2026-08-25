@@ -30,7 +30,7 @@ jobs:
       - name: Clean install dependencies
         run: |
           npm ci --include=optional --ignore-engines
-          npm install --no-save --force --ignore-engines @rolldown/binding-linux-x64-gnu @rollup/rollup-linux-x64-gnu
+          npm install --no-save --force --ignore-engines @rolldown/binding-linux-x64-gnu@1.2.5 @rollup/rollup-linux-x64-gnu@4.62.5
 
       - name: Run ESLint
         run: npm run lint
