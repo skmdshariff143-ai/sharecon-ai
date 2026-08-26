@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:camt.053.001.02">
+  <BkToCstmrStmt>
+    <GrpHdr>
+      <MsgId>MSG_SHARECON_20260302_001</MsgId>
+      <CreDtTm>2026-03-02T14:30:00.000Z</CreDtTm>
+    </GrpHdr>
+    <Stmt>
+      <Id>STMT_HDFC_CORP_20260302</Id>
+      <ElctrncSeqNb>142</ElctrncSeqNb>
+      <CreDtTm>2026-03-02T14:30:00.000Z</CreDtTm>
+      <Acct>
+        <Id>
+          <Othr>
+            <Id>50200012345678</Id>
+          </Othr>
+        </Id>
+        <Ccy>INR</Ccy>
+        <Nm>SHARECON ENTERPRISES PVT LTD</Nm>
+      </Acct>
+      <!-- Entry 1: Razorpay Clean Settlement -->
+      <Ntry>
+        <NtryRef>NT_20260302_001</NtryRef>
+        <Amt Ccy="INR">1171.68</Amt>
+        <CdtDbtInd>CRDT</CdtDbtInd>
+        <Sts>BOOK</Sts>
+        <BookgDt>
+          <Dt>2026-03-02</Dt>
+        </BookgDt>
+        <ValDt>
+          <Dt>2026-03-02</Dt>
+        </ValDt>
+        <AcctSvcrRef>CMS1000000001</AcctSvcrRef>
+        <NtryDtls>
+          <TxDtls>
+            <Refs>
+              <EndToEndId>UTR_CMS1000000001</EndToEndId>
+            </Refs>
+            <AmtDtls>
+              <TxAmt>
+                <Amt Ccy="INR">1171.68</Amt>
+              </TxAmt>
+            </AmtDtls>
+            <RmtInf>
+              <Ustrd>RAZORPAY NODAL SETTLEMENT UTR: CMS1000000001 PAYMENT REF: pay_0001</Ustrd>
+            </RmtInf>
+          </TxDtls>
+        </NtryDtls>
+      </Ntry>
+      <!-- Entry 2: Razorpay Bulk Settlement -->
+      <Ntry>
+        <NtryRef>NT_20260302_002</NtryRef>
+        <Amt Ccy="INR">4910.00</Amt>
+        <CdtDbtInd>CRDT</CdtDbtInd>
+        <Sts>BOOK</Sts>
+        <BookgDt>
+          <Dt>2026-03-02</Dt>
+        </BookgDt>
+        <ValDt>
+          <Dt>2026-03-02</Dt>
+        </ValDt>
+        <AcctSvcrRef>CMS1000000002</AcctSvcrRef>
+        <NtryDtls>
+          <TxDtls>
+            <Refs>
+              <EndToEndId>UTR_CMS1000000002</EndToEndId>
+            </Refs>
+            <RmtInf>
+              <Ustrd>RAZORPAY SETTLEMENT BATCH UTR: CMS1000000002</Ustrd>
+            </RmtInf>
+          </TxDtls>
+        </NtryDtls>
+      </Ntry>
+      <!-- Entry 3: Debit Fee Entry (Should be filtered out) -->
+      <Ntry>
+        <NtryRef>NT_20260302_003</NtryRef>
+        <Amt Ccy="INR">50.00</Amt>
+        <CdtDbtInd>DBIT</CdtDbtInd>
+        <Sts>BOOK</Sts>
+        <BookgDt>
+          <Dt>2026-03-02</Dt>
+        </BookgDt>
+        <RmtInf>
+          <Ustrd>BANK LEDGER FOLIO CHARGES</Ustrd>
+        </RmtInf>
+      </Ntry>
+    </Stmt>
+  </BkToCstmrStmt>
+</Document>
