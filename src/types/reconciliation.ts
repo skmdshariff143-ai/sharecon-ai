@@ -149,6 +149,9 @@ export interface AuditEvent {
   reason: string;
   modelUsed: string;
   fallbackUsed: boolean;
+  sequenceNumber?: number;
+  prevHash?: string;
+  eventHash?: string;
 }
 
 export interface EngineConfig {
