@@ -14,10 +14,12 @@
 
 [![Quality Gates](https://github.com/skmdshariff143-ai/sharecon-ai/actions/workflows/quality.yml/badge.svg)](https://github.com/skmdshariff143-ai/sharecon-ai/actions/workflows/quality.yml)
 [![Node.js Runtime](https://img.shields.io/badge/Node.js-v20.18.3%20(Pinned)-brightgreen.svg)](https://nodejs.org)
-[![Automated Tests](https://img.shields.io/badge/Automated%20Tests-57%2F57%20Passed-blue)](https://github.com/skmdshariff143-ai/sharecon-ai)
+[![Automated Tests](https://img.shields.io/badge/Automated%20Tests-71%2F71%20Passed-blue)](https://github.com/skmdshariff143-ai/sharecon-ai)
 [![Playwright E2E](https://img.shields.io/badge/Playwright%20E2E-41%2F41%20Passed-violet)](https://github.com/skmdshariff143-ai/sharecon-ai)
 [![Zero Horizontal Overflow](https://img.shields.io/badge/Responsive-1440%20%7C%201366%20%7C%201280%20%7C%201024%20%7C%20390-success)](https://sharecon-ai.vercel.app)
 [![Compliance Package](https://img.shields.io/badge/Compliance%20Package-Deterministic%20SHA--256-emerald)](https://sharecon-ai.vercel.app)
+[![Audit Ledger](https://img.shields.io/badge/Audit%20Ledger-Cryptographic%20Hash--Chained-cyan)](https://sharecon-ai.vercel.app)
+[![Bank Feed Adapter](https://img.shields.io/badge/Bank%20Feed-ISO%2020022%20CAMT.053-indigo)](https://sharecon-ai.vercel.app)
 [![Zero Live Money Movement](https://img.shields.io/badge/Safety-Zero%20Live%20Money%20Movement-amber)](https://sharecon-ai.vercel.app)
 
 ---

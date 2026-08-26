@@ -228,6 +228,14 @@ export interface EvaluationMetrics {
   errors: ErrorInspectionItem[];
 }
 
+export interface ReconciliationPartitionContext {
+  partitionKey?: string;
+  merchantId?: string;
+  dateBucket?: string;
+  partitionIndex?: number;
+  totalPartitions?: number;
+}
+
 export interface BatchReconciliationResult {
   batchId: string;
   executedAt: string;
@@ -237,6 +245,7 @@ export interface BatchReconciliationResult {
   records: ReconciliationRecord[];
   auditEvents: AuditEvent[];
   evaluation?: EvaluationMetrics;
+  partitionContext?: ReconciliationPartitionContext;
 }
 
 export interface SeedBenchmarkResult {
