@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState, useRef, useEffect } from 'react';
 import {
   Menu,
@@ -89,27 +91,27 @@ export const TopCommandBar: React.FC<TopCommandBarProps> = ({
         <div className="flex items-center gap-2 sm:gap-2.5 min-w-0 shrink">
           <button
             onClick={onToggleNavigation}
-            className="lg:hidden p-2 rounded-xl text-[#a7afc0] hover:bg-white/10 hover:text-white transition-colors cursor-pointer shrink-0 min-h-[40px] min-w-[40px] flex items-center justify-center"
+            className="lg:hidden p-2 rounded-xl text-[#94a3b8] hover:bg-white/10 hover:text-white transition-colors cursor-pointer shrink-0 min-h-[40px] min-w-[40px] flex items-center justify-center"
             aria-label="Toggle navigation drawer"
           >
             <Menu className="w-5 h-5" />
           </button>
 
           {/* Dataset Status Pill */}
-          <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-[#111620]/95 text-[#a7afc0] text-xs font-medium border border-white/10 shrink-0 shadow-xs">
-            <span className="w-2 h-2 rounded-full bg-[#2dd4bf] shrink-0 shadow-[0_0_8px_rgba(45,212,191,0.8)]" aria-hidden="true"></span>
-            <span className="hidden sm:inline text-[#7d879b]">
-              Dataset: <strong className="text-[#f7f8fc] font-semibold">Synthetic 3-Way</strong>
+          <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-[#0e131f] text-[#94a3b8] text-xs font-medium border border-white/8 shrink-0 shadow-xs">
+            <span className="w-2 h-2 rounded-full bg-[#2dd4bf] shrink-0 shadow-[0_0_8px_rgba(45,212,191,0.7)]" aria-hidden="true"></span>
+            <span className="hidden sm:inline text-[#64748b]">
+              Dataset: <strong className="text-[#f8fafc] font-semibold">Synthetic 3-Way</strong>
             </span>
             <span className="hidden sm:inline text-white/20" aria-hidden="true">|</span>
-            <span className="font-mono text-[#f7f8fc] font-bold tabular-nums">{totalRecords}</span>
+            <span className="font-mono text-[#f8fafc] font-bold tabular-nums">{totalRecords}</span>
             <span className="hidden xs:inline">records</span>
           </div>
 
-          {/* AI / Fallback Status Badge (Visible on wide screens without collision) */}
-          <div className="hidden xl:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-[#a78bfa]/10 text-[#a78bfa] text-xs font-medium border border-[#a78bfa]/30 shrink-0 shadow-xs">
-            <Bot className="w-3.5 h-3.5 text-[#a78bfa] shrink-0" aria-hidden="true" />
-            <span className="text-[#c4b5fd] font-medium">Gemini Analyst:</span>
+          {/* AI / Fallback Status Badge */}
+          <div className="hidden xl:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-[#c084fc]/10 text-[#c084fc] text-xs font-medium border border-[#c084fc]/25 shrink-0 shadow-xs">
+            <Bot className="w-3.5 h-3.5 text-[#c084fc] shrink-0" aria-hidden="true" />
+            <span className="text-[#e9d5ff] font-medium">Gemini Analyst:</span>
             <span className="font-bold text-[11px]">Advisory + Fallback</span>
           </div>
         </div>
@@ -119,13 +121,13 @@ export const TopCommandBar: React.FC<TopCommandBarProps> = ({
           {/* Primary Action 1: Command Palette / Quick Search Trigger */}
           <button
             onClick={onOpenCommandPalette}
-            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-medium text-[#a7afc0] bg-[#111620] border border-white/10 hover:bg-white/10 hover:text-white transition-colors cursor-pointer min-h-[38px] shadow-xs"
+            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-medium text-[#94a3b8] bg-[#0e131f] border border-white/8 hover:bg-[#141b2b] hover:text-white transition-colors cursor-pointer min-h-[38px] shadow-xs"
             title="Open Command Palette (Ctrl+K or ⌘K)"
             aria-label="Open Command Palette"
           >
-            <Search className="w-3.5 h-3.5 text-[#7d879b]" aria-hidden="true" />
+            <Search className="w-3.5 h-3.5 text-[#64748b]" aria-hidden="true" />
             <span className="hidden md:inline">Search</span>
-            <kbd className="hidden sm:inline-block text-[10px] font-mono bg-[#0c101a] border border-white/15 rounded px-1.5 py-0.5 text-[#a7afc0] shadow-xs font-semibold">
+            <kbd className="hidden sm:inline-block text-[10px] font-mono bg-[#080c14] border border-white/12 rounded px-1.5 py-0.5 text-[#94a3b8] shadow-xs font-semibold">
               ⌘K
             </kbd>
           </button>
@@ -133,11 +135,11 @@ export const TopCommandBar: React.FC<TopCommandBarProps> = ({
           {/* Primary Action 2: Guided Demo Tour Trigger */}
           <button
             onClick={onStartTour}
-            className="hidden sm:inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold text-[#7168ff] bg-[#7168ff]/10 hover:bg-[#7168ff]/20 border border-[#7168ff]/30 transition-colors cursor-pointer shadow-xs shrink-0 min-h-[38px]"
+            className="hidden sm:inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold text-[#818cf8] bg-[#6366f1]/10 hover:bg-[#6366f1]/20 border border-[#6366f1]/25 transition-colors cursor-pointer shadow-xs shrink-0 min-h-[38px]"
             title="Start interactive demo walkthrough"
             aria-label="Start Guided Demo Tour"
           >
-            <Sparkles className="w-3.5 h-3.5 text-[#7168ff] shrink-0" aria-hidden="true" />
+            <Sparkles className="w-3.5 h-3.5 text-[#818cf8] shrink-0" aria-hidden="true" />
             <span className="hidden lg:inline">Guided Demo</span>
           </button>
 
@@ -145,7 +147,7 @@ export const TopCommandBar: React.FC<TopCommandBarProps> = ({
           <button
             onClick={onLoadDemo}
             disabled={isReconciling}
-            className="inline-flex items-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-[#7168ff] to-[#5687ff] hover:from-[#5d53ea] hover:to-[#4375ea] disabled:opacity-50 transition-all shadow-[0_0_15px_rgba(113,104,255,0.4)] hover:shadow-[0_0_20px_rgba(113,104,255,0.6)] cursor-pointer shrink-0 min-h-[38px]"
+            className="inline-flex items-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-[#6366f1] to-[#3b82f6] hover:from-[#4f46e5] hover:to-[#2563eb] disabled:opacity-50 transition-all shadow-[0_0_15px_rgba(99,102,241,0.35)] hover:shadow-[0_0_20px_rgba(99,102,241,0.55)] cursor-pointer shrink-0 min-h-[38px]"
             title="Re-run reconciliation on the benchmark dataset"
             aria-label="Run reconciliation demo"
           >
@@ -160,24 +162,24 @@ export const TopCommandBar: React.FC<TopCommandBarProps> = ({
               onClick={toggleDryRun}
               className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-medium border transition-colors cursor-pointer shrink-0 min-h-[38px] shadow-xs ${
                 config.dryRun
-                  ? 'bg-[#f5b942]/10 text-[#f5b942] border-[#f5b942]/35 hover:bg-[#f5b942]/20'
-                  : 'bg-[#2dd4bf]/10 text-[#2dd4bf] border-[#2dd4bf]/35 hover:bg-[#2dd4bf]/20'
+                  ? 'bg-[#fbbf24]/10 text-[#fbbf24] border-[#fbbf24]/30 hover:bg-[#fbbf24]/20'
+                  : 'bg-[#2dd4bf]/10 text-[#2dd4bf] border-[#2dd4bf]/30 hover:bg-[#2dd4bf]/20'
               }`}
               title="When Dry-Run is enabled, match outcomes are simulated without live ledger commitments."
               aria-label="Toggle dry-run simulation mode"
             >
               {config.dryRun ? (
-                <ToggleRight className="w-4 h-4 text-[#f5b942] shrink-0" aria-hidden="true" />
+                <ToggleRight className="w-4 h-4 text-[#fbbf24] shrink-0" aria-hidden="true" />
               ) : (
                 <ToggleLeft className="w-4 h-4 text-[#2dd4bf] shrink-0" aria-hidden="true" />
               )}
-              <span className="text-[#a7afc0]">Dry-Run:</span>
+              <span className="text-[#94a3b8]">Dry-Run:</span>
               <strong className="font-mono uppercase">{config.dryRun ? 'Active' : 'Live'}</strong>
             </button>
 
             <button
               onClick={onOpenSettings}
-              className="p-2 rounded-xl text-[#a7afc0] hover:text-white hover:bg-white/10 transition-colors border border-white/10 cursor-pointer min-h-[38px] min-w-[38px] flex items-center justify-center shadow-xs"
+              className="p-2 rounded-xl text-[#94a3b8] hover:text-white hover:bg-white/10 transition-colors border border-white/8 cursor-pointer min-h-[38px] min-w-[38px] flex items-center justify-center shadow-xs bg-[#0e131f]"
               title="Configure confidence scoring thresholds and fee tolerances"
               aria-label="Threshold Settings"
             >
@@ -186,7 +188,7 @@ export const TopCommandBar: React.FC<TopCommandBarProps> = ({
 
             <button
               onClick={onOpenUpload}
-              className="p-2 rounded-xl text-[#a7afc0] hover:text-white hover:bg-white/10 transition-colors border border-white/10 cursor-pointer min-h-[38px] min-w-[38px] flex items-center justify-center shadow-xs"
+              className="p-2 rounded-xl text-[#94a3b8] hover:text-white hover:bg-white/10 transition-colors border border-white/8 cursor-pointer min-h-[38px] min-w-[38px] flex items-center justify-center shadow-xs bg-[#0e131f]"
               title="Upload custom 3-way statements"
               aria-label="Upload CSVs"
             >
@@ -195,7 +197,7 @@ export const TopCommandBar: React.FC<TopCommandBarProps> = ({
 
             <button
               onClick={onExportReports}
-              className="p-2 rounded-xl text-[#a7afc0] hover:text-white hover:bg-white/10 transition-colors border border-white/10 cursor-pointer min-h-[38px] min-w-[38px] flex items-center justify-center shadow-xs"
+              className="p-2 rounded-xl text-[#94a3b8] hover:text-white hover:bg-white/10 transition-colors border border-white/8 cursor-pointer min-h-[38px] min-w-[38px] flex items-center justify-center shadow-xs bg-[#0e131f]"
               title="Export reconciliation results and audit logs"
               aria-label="Export Reports"
             >
@@ -204,7 +206,7 @@ export const TopCommandBar: React.FC<TopCommandBarProps> = ({
 
             <button
               onClick={onReset}
-              className="p-2 rounded-xl text-[#7d879b] hover:text-[#ff6577] hover:bg-[#ff6577]/10 transition-colors cursor-pointer min-h-[38px] min-w-[38px] flex items-center justify-center"
+              className="p-2 rounded-xl text-[#64748b] hover:text-[#f87171] hover:bg-[#f87171]/10 transition-colors cursor-pointer min-h-[38px] min-w-[38px] flex items-center justify-center"
               title="Clear all records and reset workspace"
               aria-label="Reset Workspace"
             >
@@ -217,9 +219,9 @@ export const TopCommandBar: React.FC<TopCommandBarProps> = ({
             <button
               ref={moreButtonRef}
               onClick={() => setIsMoreOpen((prev) => !prev)}
-              className="p-2 rounded-xl text-[#a7afc0] hover:text-white hover:bg-white/10 transition-colors border border-white/10 cursor-pointer min-h-[38px] min-w-[38px] flex items-center justify-center shadow-xs"
-              title="More workspace tools and configuration"
-              aria-label="More workspace options"
+              className="p-2 rounded-xl text-[#94a3b8] hover:text-white hover:bg-white/10 transition-colors border border-white/8 cursor-pointer min-h-[38px] min-w-[38px] flex items-center justify-center shadow-xs bg-[#0e131f]"
+              title="More workspace actions"
+              aria-label="More actions menu"
               aria-expanded={isMoreOpen}
               aria-haspopup="true"
             >
@@ -229,84 +231,85 @@ export const TopCommandBar: React.FC<TopCommandBarProps> = ({
             {isMoreOpen && (
               <div
                 ref={moreMenuRef}
+                className="absolute right-0 top-full mt-2 w-56 bg-[#141b2b] border border-white/12 rounded-xl shadow-2xl z-50 py-1.5 animate-scale-up"
                 role="menu"
-                aria-label="Workspace Actions Menu"
-                className="absolute right-0 mt-2 w-60 modal-surface rounded-2xl shadow-2xl py-1.5 z-50 text-xs text-[#f7f8fc] animate-in fade-in zoom-in-95 duration-100 border border-white/15"
+                aria-label="Additional workspace tools"
               >
-                <div className="px-3 py-1.5 text-[10px] font-bold text-[#7d879b] uppercase tracking-wider border-b border-white/10 font-mono">
-                  Workspace Controls
-                </div>
-
-                {/* Dry-Run Toggle in Menu */}
+                {/* Mobile/Tablet Dry Run Toggle */}
                 <button
-                  role="menuitem"
                   onClick={() => {
                     toggleDryRun();
+                    setIsMoreOpen(false);
                   }}
-                  className="w-full px-3 py-2 text-left hover:bg-white/5 flex items-center justify-between cursor-pointer text-[#a7afc0] hover:text-white transition-colors"
+                  className="w-full px-3.5 py-2.5 text-left text-xs text-[#94a3b8] hover:text-white hover:bg-white/5 flex items-center justify-between transition-colors cursor-pointer"
+                  role="menuitem"
                 >
                   <span className="flex items-center gap-2">
                     {config.dryRun ? (
-                      <ToggleRight className="w-4 h-4 text-[#f5b942]" aria-hidden="true" />
+                      <ToggleRight className="w-4 h-4 text-[#fbbf24]" aria-hidden="true" />
                     ) : (
                       <ToggleLeft className="w-4 h-4 text-[#2dd4bf]" aria-hidden="true" />
                     )}
-                    <span>Dry-Run Simulation</span>
+                    <span>Simulation Mode</span>
                   </span>
-                  <span className="font-semibold text-[10px] font-mono uppercase text-[#7d879b]">
-                    {config.dryRun ? 'Active' : 'Live'}
+                  <span className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded ${config.dryRun ? 'bg-[#fbbf24]/20 text-[#fbbf24]' : 'bg-[#2dd4bf]/20 text-[#2dd4bf]'}`}>
+                    {config.dryRun ? 'DRY-RUN' : 'LIVE'}
                   </span>
                 </button>
 
-                <div className="my-1 border-t border-white/10" role="separator" />
+                <div className="my-1 border-t border-white/8" />
 
+                {/* Settings */}
                 <button
-                  role="menuitem"
                   onClick={() => {
-                    setIsMoreOpen(false);
                     onOpenSettings();
+                    setIsMoreOpen(false);
                   }}
-                  className="w-full px-3 py-2 text-left hover:bg-white/5 flex items-center gap-2 cursor-pointer text-[#a7afc0] hover:text-white transition-colors"
+                  className="w-full px-3.5 py-2.5 text-left text-xs text-[#94a3b8] hover:text-white hover:bg-white/5 flex items-center gap-2.5 transition-colors cursor-pointer"
+                  role="menuitem"
                 >
-                  <Sliders className="w-3.5 h-3.5 text-[#7d879b]" aria-hidden="true" />
+                  <Sliders className="w-4 h-4 text-[#64748b]" aria-hidden="true" />
                   <span>Threshold Settings</span>
                 </button>
 
+                {/* Upload Custom CSV */}
                 <button
-                  role="menuitem"
                   onClick={() => {
-                    setIsMoreOpen(false);
                     onOpenUpload();
+                    setIsMoreOpen(false);
                   }}
-                  className="w-full px-3 py-2 text-left hover:bg-white/5 flex items-center gap-2 cursor-pointer text-[#a7afc0] hover:text-white transition-colors"
+                  className="w-full px-3.5 py-2.5 text-left text-xs text-[#94a3b8] hover:text-white hover:bg-white/5 flex items-center gap-2.5 transition-colors cursor-pointer"
+                  role="menuitem"
                 >
-                  <Upload className="w-3.5 h-3.5 text-[#7d879b]" aria-hidden="true" />
-                  <span>Upload Statements (CSV)</span>
+                  <Upload className="w-4 h-4 text-[#64748b]" aria-hidden="true" />
+                  <span>Upload CSV Statements</span>
                 </button>
 
+                {/* Export Reports */}
                 <button
-                  role="menuitem"
                   onClick={() => {
-                    setIsMoreOpen(false);
                     onExportReports();
+                    setIsMoreOpen(false);
                   }}
-                  className="w-full px-3 py-2 text-left hover:bg-white/5 flex items-center gap-2 cursor-pointer text-[#a7afc0] hover:text-white transition-colors"
+                  className="w-full px-3.5 py-2.5 text-left text-xs text-[#94a3b8] hover:text-white hover:bg-white/5 flex items-center gap-2.5 transition-colors cursor-pointer"
+                  role="menuitem"
                 >
-                  <Download className="w-3.5 h-3.5 text-[#7d879b]" aria-hidden="true" />
-                  <span>Export Reports (CSV/JSON)</span>
+                  <Download className="w-4 h-4 text-[#64748b]" aria-hidden="true" />
+                  <span>Export Reports & Logs</span>
                 </button>
 
-                <div className="my-1 border-t border-white/10" role="separator" />
+                <div className="my-1 border-t border-white/8" />
 
+                {/* Reset Workspace */}
                 <button
-                  role="menuitem"
                   onClick={() => {
-                    setIsMoreOpen(false);
                     onReset();
+                    setIsMoreOpen(false);
                   }}
-                  className="w-full px-3 py-2 text-left hover:bg-[#ff6577]/15 text-[#ff6577] flex items-center gap-2 cursor-pointer transition-colors"
+                  className="w-full px-3.5 py-2.5 text-left text-xs text-[#f87171] hover:bg-[#f87171]/10 flex items-center gap-2.5 transition-colors cursor-pointer"
+                  role="menuitem"
                 >
-                  <RotateCcw className="w-3.5 h-3.5 text-[#ff6577]" aria-hidden="true" />
+                  <RotateCcw className="w-4 h-4 text-[#f87171]" aria-hidden="true" />
                   <span>Reset Workspace</span>
                 </button>
               </div>

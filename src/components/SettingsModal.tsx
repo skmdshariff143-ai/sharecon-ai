@@ -52,148 +52,169 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
       role="dialog"
       aria-modal="true"
       aria-labelledby="settings-modal-title"
-      className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 bg-[#070a10]/85 backdrop-blur-md animate-in fade-in duration-150"
+      className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 bg-[#070a10]/85 backdrop-blur-md animate-fade-in"
     >
-      <div className="modal-surface max-w-lg w-full p-6 shadow-2xl bg-[#111620] border border-white/15 rounded-2xl animate-in zoom-in-95 duration-150">
-        <div className="flex items-center justify-between pb-4 border-b border-white/10">
+      <div className="modal-surface max-w-lg w-full p-6 shadow-2xl bg-[#141b2b] border border-white/12 rounded-2xl animate-scale-up">
+        <div className="flex items-center justify-between pb-4 border-b border-white/8">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 bg-[#7168ff]/20 text-[#7168ff] rounded-xl border border-[#7168ff]/40 shadow-[0_0_8px_rgba(113,104,255,0.3)]">
+            <div className="p-2 bg-[#6366f1]/15 text-[#818cf8] rounded-xl border border-[#6366f1]/30 shadow-[0_0_8px_rgba(99,102,241,0.25)]">
               <Sliders className="w-5 h-5" />
             </div>
             <div>
-              <h3 id="settings-modal-title" className="text-base font-extrabold text-[#f7f8fc] font-mono">
-                Reconciliation Engine Settings
-              </h3>
-              <p className="text-xs text-[#a7afc0] font-sans">
-                Calibrate thresholds and automated matching safety gates.
+              <h2 id="settings-modal-title" className="text-base font-bold text-[#f8fafc] font-mono">
+                Reconciliation Policy Settings
+              </h2>
+              <p className="text-xs text-[#94a3b8] font-sans">
+                Fine-tune confidence score boundaries and risk tolerance thresholds.
               </p>
             </div>
           </div>
+
           <button
             onClick={onClose}
-            className="p-1.5 text-[#7d879b] hover:text-white hover:bg-white/10 rounded-lg cursor-pointer transition-colors min-h-[36px] min-w-[36px] flex items-center justify-center"
+            className="p-1 text-[#64748b] hover:text-white rounded-lg transition-colors cursor-pointer"
+            aria-label="Close Settings"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="space-y-4 py-4 text-xs">
+        <div className="py-4 space-y-4 text-xs font-sans">
           {/* High Confidence Threshold */}
-          <div>
-            <div className="flex justify-between font-semibold text-[#f7f8fc] mb-1">
-              <span>Auto-Reconcile Threshold (High Confidence)</span>
-              <span className="text-[#7168ff] font-mono font-bold">{highThreshold}%</span>
+          <div className="space-y-1">
+            <div className="flex justify-between">
+              <label htmlFor="high-threshold-input" className="font-semibold text-[#f8fafc]">
+                Auto-Reconciliation Threshold (Score &ge; X)
+              </label>
+              <span className="font-mono font-bold text-[#2dd4bf]">{highThreshold}%</span>
             </div>
-            <p className="text-[11px] text-[#a7afc0] mb-1.5 font-sans">
-              Matches with confidence score ≥ this value are eligible for automatic reconciliation.
-            </p>
             <input
+              id="high-threshold-input"
               type="range"
-              min="70"
-              max="98"
-              step="1"
+              min={70}
+              max={95}
               value={highThreshold}
               onChange={(e) => setHighThreshold(Number(e.target.value))}
-              className="w-full accent-[#7168ff] cursor-pointer"
+              className="w-full accent-[#2dd4bf] cursor-pointer"
             />
+            <p className="text-[11px] text-[#64748b]">
+              Matches scoring above this threshold are automatically approved without human intervention.
+            </p>
           </div>
 
           {/* Medium Confidence Threshold */}
-          <div>
-            <div className="flex justify-between font-semibold text-[#f7f8fc] mb-1">
-              <span>Human Review Threshold (Medium Confidence)</span>
-              <span className="text-[#f5b942] font-mono font-bold">{medThreshold}%</span>
+          <div className="space-y-1">
+            <div className="flex justify-between">
+              <label htmlFor="med-threshold-input" className="font-semibold text-[#f8fafc]">
+                Review Queue Lower Bound (Score &ge; Y)
+              </label>
+              <span className="font-mono font-bold text-[#fbbf24]">{medThreshold}%</span>
             </div>
-            <p className="text-[11px] text-[#a7afc0] mb-1.5 font-sans">
-              Matches with scores between this value and High Threshold route to human reviewer triage.
-            </p>
             <input
+              id="med-threshold-input"
               type="range"
-              min="30"
-              max="80"
-              step="1"
+              min={30}
+              max={65}
               value={medThreshold}
               onChange={(e) => setMedThreshold(Number(e.target.value))}
-              className="w-full accent-[#f5b942] cursor-pointer"
+              className="w-full accent-[#fbbf24] cursor-pointer"
             />
+            <p className="text-[11px] text-[#64748b]">
+              Matches scoring below this are flagged as unmatched exceptions; between Y and X go to Review Queue.
+            </p>
           </div>
 
-          {/* Max Date Delta Window */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="font-semibold text-[#f7f8fc] block mb-1">Max Settlement Lag (Days)</label>
-              <input
-                type="number"
-                min="1"
-                max="14"
-                value={maxDateDelta}
-                onChange={(e) => setMaxDateDelta(Number(e.target.value))}
-                className="w-full bg-[#0c101a] border border-white/10 rounded-xl p-2 font-mono text-[#f7f8fc] focus:outline-hidden focus:ring-1 focus:ring-[#7168ff]"
-              />
+          {/* Date Window */}
+          <div className="space-y-1">
+            <div className="flex justify-between">
+              <label htmlFor="date-window-input" className="font-semibold text-[#f8fafc]">
+                Settlement Window SLA (Max Days)
+              </label>
+              <span className="font-mono font-bold text-[#818cf8]">{maxDateDelta} Days</span>
             </div>
+            <input
+              id="date-window-input"
+              type="range"
+              min={1}
+              max={7}
+              value={maxDateDelta}
+              onChange={(e) => setMaxDateDelta(Number(e.target.value))}
+              className="w-full accent-[#6366f1] cursor-pointer"
+            />
+            <p className="text-[11px] text-[#64748b]">
+              Maximum calendar days elapsed between captured payment and bank statement credit before penalty.
+            </p>
+          </div>
 
-            <div>
-              <label className="font-semibold text-[#f7f8fc] block mb-1">Fee Variance Tolerance (INR)</label>
-              <input
-                type="number"
-                min="0"
-                step="0.01"
-                value={feeTolerance}
-                onChange={(e) => setFeeTolerance(Number(e.target.value))}
-                className="w-full bg-[#0c101a] border border-white/10 rounded-xl p-2 font-mono text-[#f7f8fc] focus:outline-hidden focus:ring-1 focus:ring-[#7168ff]"
-              />
-            </div>
+          {/* Fee Tolerance */}
+          <div className="space-y-1">
+            <label htmlFor="fee-tolerance-input" className="font-semibold text-[#f8fafc] block">
+              Fee Difference Tolerance (INR)
+            </label>
+            <input
+              id="fee-tolerance-input"
+              type="number"
+              step="0.1"
+              min="0"
+              value={feeTolerance}
+              onChange={(e) => setFeeTolerance(Number(e.target.value))}
+              className="w-full px-3 py-2 bg-[#080c14] border border-white/8 rounded-xl text-xs text-[#f8fafc] focus:outline-hidden focus:ring-1 focus:ring-[#6366f1]"
+            />
+            <p className="text-[11px] text-[#64748b]">
+              Acceptable rounding delta between expected gateway fee and actual advice deduction (₹0.00 = strict).
+            </p>
           </div>
 
           {/* Circuit Breaker */}
-          <div>
-            <div className="flex justify-between font-semibold text-[#f7f8fc] mb-1">
-              <span>Safety Circuit Breaker (Batch Anomaly Limit)</span>
-              <span className="text-[#ff6577] font-mono font-bold">{circuitBreaker}%</span>
+          <div className="space-y-1">
+            <div className="flex justify-between">
+              <label htmlFor="circuit-breaker-input" className="font-semibold text-[#f8fafc]">
+                Safety Circuit Breaker Threshold (% Unmatched Stop)
+              </label>
+              <span className="font-mono font-bold text-[#f87171]">{circuitBreaker}%</span>
             </div>
-            <p className="text-[11px] text-[#a7afc0] mb-1.5 font-sans">
-              Halts batch automation if exception rate exceeds this threshold.
-            </p>
             <input
+              id="circuit-breaker-input"
               type="range"
-              min="10"
-              max="60"
-              step="5"
+              min={10}
+              max={50}
               value={circuitBreaker}
               onChange={(e) => setCircuitBreaker(Number(e.target.value))}
-              className="w-full accent-[#ff6577] cursor-pointer"
+              className="w-full accent-[#f87171] cursor-pointer"
             />
+            <p className="text-[11px] text-[#64748b]">
+              Halts automated settlement batches if unmatched exception volume exceeds this threshold.
+            </p>
           </div>
 
-          {/* Dry-Run Mode Toggle */}
-          <div className="flex items-center justify-between p-3 rounded-xl bg-[#0c101a] border border-white/10">
+          {/* Dry Run Toggle */}
+          <div className="flex items-center justify-between p-3 bg-[#080c14] rounded-xl border border-white/8">
             <div>
-              <div className="font-bold text-[#f7f8fc]">Dry-Run Simulation Mode</div>
-              <p className="text-[11px] text-[#a7afc0] font-sans">
-                Matches are simulated without emitting irreversible ledger write actions.
-              </p>
+              <span className="font-semibold text-[#f8fafc] block">Dry-Run Simulation Mode</span>
+              <p className="text-[11px] text-[#64748b]">Simulate reconciliation matches without committing live state.</p>
             </div>
             <input
               type="checkbox"
               checked={dryRun}
               onChange={(e) => setDryRun(e.target.checked)}
-              className="w-4 h-4 rounded text-[#7168ff] accent-[#7168ff] cursor-pointer"
+              className="w-4 h-4 accent-[#2dd4bf] cursor-pointer"
+              aria-label="Toggle dry-run simulation mode"
             />
           </div>
         </div>
 
-        <div className="flex items-center justify-end gap-2 pt-4 border-t border-white/10">
+        <div className="flex items-center justify-end gap-2 pt-4 border-t border-white/8">
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded-xl text-xs font-semibold text-[#a7afc0] hover:text-white hover:bg-white/10 border border-white/10 transition-colors cursor-pointer"
+            className="px-4 py-2 text-xs font-semibold text-[#94a3b8] hover:text-white bg-[#080c14] hover:bg-[#1a2236] border border-white/8 rounded-xl transition-colors cursor-pointer"
           >
             Cancel
           </button>
           <button
             onClick={handleSave}
-            className="px-4 py-2 rounded-xl text-xs font-semibold text-white bg-gradient-to-r from-[#7168ff] to-[#5687ff] hover:from-[#5d53ea] hover:to-[#4375ea] transition-all shadow-[0_0_12px_rgba(113,104,255,0.4)] cursor-pointer"
+            className="px-4 py-2 text-xs font-bold text-white bg-gradient-to-r from-[#6366f1] to-[#3b82f6] hover:from-[#4f46e5] hover:to-[#2563eb] rounded-xl shadow-[0_0_12px_rgba(99,102,241,0.3)] transition-all cursor-pointer"
           >
-            Save Configuration
+            Save Policy
           </button>
         </div>
       </div>

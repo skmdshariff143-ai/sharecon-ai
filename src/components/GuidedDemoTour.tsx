@@ -59,40 +59,31 @@ const TOUR_STEPS: TourStep[] = [
       'Filters by exception category enable rapid bulk diagnosis of fee anomalies, delayed settlements, and ambiguous amounts.',
   },
   {
-    title: '5. Grounded Gemini Analyst & Fallback',
+    title: '5. Grounded Gemini AI Advisory Copilot',
     tab: 'exceptions',
-    badge: 'Advisory AI Copilot',
+    badge: 'Safe AI Boundaries',
     content:
-      'Gemini 2.5 Flash analyzes transaction anomalies to generate remediation checklists. When API keys are absent or rate limits are reached, the deterministic offline fallback activates with explicit UI disclosure.',
+      'Gemini AI assists finance reviewers by formulating structured diagnoses, actionable next steps, and missing document checklists. AI is bounded: it cannot modify scores or commit matches.',
     targetExplanation:
-      'AI operates strictly as an advisory copilot—it cannot move funds, modify confidence scores, or alter IDs.',
+      'If the live Gemini API is unreachable, deterministic offline fallback analysis ensures seamless operation.',
   },
   {
-    title: '6. Reviewer Workflow & Confirmation Safeguards',
-    tab: 'reconciliation',
-    badge: 'Human-in-the-Loop',
-    content:
-      'Finance controllers can Approve, Reject, or Flag review cases. To prevent accidental commitments, consequential actions require explicit confirmation and record auditor notes.',
-    targetExplanation:
-      'Reviewer approvals update live operational state without modifying the baseline algorithmic benchmark.',
-  },
-  {
-    title: '7. Immutable Audit Trail & Compliance Export',
+    title: '6. Forensic Append-Only Audit Trail',
     tab: 'audit',
-    badge: 'Audit & Governance',
+    badge: 'Governance & Compliance',
     content:
-      'Every automated scoring decision and human controller action is recorded in an append-only event log with previous/new state diffs and timestamps.',
+      'Every auto-reconciliation, manual approval, rejection, and policy change is permanently logged with SHA-256 integrity during the session and exportable to CSV/JSON.',
     targetExplanation:
-      'Audit logs can be exported directly to JSON and CSV formats for external compliance inspections.',
+      'Complete traceability guarantees readiness for statutory financial audits.',
   },
   {
-    title: '8. Evaluation Lab & Live Threshold Simulator',
+    title: '7. Honest Evaluation Lab & Policy Matrix',
     tab: 'evaluation',
-    badge: 'Honest Metrics',
+    badge: 'Benchmark & Simulator',
     content:
-      'Evaluates engine decisions against ground truth using separated metrics (Proposed-Pair Precision, Auto-Precision, Review-Routing). Test multi-seed robustness across 5 seeds or simulate threshold trade-offs in real time.',
+      'Inspect honest, separated precision metrics across 5 random seeds, simulate policy threshold tradeoffs, and test the 80-case held-out adversarial benchmark.',
     targetExplanation:
-      'Zero fabricated metrics. The Error Inspector table displays every single mismatch for transparent review.',
+      'Live policy simulator lets controllers model the impact of changing confidence thresholds before saving.',
   },
 ];
 
@@ -103,133 +94,128 @@ export const GuidedDemoTour: React.FC<GuidedDemoTourProps> = ({
 }) => {
   const [currentStep, setCurrentStep] = useState(0);
 
-  const handleRestart = React.useCallback(() => {
-    setCurrentStep(0);
-    onNavigateTab(TOUR_STEPS[0].tab);
-  }, [onNavigateTab]);
-
-  const handleNext = React.useCallback(() => {
-    if (currentStep < TOUR_STEPS.length - 1) {
-      const nextIdx = currentStep + 1;
-      setCurrentStep(nextIdx);
-      onNavigateTab(TOUR_STEPS[nextIdx].tab);
-    } else {
-      onClose();
-    }
-  }, [currentStep, onNavigateTab, onClose]);
-
-  const handlePrev = React.useCallback(() => {
-    if (currentStep > 0) {
-      const prevIdx = currentStep - 1;
-      setCurrentStep(prevIdx);
-      onNavigateTab(TOUR_STEPS[prevIdx].tab);
-    }
-  }, [currentStep, onNavigateTab]);
-
-  React.useEffect(() => {
-    if (!isOpen) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        onClose();
-      } else if (e.key === 'ArrowRight') {
-        handleNext();
-      } else if (e.key === 'ArrowLeft') {
-        handlePrev();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, handleNext, handlePrev, onClose]);
-
   if (!isOpen) return null;
 
   const step = TOUR_STEPS[currentStep];
+
+  const handleNext = () => {
+    if (currentStep < TOUR_STEPS.length - 1) {
+      const next = currentStep + 1;
+      setCurrentStep(next);
+      onNavigateTab(TOUR_STEPS[next].tab);
+    } else {
+      onClose();
+    }
+  };
+
+  const handlePrev = () => {
+    if (currentStep > 0) {
+      const prev = currentStep - 1;
+      setCurrentStep(prev);
+      onNavigateTab(TOUR_STEPS[prev].tab);
+    }
+  };
 
   return (
     <div
       role="dialog"
       aria-modal="true"
-      className="fixed bottom-6 left-6 z-50 max-w-md w-full animate-in slide-in-from-bottom-4 duration-200"
+      aria-labelledby="tour-step-title"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#070a10]/85 backdrop-blur-md animate-fade-in"
     >
-      <div className="bg-[#111620] text-[#f7f8fc] border border-white/15 rounded-2xl p-5 shadow-2xl space-y-3 relative overflow-hidden">
-        {/* Top Glow Bar */}
-        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#7168ff] via-[#a78bfa] to-[#2dd4bf]"></div>
-
-        {/* Step Header */}
-        <div className="flex items-center justify-between pt-1">
+      <div className="modal-surface max-w-lg w-full p-6 shadow-2xl bg-[#141b2b] border border-white/12 rounded-2xl animate-scale-up space-y-4">
+        {/* Header */}
+        <div className="flex items-center justify-between border-b border-white/8 pb-3">
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-bold uppercase tracking-wider bg-[#a78bfa]/20 text-[#c4b5fd] border border-[#a78bfa]/40 px-2 py-0.5 rounded-full font-mono">
-              {step.badge}
-            </span>
-            <span className="text-xs text-[#7d879b] font-mono">
-              Step {currentStep + 1} of {TOUR_STEPS.length}
-            </span>
+            <div className="w-8 h-8 rounded-lg bg-[#6366f1]/15 text-[#818cf8] flex items-center justify-center border border-[#6366f1]/30">
+              <ShieldCheck className="w-4 h-4" />
+            </div>
+            <div>
+              <span className="text-[10px] font-mono text-[#818cf8] font-bold uppercase tracking-wider block">
+                Guided Interactive Walkthrough
+              </span>
+              <span className="text-xs font-semibold text-[#94a3b8]">
+                Step {currentStep + 1} of {TOUR_STEPS.length}
+              </span>
+            </div>
           </div>
 
           <button
             onClick={onClose}
-            className="text-[#7d879b] hover:text-white transition-colors p-1 rounded-lg cursor-pointer hover:bg-white/10"
-            aria-label="Close guided demo"
+            className="p-1 text-[#64748b] hover:text-white rounded-lg transition-colors cursor-pointer"
+            aria-label="Close walkthrough"
           >
-            <X className="w-4 h-4" />
+            <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Title & Body */}
-        <div>
-          <h4 className="text-sm font-extrabold text-[#f7f8fc] leading-tight font-mono">
-            {step.title}
-          </h4>
-          <p className="text-xs text-[#a7afc0] mt-2 leading-relaxed font-sans">
+        {/* Content Body */}
+        <div className="space-y-3 py-1">
+          <div className="flex items-center gap-2">
+            <h3 id="tour-step-title" className="text-base font-bold text-[#f8fafc] font-mono">
+              {step.title}
+            </h3>
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#6366f1]/15 text-[#a5b4fc] border border-[#6366f1]/30">
+              {step.badge}
+            </span>
+          </div>
+
+          <p className="text-xs text-[#94a3b8] leading-relaxed font-sans">
             {step.content}
           </p>
+
+          <div className="p-3 bg-[#080c14] rounded-xl border border-white/8 text-[11px] text-[#2dd4bf] font-sans">
+            <strong className="block font-mono text-[10px] uppercase text-[#64748b] mb-0.5">
+              Key Engineering Highlight:
+            </strong>
+            {step.targetExplanation}
+          </div>
         </div>
 
-        {/* Highlight Callout */}
-        <div className="bg-[#0c101a] rounded-xl p-2.5 border border-white/10 flex items-start gap-2 text-[11px] text-[#2dd4bf]">
-          <ShieldCheck className="w-4 h-4 shrink-0 text-[#2dd4bf] mt-0.5" />
-          <span className="leading-snug font-sans">{step.targetExplanation}</span>
-        </div>
-
-        {/* Controls */}
-        <div className="flex items-center justify-between pt-2 border-t border-white/10">
-          <div className="flex items-center gap-2">
+        {/* Progress Dots */}
+        <div className="flex items-center justify-center gap-1.5 py-1">
+          {TOUR_STEPS.map((_, idx) => (
             <button
-              onClick={handlePrev}
-              disabled={currentStep === 0}
-              className="text-xs text-[#a7afc0] hover:text-white disabled:opacity-30 flex items-center gap-1 cursor-pointer transition-colors"
-            >
-              <ChevronLeft className="w-4 h-4" /> Back
-            </button>
+              key={idx}
+              onClick={() => {
+                setCurrentStep(idx);
+                onNavigateTab(TOUR_STEPS[idx].tab);
+              }}
+              className={`h-1.5 rounded-full transition-all cursor-pointer ${
+                idx === currentStep ? 'w-6 bg-[#6366f1]' : 'w-1.5 bg-white/20 hover:bg-white/40'
+              }`}
+              aria-label={`Go to tour step ${idx + 1}`}
+            />
+          ))}
+        </div>
+
+        {/* Footer Actions */}
+        <div className="flex items-center justify-between pt-3 border-t border-white/8">
+          <button
+            onClick={onClose}
+            className="text-xs text-[#64748b] hover:text-white transition-colors cursor-pointer font-sans"
+          >
+            Skip Tour
+          </button>
+
+          <div className="flex items-center gap-2">
             {currentStep > 0 && (
               <button
-                onClick={handleRestart}
-                className="text-[11px] text-[#7d879b] hover:text-[#f7f8fc] transition-colors cursor-pointer"
-                title="Restart walkthrough from beginning"
+                onClick={handlePrev}
+                className="px-3 py-1.5 bg-[#080c14] hover:bg-[#1a2236] text-[#94a3b8] hover:text-white rounded-xl text-xs font-semibold border border-white/8 transition-colors flex items-center gap-1 cursor-pointer"
               >
-                Restart
+                <ChevronLeft className="w-3.5 h-3.5" /> Back
               </button>
             )}
-          </div>
 
-          <div className="flex items-center gap-1">
-            {TOUR_STEPS.map((_, i) => (
-              <span
-                key={i}
-                className={`w-1.5 h-1.5 rounded-full transition-all ${
-                  i === currentStep ? 'bg-[#7168ff] w-3' : 'bg-[#1c2433]'
-                }`}
-              />
-            ))}
+            <button
+              onClick={handleNext}
+              className="px-4 py-1.5 bg-gradient-to-r from-[#6366f1] to-[#3b82f6] hover:from-[#4f46e5] hover:to-[#2563eb] text-white rounded-xl text-xs font-bold shadow-[0_0_12px_rgba(99,102,241,0.3)] transition-all flex items-center gap-1 cursor-pointer"
+            >
+              <span>{currentStep === TOUR_STEPS.length - 1 ? 'Finish Tour' : 'Next Step'}</span>
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
           </div>
-
-          <button
-            onClick={handleNext}
-            className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-[#7168ff] to-[#5687ff] hover:from-[#5d53ea] hover:to-[#4375ea] text-white text-xs font-semibold flex items-center gap-1 transition-all shadow-[0_0_10px_rgba(113,104,255,0.4)] cursor-pointer min-h-[34px]"
-          >
-            <span>{currentStep === TOUR_STEPS.length - 1 ? 'Finish Tour' : 'Next Step'}</span>
-            <ChevronRight className="w-3.5 h-3.5" />
-          </button>
         </div>
       </div>
     </div>

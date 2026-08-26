@@ -59,14 +59,14 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         {toasts.map((toast) => (
           <div
             key={toast.id}
-            className={`pointer-events-auto flex items-start gap-3 p-3.5 rounded-xl border shadow-2xl transition-all transform translate-y-0 text-xs backdrop-blur-md ${
+            className={`pointer-events-auto flex items-start gap-3 p-3.5 rounded-xl border shadow-2xl transition-all transform translate-y-0 text-xs backdrop-blur-md animate-fade-in ${
               toast.type === 'success'
-                ? 'bg-[#111620]/95 text-[#f7f8fc] border-[#2dd4bf]/40 shadow-[0_0_15px_rgba(45,212,191,0.2)]'
+                ? 'bg-[#141b2b]/95 text-[#f8fafc] border-[#2dd4bf]/35 shadow-[0_0_15px_rgba(45,212,191,0.2)]'
                 : toast.type === 'error'
-                ? 'bg-[#111620]/95 text-[#f7f8fc] border-[#ff6577]/40 shadow-[0_0_15px_rgba(255,101,119,0.2)]'
+                ? 'bg-[#141b2b]/95 text-[#f8fafc] border-[#f87171]/35 shadow-[0_0_15px_rgba(248,113,113,0.2)]'
                 : toast.type === 'warning'
-                ? 'bg-[#111620]/95 text-[#f7f8fc] border-[#f5b942]/40 shadow-[0_0_15px_rgba(245,185,66,0.2)]'
-                : 'bg-[#111620]/95 text-[#f7f8fc] border-[#7168ff]/40 shadow-[0_0_15px_rgba(113,104,255,0.2)]'
+                ? 'bg-[#141b2b]/95 text-[#f8fafc] border-[#fbbf24]/35 shadow-[0_0_15px_rgba(251,191,36,0.2)]'
+                : 'bg-[#141b2b]/95 text-[#f8fafc] border-[#6366f1]/35 shadow-[0_0_15px_rgba(99,102,241,0.2)]'
             }`}
           >
             <div className="shrink-0 mt-0.5">
@@ -74,20 +74,20 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                 <CheckCircle2 className="w-4 h-4 text-[#2dd4bf]" />
               )}
               {toast.type === 'error' && (
-                <AlertCircle className="w-4 h-4 text-[#ff6577]" />
+                <AlertCircle className="w-4 h-4 text-[#f87171]" />
               )}
               {toast.type === 'warning' && (
-                <AlertCircle className="w-4 h-4 text-[#f5b942]" />
+                <AlertCircle className="w-4 h-4 text-[#fbbf24]" />
               )}
               {toast.type === 'info' && (
-                <Info className="w-4 h-4 text-[#7168ff]" />
+                <Info className="w-4 h-4 text-[#818cf8]" />
               )}
             </div>
 
             <div className="flex-1">
-              <div className="font-semibold text-[#f7f8fc] font-mono">{toast.title}</div>
+              <div className="font-semibold text-[#f8fafc] font-mono">{toast.title}</div>
               {toast.description && (
-                <div className="text-[11px] text-[#a7afc0] mt-0.5 leading-relaxed font-sans">
+                <div className="text-[11px] text-[#94a3b8] mt-0.5 leading-relaxed font-sans">
                   {toast.description}
                 </div>
               )}
@@ -95,7 +95,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
             <button
               onClick={() => removeToast(toast.id)}
-              className="text-[#7d879b] hover:text-white transition-colors p-0.5 rounded cursor-pointer"
+              className="text-[#64748b] hover:text-white transition-colors p-0.5 rounded cursor-pointer"
               aria-label="Dismiss notification"
             >
               <X className="w-4 h-4" />
