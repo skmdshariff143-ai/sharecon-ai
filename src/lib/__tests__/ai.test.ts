@@ -100,7 +100,149 @@ describe('AI Exception Analyst & Deterministic Fallback', () => {
       },
     });
     expect(invalid2.success).toBe(false);
+  });
 
+  describe('Multi-Model LLM Fallback Chain & Circuit Breaker', () => {
+    it('routes to secondary model when primary model fails', async () => {
+      const dataset = generateSyntheticDataset(42);
+      const batch = reconcileBatch(
+        dataset.payments,
+        dataset.settlements,
+        dataset.bankTransactions,
+        DEFAULT_ENGINE_CONFIG
+      );
+      const record = batch.records[0];
+
+      const { analyzeExceptionWithMultiModelRouting, AiModelCircuitBreaker } = await import('@/lib/ai/analyst');
+      const testBreaker = new AiModelCircuitBreaker({ maxConsecutiveFailures: 3 });
+
+      const customPrimaryCaller = async () => {
+        throw new Error('Primary Gemini-2.5-flash timed out (504)');
+      };
+
+      const customSecondaryCaller = async () => {
+        return {
+          exceptionCategory: 'CLEAN_MATCH' as const,
+          summary: 'Secondary model analysis from gemini-2.5-flash-lite',
+          recommendedAction: 'Proceed with auto-settlement review',
+          missingInformation: [],
+          reviewerNote: 'Secondary LLM completed triage',
+          riskAssessment: 'LOW' as const,
+          modelUsed: 'gemini-2.5-flash-lite',
+          isFallback: true,
+          analyzedAt: new Date().toISOString(),
+        };
+      };
+
+      const result = await analyzeExceptionWithMultiModelRouting(record, {
+        circuitBreaker: testBreaker,
+        customPrimaryCaller,
+        customSecondaryCaller,
+      });
+
+      expect(result.modelUsed).toContain('gemini-2.5-flash-lite');
+      expect(result.summary).toContain('Secondary model analysis');
+      expect(testBreaker.getStats().consecutiveFailures).toBe(1);
+    });
+
+    it('falls back to deterministic rule-based analyst when all models fail', async () => {
+      const dataset = generateSyntheticDataset(42);
+      const batch = reconcileBatch(
+        dataset.payments,
+        dataset.settlements,
+        dataset.bankTransactions,
+        DEFAULT_ENGINE_CONFIG
+      );
+      const record = batch.records.find((r) => r.exceptionType === 'MISSING_BANK_CREDIT') || batch.records[0];
+
+      const { analyzeExceptionWithMultiModelRouting, AiModelCircuitBreaker } = await import('@/lib/ai/analyst');
+      const testBreaker = new AiModelCircuitBreaker({ maxConsecutiveFailures: 3 });
+
+      const failingPrimary = async () => {
+        throw new Error('Primary model unavailable');
+      };
+      const failingSecondary = async () => {
+        throw new Error('Secondary model rate limited');
+      };
+
+      const result = await analyzeExceptionWithMultiModelRouting(record, {
+        circuitBreaker: testBreaker,
+        customPrimaryCaller: failingPrimary,
+        customSecondaryCaller: failingSecondary,
+      });
+
+      expect(result.isFallback).toBe(true);
+      expect(result.modelUsed).toBe('ShaRecon-Deterministic-Fallback');
+      expect(result.riskAssessment).toBeDefined();
+    });
+
+    it('trips circuit breaker after N consecutive failures and bypasses primary', async () => {
+      const dataset = generateSyntheticDataset(42);
+      const batch = reconcileBatch(
+        dataset.payments,
+        dataset.settlements,
+        dataset.bankTransactions,
+        DEFAULT_ENGINE_CONFIG
+      );
+      const record = batch.records[0];
+
+      const { analyzeExceptionWithMultiModelRouting, AiModelCircuitBreaker } = await import('@/lib/ai/analyst');
+      const testBreaker = new AiModelCircuitBreaker({ maxConsecutiveFailures: 2, cooldownMs: 5000 });
+
+      let primaryCalls = 0;
+      let secondaryCalls = 0;
+
+      const failingPrimary = async () => {
+        primaryCalls++;
+        throw new Error('Primary 500 internal server error');
+      };
+      const succeedingSecondary = async () => {
+        secondaryCalls++;
+        return {
+          exceptionCategory: 'CLEAN_MATCH' as const,
+          summary: 'Secondary analysis',
+          recommendedAction: 'Verify',
+          missingInformation: [],
+          reviewerNote: 'OK',
+          riskAssessment: 'LOW' as const,
+          modelUsed: 'gemini-2.5-flash-lite',
+          isFallback: true,
+          analyzedAt: new Date().toISOString(),
+        };
+      };
+
+      // Call 1: primary fails, secondary succeeds (failures: 1, breaker closed)
+      await analyzeExceptionWithMultiModelRouting(record, {
+        circuitBreaker: testBreaker,
+        customPrimaryCaller: failingPrimary,
+        customSecondaryCaller: succeedingSecondary,
+      });
+      expect(primaryCalls).toBe(1);
+      expect(secondaryCalls).toBe(1);
+      expect(testBreaker.isOpen()).toBe(false);
+
+      // Call 2: primary fails, secondary succeeds (failures: 2, breaker trips OPEN)
+      await analyzeExceptionWithMultiModelRouting(record, {
+        circuitBreaker: testBreaker,
+        customPrimaryCaller: failingPrimary,
+        customSecondaryCaller: succeedingSecondary,
+      });
+      expect(primaryCalls).toBe(2);
+      expect(secondaryCalls).toBe(2);
+      expect(testBreaker.isOpen()).toBe(true);
+
+      // Call 3: breaker is OPEN, primary is NOT called, routed immediately to secondary!
+      await analyzeExceptionWithMultiModelRouting(record, {
+        circuitBreaker: testBreaker,
+        customPrimaryCaller: failingPrimary,
+        customSecondaryCaller: succeedingSecondary,
+      });
+      expect(primaryCalls).toBe(2); // Not called!
+      expect(secondaryCalls).toBe(3);
+    });
+  });
+
+  it('rejects malformed API input payloads with strict Zod validation (continued)', () => {
     // Missing evidence details
     const invalid3 = AnalyzeExceptionRequestBodySchema.safeParse({
       record: {
