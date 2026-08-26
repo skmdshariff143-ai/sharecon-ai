@@ -16,6 +16,7 @@ import { evaluateReconciliation } from '@/lib/engine/evaluator';
 import { applyReviewerDecision } from '@/lib/engine/operations';
 import { exportReconciliationCsv, exportAuditEventsCsv } from '@/lib/dataset/csv';
 import { downloadCompliancePackage } from '@/lib/dataset/compliance_package';
+import { chainAuditEvents } from '@/lib/dataset/audit_ledger';
 
 // Components
 import { NavigationRail, WorkspaceTab } from '@/components/NavigationRail';
@@ -106,6 +107,7 @@ function DashboardContent() {
     const duration = performance.now() - start;
     const evaluation = evaluateReconciliation(result.records, dataset.groundTruth, duration);
     result.evaluation = evaluation;
+    result.auditEvents = chainAuditEvents(result.auditEvents);
 
     setBatch(result);
     setIsReconciling(false);
@@ -134,6 +136,7 @@ function DashboardContent() {
     if (groundTruth.length > 0) {
       result.evaluation = evaluateReconciliation(result.records, groundTruth, duration);
     }
+    result.auditEvents = chainAuditEvents(result.auditEvents);
 
     setBatch(result);
     showToast({
@@ -164,7 +167,7 @@ function DashboardContent() {
     setBatch({
       ...batch,
       records: decisionResult.updatedRecords,
-      auditEvents: decisionResult.updatedAuditEvents,
+      auditEvents: chainAuditEvents(decisionResult.updatedAuditEvents.slice().reverse()).reverse(),
     });
 
     // Update selected record in drawer if open
