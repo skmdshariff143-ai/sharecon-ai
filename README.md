@@ -14,9 +14,10 @@
 
 [![Quality Gates](https://github.com/skmdshariff143-ai/sharecon-ai/actions/workflows/quality.yml/badge.svg)](https://github.com/skmdshariff143-ai/sharecon-ai/actions/workflows/quality.yml)
 [![Node.js Runtime](https://img.shields.io/badge/Node.js-v20.18.3%20(Pinned)-brightgreen.svg)](https://nodejs.org)
-[![Automated Tests](https://img.shields.io/badge/Automated%20Tests-48%2F48%20Passed-blue)](https://github.com/skmdshariff143-ai/sharecon-ai)
-[![Playwright E2E](https://img.shields.io/badge/Playwright%20E2E-40%2F40%20Passed-violet)](https://github.com/skmdshariff143-ai/sharecon-ai)
+[![Automated Tests](https://img.shields.io/badge/Automated%20Tests-57%2F57%20Passed-blue)](https://github.com/skmdshariff143-ai/sharecon-ai)
+[![Playwright E2E](https://img.shields.io/badge/Playwright%20E2E-41%2F41%20Passed-violet)](https://github.com/skmdshariff143-ai/sharecon-ai)
 [![Zero Horizontal Overflow](https://img.shields.io/badge/Responsive-1440%20%7C%201366%20%7C%201280%20%7C%201024%20%7C%20390-success)](https://sharecon-ai.vercel.app)
+[![Compliance Package](https://img.shields.io/badge/Compliance%20Package-Deterministic%20SHA--256-emerald)](https://sharecon-ai.vercel.app)
 [![Zero Live Money Movement](https://img.shields.io/badge/Safety-Zero%20Live%20Money%20Movement-amber)](https://sharecon-ai.vercel.app)
 
 ---
@@ -56,12 +57,13 @@ ShaRecon AI provides an explainable financial operations control center built ar
 
 ![Control Center Dashboard](docs/assets/screenshots/desktop_control_center.png)
 
-1. **Executive Control Center (`ControlCenterTab`)**: Instantly review total processed volume, auto-reconciliation rate, pending human review count, active exception count, and total monetary exposure.
-2. **3-Way Reconciliation Grid (`ReconciliationTab`)**: Filter and inspect multi-leg transactions across Razorpay payments, settlements, and bank credits with real-time multi-column search and confidence scoring.
+1. **Executive Control Center (`ControlCenterTab`)**: Instantly review total processed volume, auto-reconciliation rate, pending human review count, active exception count, and total monetary exposure via [`useControlCenterMetrics`](src/hooks/useControlCenterMetrics.ts).
+2. **3-Way Reconciliation Grid (`ReconciliationTab`)**: Filter and inspect multi-leg transactions across Razorpay payments, settlements, and bank credits with real-time multi-column search and confidence scoring via [`useReconciliationFilter`](src/hooks/useReconciliationFilter.ts).
 3. **3-Way Trace Inspector (`MatchDetailDrawer`)**: Inspect the full 4-factor scoring breakdown (Reference Match, Amount Compatibility, Date Window SLA, UTR Similarity) and explore alternative candidate ties.
 4. **Financial Triage & Exception Command Center (`ExceptionsTab`)**: Prioritize anomalies by monetary exposure and severity (`CRITICAL`, `WARNING`, `ADVISORY`). Review grounded AI advisory notes with full transaction evidence and execute 1-click approvals or rejections.
-5. **Dual-Track Evaluation Lab & Policy Simulator (`EvaluationLabTab`)**: Validate matching accuracy across 5 deterministic PRNG seeds or test the engine against an 80-record hand-curated held-out adversarial suite with a real-time policy threshold simulator.
-6. **Append-Only Session Audit Trail (`AuditTab`)**: Maintain governance with timestamped records of every automated match, manual approval, rejection, and policy adjustment during the session, exportable to CSV and JSON (production will connect to durable ledger storage).
+5. **Dual-Track Evaluation Lab & Policy Simulator (`EvaluationLabTab`)**: Validate matching accuracy across 5 deterministic PRNG seeds or test the engine against an 80-record hand-curated held-out adversarial suite with a real-time policy threshold simulator via [`useEvaluationMetrics`](src/hooks/useEvaluationMetrics.ts).
+6. **Append-Only Session Audit Trail (`AuditTab`)**: Maintain governance with timestamped records of every automated match, manual approval, rejection, and policy adjustment during the session.
+7. **Unified Compliance & Audit Package**: Export a standardized, tamper-evident JSON audit manifest bundling session SHA-256 integrity digests, scoring model attestations, 3-way reconciliation lineages, and full audit logs.
 
 | 3-Way Evidence Inspector Drawer | Financial Triage & AI Advisory |
 | :---: | :---: |
@@ -273,12 +275,12 @@ npm run verify
 ├───────────────────────────────┬────────────────────────────────────────┤
 │ 1. npm run lint               │ ESLint clean (0 errors, 0 warnings)    │
 │ 2. npm run type-check         │ Strict TypeScript 5 check (0 errors)   │
-│ 3. npm run test               │ 48 automated unit & integrity tests    │
+│ 3. npm run test               │ 57 automated unit & integrity tests    │
 │ 4. npm run generate:benchmark │ Compile canonical benchmark.json/.md   │
 │ 5. npm run generate:heldout   │ Compile held-out report & JSON data    │
 │ 6. npm run verify:artifacts   │ Assert zero git diff on generated data │
 │ 7. npm run build              │ Next.js 16 production Turbopack build   │
-│ 8. npm run test:e2e           │ 40 Playwright E2E browser tests        │
+│ 8. npm run test:e2e           │ 41 Playwright E2E browser tests        │
 └───────────────────────────────┴────────────────────────────────────────┘
 ```
 
@@ -314,6 +316,7 @@ sharecon-ai/
 │   └── workflows/quality.yml              # Automated GitHub Actions CI pipeline
 ├── docs/                                  # Canonical documentation & audit reports
 │   ├── INTERNAL_SUBMISSION_AUDIT.md       # Internal self-assessment checklist
+│   ├── PRODUCT_AUDIT.md                   # Elevation, hook architecture & audit log
 │   ├── WHAT_BROKE.md                      # Post-mortem case study (4 formats)
 │   ├── METRIC_INTEGRITY_AUDIT.md          # Benchmark integrity audit report
 │   ├── METHODOLOGY.md                     # Math rules, 4-factor scoring & algorithms
@@ -333,6 +336,10 @@ sharecon-ai/
 │   │   ├── layout.tsx                     # Dark fintech theme layout & fonts
 │   │   ├── globals.css                    # Glassmorphism, elevated 3D cards & styles
 │   │   └── api/analyze-exception/         # Server-side Gemini advisory endpoint
+│   ├── hooks/                             # Presentation state & aggregation hooks
+│   │   ├── useControlCenterMetrics.ts     # 3-way stage progression & volume aggregates
+│   │   ├── useReconciliationFilter.ts     # Multi-field search & ledger filter state
+│   │   └── useEvaluationMetrics.ts        # Policy simulator & benchmark calculations
 │   ├── components/                        # React presentation components
 │   │   ├── TopCommandBar.tsx              # Responsive command bar & overflow menu
 │   │   ├── NavigationRail.tsx             # 7-tab sidebar navigation rail & mobile drawer
@@ -351,9 +358,11 @@ sharecon-ai/
 │   │   │   ├── matcher.ts                 # 3-way triad matching & candidate explorer
 │   │   │   ├── scorer.ts                  # 4-factor scoring matrix & delta calculations
 │   │   │   └── evaluator.ts               # Multi-seed & held-out evaluation runner
-│   │   ├── dataset/                       # Benchmark data sources
+│   │   ├── dataset/                       # Benchmark data sources & exports
 │   │   │   ├── generator.ts               # PRNG synthetic statement generator
-│   │   │   └── held_out_dataset.ts        # 80-record frozen held-out dataset
+│   │   │   ├── held_out_dataset.ts        # 80-record frozen held-out dataset
+│   │   │   ├── csv.ts                     # CSV export helpers
+│   │   │   └── compliance_package.ts      # Compliance & Audit Package generator
 │   │   ├── ai/                            # AI advisory & fallback implementations
 │   │   │   └── analyst.ts                 # Gemini 2.5 Flash prompt & offline fallback
 │   │   └── money.ts                       # Integer-paise formatting & currency helpers
