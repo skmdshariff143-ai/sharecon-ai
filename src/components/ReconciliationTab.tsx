@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React from 'react';
 import {
   Search,
   CheckCircle2,
@@ -6,7 +6,6 @@ import {
   AlertCircle,
   ArrowUpDown,
   ExternalLink,
-  Ban,
   Download,
   X,
   LayoutList,
@@ -14,7 +13,8 @@ import {
 } from 'lucide-react';
 import { ReconciliationRecord, MatchStatus } from '@/types/reconciliation';
 import { formatINR } from '@/lib/money';
-import { exportReconciliationCsv } from '@/lib/dataset/csv';
+
+import { useReconciliationFilter } from '@/hooks/useReconciliationFilter';
 
 interface ReconciliationTabProps {
   records: ReconciliationRecord[];
@@ -29,96 +29,47 @@ export const ReconciliationTab: React.FC<ReconciliationTabProps> = ({
   onQuickApprove,
   onQuickReject,
 }) => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'ALL' | MatchStatus>('ALL');
-  const [exceptionFilter, setExceptionFilter] = useState<string>('ALL');
-  const [minConfidence] = useState<number>(0);
-  const [sortBy, setSortBy] = useState<'DATE' | 'AMOUNT' | 'CONFIDENCE'>('DATE');
-  const [sortOrder, setSortOrder] = useState<'ASC' | 'DESC'>('DESC');
-  const [viewMode, setViewMode] = useState<'TABLE' | 'CARDS'>('TABLE');
-
-  // Extract unique exception categories
-  const exceptionCategories = useMemo(() => {
-    const set = new Set<string>();
-    records.forEach((r) => set.add(r.exceptionType));
-    return Array.from(set);
-  }, [records]);
-
-  const filteredRecords = useMemo(() => {
-    return records
-      .filter((r) => {
-        if (statusFilter !== 'ALL' && r.status !== statusFilter) return false;
-        if (exceptionFilter !== 'ALL' && r.exceptionType !== exceptionFilter) return false;
-        if (r.confidence < minConfidence) return false;
-        if (!searchQuery) return true;
-
-        const q = searchQuery.toLowerCase();
-        return (
-          r.payment.paymentId.toLowerCase().includes(q) ||
-          r.payment.orderId.toLowerCase().includes(q) ||
-          (r.matchedSettlement?.utr && r.matchedSettlement.utr.toLowerCase().includes(q)) ||
-          (r.matchedSettlement?.settlementId && r.matchedSettlement.settlementId.toLowerCase().includes(q)) ||
-          (r.matchedBankTransaction?.bankTransactionId && r.matchedBankTransaction.bankTransactionId.toLowerCase().includes(q)) ||
-          r.exceptionType.toLowerCase().includes(q)
-        );
-      })
-      .sort((a, b) => {
-        let comp = 0;
-        if (sortBy === 'DATE') {
-          comp =
-            new Date(a.payment.createdAt).getTime() -
-            new Date(b.payment.createdAt).getTime();
-        } else if (sortBy === 'AMOUNT') {
-          comp = a.payment.grossAmount - b.payment.grossAmount;
-        } else if (sortBy === 'CONFIDENCE') {
-          comp = a.confidence - b.confidence;
-        }
-        return sortOrder === 'DESC' ? -comp : comp;
-      });
-  }, [records, searchQuery, statusFilter, exceptionFilter, minConfidence, sortBy, sortOrder]);
-
-  const handleExportFiltered = () => {
-    const csv = exportReconciliationCsv(filteredRecords);
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `reconciliation_filtered_${Date.now()}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
-  const clearFilters = () => {
-    setSearchQuery('');
-    setStatusFilter('ALL');
-    setExceptionFilter('ALL');
-  };
-
-  const hasActiveFilters =
-    searchQuery || statusFilter !== 'ALL' || exceptionFilter !== 'ALL' || minConfidence > 0;
+  const {
+    searchQuery,
+    setSearchQuery,
+    statusFilter,
+    setStatusFilter,
+    exceptionFilter,
+    setExceptionFilter,
+    setSortBy,
+    sortOrder,
+    setSortOrder,
+    viewMode,
+    setViewMode,
+    filteredRecords,
+    exceptionCategories,
+    hasActiveFilters,
+    clearFilters,
+    handleExportFiltered,
+  } = useReconciliationFilter(records);
 
   const getStatusBadge = (status: MatchStatus) => {
     switch (status) {
       case 'AUTO_RECONCILED':
       case 'MANUALLY_APPROVED':
         return (
-          <span className="status-badge bg-[#2dd4bf]/15 text-[#2dd4bf] border border-[#2dd4bf]/35">
+          <span className="status-badge bg-[#2dd4bf]/15 text-[#2dd4bf] border border-[#2dd4bf]/30">
             <CheckCircle2 className="w-3 h-3 text-[#2dd4bf]" />
             {status === 'AUTO_RECONCILED' ? 'Auto-Reconciled' : 'Approved'}
           </span>
         );
       case 'PENDING_REVIEW':
         return (
-          <span className="status-badge bg-[#f5b942]/15 text-[#f5b942] border border-[#f5b942]/35">
-            <Clock className="w-3 h-3 text-[#f5b942]" />
+          <span className="status-badge bg-[#fbbf24]/15 text-[#fbbf24] border border-[#fbbf24]/30">
+            <Clock className="w-3 h-3 text-[#fbbf24]" />
             Review Needed
           </span>
         );
       case 'UNMATCHED_EXCEPTION':
       case 'MANUALLY_REJECTED':
         return (
-          <span className="status-badge bg-[#ff6577]/15 text-[#ff6577] border border-[#ff6577]/35">
-            <AlertCircle className="w-3 h-3 text-[#ff6577]" />
+          <span className="status-badge bg-[#f87171]/15 text-[#f87171] border border-[#f87171]/30">
+            <AlertCircle className="w-3 h-3 text-[#f87171]" />
             {status === 'UNMATCHED_EXCEPTION' ? 'Exception' : 'Rejected'}
           </span>
         );
@@ -128,17 +79,17 @@ export const ReconciliationTab: React.FC<ReconciliationTabProps> = ({
   return (
     <div className="space-y-4">
       {/* Multi-Facet Filter Toolbar */}
-      <div className="elevated-card p-4 space-y-3 bg-[#111620] border-white/10">
+      <div className="elevated-card p-4 space-y-3 bg-[#0e131f] border-white/8">
         <div className="flex flex-wrap items-center justify-between gap-3">
           {/* Search Box */}
           <div className="relative flex-1 min-w-[240px]">
-            <Search className="w-4 h-4 text-[#7d879b] absolute left-3 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-[#64748b] absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               placeholder="Search Payment ID, Order Ref, Gateway UTR..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 bg-[#0c101a] border border-white/10 rounded-xl text-xs text-[#f7f8fc] placeholder:text-[#7d879b] focus:outline-hidden focus:ring-1 focus:ring-[#7168ff] focus:border-[#7168ff]/50 transition-colors"
+              className="w-full pl-9 pr-4 py-2 bg-[#080c14] border border-white/8 rounded-xl text-xs text-[#f8fafc] placeholder:text-[#64748b] focus:outline-hidden focus:ring-1 focus:ring-[#6366f1] focus:border-[#6366f1]/50 transition-colors"
             />
           </div>
 
@@ -148,7 +99,8 @@ export const ReconciliationTab: React.FC<ReconciliationTabProps> = ({
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value as 'ALL' | MatchStatus)}
-              className="px-3 py-2 bg-[#0c101a] border border-white/10 rounded-xl text-xs text-[#a7afc0] font-medium cursor-pointer hover:bg-white/5 transition-colors"
+              className="px-3 py-2 bg-[#080c14] border border-white/8 rounded-xl text-xs text-[#94a3b8] font-medium cursor-pointer hover:bg-white/5 transition-colors focus:outline-hidden"
+              aria-label="Filter by Match Status"
             >
               <option value="ALL">All Statuses</option>
               <option value="AUTO_RECONCILED">Auto-Reconciled</option>
@@ -162,7 +114,8 @@ export const ReconciliationTab: React.FC<ReconciliationTabProps> = ({
             <select
               value={exceptionFilter}
               onChange={(e) => setExceptionFilter(e.target.value)}
-              className="px-3 py-2 bg-[#0c101a] border border-white/10 rounded-xl text-xs text-[#a7afc0] font-medium cursor-pointer max-w-[180px] truncate hover:bg-white/5 transition-colors"
+              className="px-3 py-2 bg-[#080c14] border border-white/8 rounded-xl text-xs text-[#94a3b8] font-medium cursor-pointer max-w-[180px] truncate hover:bg-white/5 transition-colors focus:outline-hidden"
+              aria-label="Filter by Anomaly Type"
             >
               <option value="ALL">All Anomaly Types</option>
               {exceptionCategories.map((cat) => (
@@ -173,15 +126,16 @@ export const ReconciliationTab: React.FC<ReconciliationTabProps> = ({
             </select>
 
             {/* View Mode Switcher */}
-            <div className="hidden sm:flex items-center border border-white/10 rounded-xl p-0.5 bg-[#0c101a]">
+            <div className="hidden sm:flex items-center border border-white/8 rounded-xl p-0.5 bg-[#080c14]">
               <button
                 onClick={() => setViewMode('TABLE')}
                 className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
                   viewMode === 'TABLE'
-                    ? 'bg-[#7168ff]/25 text-[#7168ff] shadow-xs font-semibold'
-                    : 'text-[#7d879b] hover:text-[#a7afc0]'
+                    ? 'bg-[#6366f1]/20 text-[#818cf8] shadow-xs font-semibold'
+                    : 'text-[#64748b] hover:text-[#94a3b8]'
                 }`}
                 title="Table Grid View"
+                aria-label="Table Grid View"
               >
                 <TableProperties className="w-3.5 h-3.5" />
               </button>
@@ -189,10 +143,11 @@ export const ReconciliationTab: React.FC<ReconciliationTabProps> = ({
                 onClick={() => setViewMode('CARDS')}
                 className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
                   viewMode === 'CARDS'
-                    ? 'bg-[#7168ff]/25 text-[#7168ff] shadow-xs font-semibold'
-                    : 'text-[#7d879b] hover:text-[#a7afc0]'
+                    ? 'bg-[#6366f1]/20 text-[#818cf8] shadow-xs font-semibold'
+                    : 'text-[#64748b] hover:text-[#94a3b8]'
                 }`}
                 title="Card List View"
+                aria-label="Card List View"
               >
                 <LayoutList className="w-3.5 h-3.5" />
               </button>
@@ -201,9 +156,9 @@ export const ReconciliationTab: React.FC<ReconciliationTabProps> = ({
             {/* Export Current View */}
             <button
               onClick={handleExportFiltered}
-              className="inline-flex items-center gap-1.5 px-3 py-2 bg-white/5 hover:bg-white/10 text-[#a7afc0] hover:text-white rounded-xl text-xs font-semibold border border-white/10 transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-2 bg-white/5 hover:bg-white/10 text-[#94a3b8] hover:text-white rounded-xl text-xs font-semibold border border-white/8 transition-colors cursor-pointer"
             >
-              <Download className="w-3.5 h-3.5 text-[#7d879b]" />
+              <Download className="w-3.5 h-3.5 text-[#64748b]" />
               <span>Export ({filteredRecords.length})</span>
             </button>
           </div>
@@ -211,31 +166,31 @@ export const ReconciliationTab: React.FC<ReconciliationTabProps> = ({
 
         {/* Active Filter Chips */}
         {hasActiveFilters && (
-          <div className="flex items-center flex-wrap gap-2 pt-2.5 border-t border-white/10 text-xs font-sans">
-            <span className="text-[11px] text-[#7d879b] font-semibold font-mono">Active Filters:</span>
+          <div className="flex items-center flex-wrap gap-2 pt-2.5 border-t border-white/8 text-xs font-sans">
+            <span className="text-[11px] text-[#64748b] font-semibold font-mono">Active Filters:</span>
             {searchQuery && (
-              <span className="inline-flex items-center gap-1 bg-[#7168ff]/15 text-[#7168ff] px-2.5 py-0.5 rounded-lg text-[11px] font-medium border border-[#7168ff]/30">
+              <span className="inline-flex items-center gap-1 bg-[#6366f1]/15 text-[#a5b4fc] px-2.5 py-0.5 rounded-lg text-[11px] font-medium border border-[#6366f1]/30">
                 Search: &quot;{searchQuery}&quot;
-                <X className="w-3 h-3 cursor-pointer hover:text-[#c4b5fd]" onClick={() => setSearchQuery('')} />
+                <X className="w-3 h-3 cursor-pointer hover:text-white" onClick={() => setSearchQuery('')} />
               </span>
             )}
             {statusFilter !== 'ALL' && (
-              <span className="inline-flex items-center gap-1 bg-[#7168ff]/15 text-[#7168ff] px-2.5 py-0.5 rounded-lg text-[11px] font-medium border border-[#7168ff]/30">
+              <span className="inline-flex items-center gap-1 bg-[#6366f1]/15 text-[#a5b4fc] px-2.5 py-0.5 rounded-lg text-[11px] font-medium border border-[#6366f1]/30">
                 Status: {statusFilter.replace(/_/g, ' ')}
-                <X className="w-3 h-3 cursor-pointer hover:text-[#c4b5fd]" onClick={() => setStatusFilter('ALL')} />
+                <X className="w-3 h-3 cursor-pointer hover:text-white" onClick={() => setStatusFilter('ALL')} />
               </span>
             )}
             {exceptionFilter !== 'ALL' && (
-              <span className="inline-flex items-center gap-1 bg-[#7168ff]/15 text-[#7168ff] px-2.5 py-0.5 rounded-lg text-[11px] font-medium border border-[#7168ff]/30">
+              <span className="inline-flex items-center gap-1 bg-[#6366f1]/15 text-[#a5b4fc] px-2.5 py-0.5 rounded-lg text-[11px] font-medium border border-[#6366f1]/30">
                 Category: {exceptionFilter.replace(/_/g, ' ')}
-                <X className="w-3 h-3 cursor-pointer hover:text-[#c4b5fd]" onClick={() => setExceptionFilter('ALL')} />
+                <X className="w-3 h-3 cursor-pointer hover:text-white" onClick={() => setExceptionFilter('ALL')} />
               </span>
             )}
             <button
               onClick={clearFilters}
-              className="text-[11px] text-[#7d879b] hover:text-[#f7f8fc] font-semibold underline cursor-pointer ml-auto"
+              className="text-[11px] text-[#64748b] hover:text-[#f8fafc] font-semibold underline cursor-pointer ml-auto"
             >
-              Reset All Filters
+              Reset Filters
             </button>
           </div>
         )}
@@ -243,10 +198,10 @@ export const ReconciliationTab: React.FC<ReconciliationTabProps> = ({
 
       {/* Main Table View */}
       {viewMode === 'TABLE' ? (
-        <div className="elevated-card overflow-hidden bg-[#111620] border-white/10">
+        <div className="elevated-card overflow-hidden bg-[#0e131f] border-white/8">
           <div className="overflow-x-auto">
-            <table className="min-w-full text-xs text-left divide-y divide-white/10">
-              <thead className="bg-[#090d16] text-[#7d879b] font-semibold uppercase text-[10px] sticky top-0 z-10 font-mono">
+            <table className="min-w-full text-xs text-left divide-y divide-white/8">
+              <thead className="bg-[#080c14] text-[#64748b] font-semibold uppercase text-[10px] sticky top-0 z-10 font-mono">
                 <tr>
                   <th className="py-3 px-3.5">Payment ID</th>
                   <th className="py-3 px-3.5">Order Ref</th>
@@ -258,13 +213,13 @@ export const ReconciliationTab: React.FC<ReconciliationTabProps> = ({
                     }}
                   >
                     <div className="flex items-center justify-end gap-1">
-                      <span>Gross Amt</span>
-                      <ArrowUpDown className="w-3 h-3 text-[#7d879b]" />
+                      <span>Gross Amount</span>
+                      <ArrowUpDown className="w-3 h-3" />
                     </div>
                   </th>
-                  <th className="py-3 px-3.5">Settlement ID</th>
-                  <th className="py-3 px-3.5">Bank UTR</th>
-                  <th className="py-3 px-3.5">Status</th>
+                  <th className="py-3 px-3.5 text-right">Expected Net</th>
+                  <th className="py-3 px-3.5">Settlement Match</th>
+                  <th className="py-3 px-3.5">Bank Credit UTR</th>
                   <th
                     className="py-3 px-3.5 cursor-pointer hover:text-white text-center"
                     onClick={() => {
@@ -274,142 +229,179 @@ export const ReconciliationTab: React.FC<ReconciliationTabProps> = ({
                   >
                     <div className="flex items-center justify-center gap-1">
                       <span>Score</span>
-                      <ArrowUpDown className="w-3 h-3 text-[#7d879b]" />
+                      <ArrowUpDown className="w-3 h-3" />
                     </div>
                   </th>
-                  <th className="py-3 px-3.5">Anomaly Category</th>
-                  <th className="py-3 px-3.5 text-right">Action</th>
+                  <th className="py-3 px-3.5">Match Status</th>
+                  <th className="py-3 px-3.5 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5 font-mono">
+              <tbody className="divide-y divide-white/5 font-mono text-xs">
                 {filteredRecords.length === 0 ? (
                   <tr>
-                    <td colSpan={9} className="py-12 text-center text-[#7d879b] font-sans">
-                      No reconciliation records match the active search and filter criteria.
+                    <td colSpan={9} className="py-12 text-center text-[#64748b] font-sans">
+                      No reconciliation records match the selected filter criteria.
                     </td>
                   </tr>
                 ) : (
-                  filteredRecords.map((record) => (
-                    <tr
-                      key={record.recordId}
-                      className="hover:bg-white/5 transition-colors cursor-pointer group"
-                      onClick={() => onSelectRecord(record)}
-                    >
-                      <td className="py-3 px-3.5 font-bold text-[#f7f8fc] group-hover:text-[#7168ff] transition-colors">
-                        {record.payment.paymentId}
-                      </td>
-                      <td className="py-3 px-3.5 text-[#a7afc0]">{record.payment.orderId}</td>
-                      <td className="py-3 px-3.5 font-bold text-[#f7f8fc] text-right tabular-nums">
-                        {formatINR(record.payment.grossAmount)}
-                      </td>
-                      <td className="py-3 px-3.5 text-[#a7afc0]">
-                        {record.matchedSettlement ? (
-                          record.matchedSettlement.settlementId
-                        ) : (
-                          <span className="text-[#ff6577] font-sans text-[11px] font-semibold">Missing</span>
-                        )}
-                      </td>
-                      <td className="py-3 px-3.5 text-[#a7afc0]">
-                        {record.matchedSettlement?.utr ||
-                          record.matchedBankTransaction?.utr || (
-                            <span className="text-[#7d879b] font-sans text-[11px]">—</span>
-                          )}
-                      </td>
-                      <td className="py-3 px-3.5 font-sans">{getStatusBadge(record.status)}</td>
-                      <td className="py-3 px-3.5 text-center">
-                        <span
-                          className={`font-bold tabular-nums ${
-                            record.confidence >= 85
-                              ? 'text-[#2dd4bf]'
-                              : record.confidence >= 50
-                              ? 'text-[#f5b942]'
-                              : 'text-[#ff6577]'
-                          }`}
-                        >
-                          {record.confidence}%
-                        </span>
-                      </td>
-                      <td className="py-3 px-3.5 font-sans">
-                        <span className="text-[11px] text-[#a7afc0] bg-[#0c101a] border border-white/10 px-2 py-0.5 rounded-md font-mono">
-                          {record.exceptionType.replace(/_/g, ' ')}
-                        </span>
-                      </td>
-                      <td
-                        className="py-3 px-3.5 text-right font-sans"
-                        onClick={(e) => e.stopPropagation()}
+                  filteredRecords.map((record) => {
+                    const isPending = record.status === 'PENDING_REVIEW';
+
+                    return (
+                      <tr
+                        key={record.recordId}
+                        onClick={() => onSelectRecord(record)}
+                        className="hover:bg-white/4 transition-colors cursor-pointer group"
                       >
-                        {record.status === 'PENDING_REVIEW' ? (
-                          <div className="flex items-center justify-end gap-1">
-                            <button
-                              onClick={() => onQuickApprove(record.recordId)}
-                              className="p-1.5 rounded-lg text-[#2dd4bf] hover:bg-[#2dd4bf]/20 border border-[#2dd4bf]/40 cursor-pointer transition-colors"
-                              title="Quick Approve"
-                            >
-                              <CheckCircle2 className="w-3.5 h-3.5" />
-                            </button>
-                            <button
-                              onClick={() => onQuickReject(record.recordId)}
-                              className="p-1.5 rounded-lg text-[#ff6577] hover:bg-[#ff6577]/20 border border-[#ff6577]/40 cursor-pointer transition-colors"
-                              title="Quick Reject"
-                            >
-                              <Ban className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        ) : (
+                        {/* Payment ID */}
+                        <td className="py-3 px-3.5 font-semibold text-[#f8fafc] group-hover:text-[#818cf8]">
+                          {record.payment.paymentId}
+                        </td>
+
+                        {/* Order ID */}
+                        <td className="py-3 px-3.5 text-[#94a3b8]">
+                          {record.payment.orderId}
+                        </td>
+
+                        {/* Gross Amount */}
+                        <td className="py-3 px-3.5 text-right font-semibold text-[#f8fafc] tabular-nums">
+                          {formatINR(record.payment.grossAmount)}
+                        </td>
+
+                        {/* Expected Net Amount */}
+                        <td className="py-3 px-3.5 text-right text-[#94a3b8] tabular-nums">
+                          {formatINR(record.payment.expectedNetAmount)}
+                        </td>
+
+                        {/* Settlement Match */}
+                        <td className="py-3 px-3.5 font-sans">
+                          {record.matchedSettlement ? (
+                            <span className="text-[#2dd4bf] flex items-center gap-1 font-mono text-[11px]">
+                              <CheckCircle2 className="w-3 h-3 shrink-0" />
+                              {record.matchedSettlement.settlementId}
+                            </span>
+                          ) : (
+                            <span className="text-[#f87171] text-[11px] font-mono">Missing Settlement</span>
+                          )}
+                        </td>
+
+                        {/* Bank Credit UTR */}
+                        <td className="py-3 px-3.5 font-sans">
+                          {record.matchedBankTransaction ? (
+                            <span className="text-[#94a3b8] font-mono text-[11px] truncate max-w-[130px] inline-block" title={record.matchedBankTransaction.utr}>
+                              {record.matchedBankTransaction.utr}
+                            </span>
+                          ) : (
+                            <span className="text-[#f87171] text-[11px] font-mono">Missing Credit</span>
+                          )}
+                        </td>
+
+                        {/* Confidence Score */}
+                        <td className="py-3 px-3.5 text-center">
+                          <span
+                            className={`font-bold font-mono px-2 py-0.5 rounded text-xs ${
+                              record.confidence >= 85
+                                ? 'bg-[#2dd4bf]/15 text-[#2dd4bf] border border-[#2dd4bf]/30'
+                                : record.confidence >= 50
+                                ? 'bg-[#fbbf24]/15 text-[#fbbf24] border border-[#fbbf24]/30'
+                                : 'bg-[#f87171]/15 text-[#f87171] border border-[#f87171]/30'
+                            }`}
+                          >
+                            {record.confidence}%
+                          </span>
+                        </td>
+
+                        {/* Status */}
+                        <td className="py-3 px-3.5 font-sans">
+                          {getStatusBadge(record.status)}
+                        </td>
+
+                        {/* Actions */}
+                        <td
+                          className="py-3 px-3.5 text-right font-sans space-x-1"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          {isPending && (
+                            <>
+                              <button
+                                onClick={() => onQuickApprove(record.recordId)}
+                                className="px-2 py-1 rounded-md bg-[#2dd4bf]/15 hover:bg-[#2dd4bf]/25 text-[#2dd4bf] border border-[#2dd4bf]/30 text-[11px] font-semibold transition-colors cursor-pointer"
+                                title="Approve match"
+                              >
+                                Approve
+                              </button>
+                              <button
+                                onClick={() => onQuickReject(record.recordId)}
+                                className="px-2 py-1 rounded-md bg-[#f87171]/15 hover:bg-[#f87171]/25 text-[#f87171] border border-[#f87171]/30 text-[11px] font-semibold transition-colors cursor-pointer"
+                                title="Reject match"
+                              >
+                                Reject
+                              </button>
+                            </>
+                          )}
                           <button
                             onClick={() => onSelectRecord(record)}
-                            className="text-xs font-semibold text-[#7168ff] hover:text-[#5687ff] inline-flex items-center gap-1 cursor-pointer"
+                            className="p-1 rounded-md text-[#64748b] hover:text-[#f8fafc] hover:bg-white/10 transition-colors cursor-pointer"
+                            title="Inspect 3-way trace"
+                            aria-label={`Inspect evidence for ${record.payment.paymentId}`}
                           >
-                            Trace <ExternalLink className="w-3 h-3" />
+                            <ExternalLink className="w-3.5 h-3.5" />
                           </button>
-                        )}
-                      </td>
-                    </tr>
-                  ))
+                        </td>
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>
           </div>
         </div>
       ) : (
-        /* Mobile / Card List View */
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+        /* Mobile Card View */
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 font-sans">
           {filteredRecords.map((record) => (
             <div
               key={record.recordId}
               onClick={() => onSelectRecord(record)}
-              className="elevated-card-interactive p-4 space-y-2.5 group bg-[#111620] border-white/10"
+              className="elevated-card-interactive p-4 space-y-3 bg-[#0e131f] border-white/8"
             >
               <div className="flex items-center justify-between">
-                <span className="font-mono font-bold text-[#f7f8fc] group-hover:text-[#7168ff] transition-colors">
-                  {record.payment.paymentId}
-                </span>
+                <div>
+                  <div className="font-bold text-[#f8fafc] font-mono text-sm">
+                    {record.payment.paymentId}
+                  </div>
+                  <div className="text-[11px] text-[#64748b] font-mono">
+                    {record.payment.orderId}
+                  </div>
+                </div>
                 {getStatusBadge(record.status)}
               </div>
 
-              <div className="grid grid-cols-2 gap-2 text-xs font-mono pt-2 border-t border-white/10">
+              <div className="grid grid-cols-2 gap-2 text-xs py-2 border-y border-white/8 font-mono">
                 <div>
-                  <span className="text-[10px] uppercase font-bold text-[#7d879b] font-sans block">Gross</span>
-                  <strong className="metric-value">{formatINR(record.payment.grossAmount)}</strong>
+                  <span className="text-[#64748b] block text-[10px]">GROSS AMOUNT</span>
+                  <strong className="text-[#f8fafc]">{formatINR(record.payment.grossAmount)}</strong>
                 </div>
                 <div>
-                  <span className="text-[10px] uppercase font-bold text-[#7d879b] font-sans block">Confidence</span>
-                  <strong className="text-[#7168ff] font-bold tabular-nums">{record.confidence}%</strong>
+                  <span className="text-[#64748b] block text-[10px]">EXPECTED NET</span>
+                  <strong className="text-[#94a3b8]">{formatINR(record.payment.expectedNetAmount)}</strong>
                 </div>
-              </div>
-
-              <div className="text-[11px] text-[#a7afc0] bg-[#0c101a] p-2.5 rounded-xl border border-white/10 font-mono">
-                <div>Order: {record.payment.orderId}</div>
-                <div>UTR: {record.matchedSettlement?.utr || '—'}</div>
               </div>
 
               <div className="flex items-center justify-between text-xs pt-1">
-                <span className="text-[11px] text-[#7d879b] font-semibold">
-                  {record.exceptionType.replace(/_/g, ' ')}
-                </span>
-                <span className="text-xs font-semibold text-[#7168ff] group-hover:text-[#5687ff] flex items-center gap-1">
-                  Inspect 3-Way <ExternalLink className="w-3 h-3" />
-                </span>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[#64748b]">Score:</span>
+                  <span className="font-bold text-[#f8fafc] font-mono">{record.confidence}%</span>
+                </div>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onSelectRecord(record);
+                  }}
+                  className="text-xs font-semibold text-[#818cf8] hover:text-[#a5b4fc] flex items-center gap-1 cursor-pointer"
+                >
+                  Inspect Trace <ExternalLink className="w-3 h-3" />
+                </button>
               </div>
             </div>
           ))}
