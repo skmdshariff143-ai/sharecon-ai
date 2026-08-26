@@ -51,60 +51,60 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-title"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#070a10]/85 backdrop-blur-md animate-in fade-in duration-150"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#070a10]/85 backdrop-blur-md animate-fade-in"
     >
       <div
         ref={modalRef}
-        className="modal-surface max-w-md w-full p-6 shadow-2xl space-y-4 bg-[#111620] border border-white/15 rounded-2xl animate-in zoom-in-95 duration-150"
+        className="modal-surface max-w-md w-full p-6 shadow-2xl space-y-4 bg-[#141b2b] border border-white/12 rounded-2xl animate-scale-up"
       >
         {/* Header */}
         <div className="flex items-start gap-3.5">
           <div
             className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
               actionType === 'APPROVE'
-                ? 'bg-[#2dd4bf]/20 text-[#2dd4bf] border border-[#2dd4bf]/40'
+                ? 'bg-[#2dd4bf]/20 text-[#2dd4bf] border border-[#2dd4bf]/35'
                 : actionType === 'REJECT' || actionType === 'DANGER'
-                ? 'bg-[#ff6577]/20 text-[#ff6577] border border-[#ff6577]/40'
+                ? 'bg-[#f87171]/20 text-[#f87171] border border-[#f87171]/35'
                 : actionType === 'FLAG'
-                ? 'bg-[#f5b942]/20 text-[#f5b942] border border-[#f5b942]/40'
-                : 'bg-[#7168ff]/20 text-[#7168ff] border border-[#7168ff]/40'
+                ? 'bg-[#fbbf24]/20 text-[#fbbf24] border border-[#fbbf24]/35'
+                : 'bg-[#6366f1]/20 text-[#818cf8] border border-[#6366f1]/35'
             }`}
           >
-            {actionType === 'APPROVE' && <CheckCircle2 className="w-5 h-5" />}
-            {(actionType === 'REJECT' || actionType === 'DANGER') && (
+            {actionType === 'APPROVE' ? (
+              <CheckCircle2 className="w-5 h-5" />
+            ) : actionType === 'REJECT' ? (
               <Ban className="w-5 h-5" />
+            ) : actionType === 'FLAG' ? (
+              <Flag className="w-5 h-5" />
+            ) : (
+              <AlertTriangle className="w-5 h-5" />
             )}
-            {actionType === 'FLAG' && <Flag className="w-5 h-5" />}
-            {actionType === 'INFO' && <AlertTriangle className="w-5 h-5" />}
           </div>
 
           <div className="flex-1">
-            <h3
-              id="modal-title"
-              className="text-base font-extrabold text-[#f7f8fc] leading-tight font-mono"
-            >
+            <h3 id="modal-title" className="text-base font-bold text-[#f8fafc] font-mono">
               {title}
             </h3>
-            <p className="text-xs text-[#a7afc0] mt-1 leading-relaxed font-sans">
+            <p className="text-xs text-[#94a3b8] mt-1 leading-relaxed font-sans">
               {description}
             </p>
           </div>
 
           <button
             onClick={onClose}
-            className="text-[#7d879b] hover:text-white p-1 rounded-lg transition-colors cursor-pointer"
+            className="p-1 text-[#64748b] hover:text-white rounded-lg transition-colors cursor-pointer"
             aria-label="Close dialog"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Actions */}
-        <div className="flex items-center justify-end gap-2 pt-2">
+        {/* Action Buttons */}
+        <div className="flex items-center justify-end gap-2 pt-3 border-t border-white/8">
           <button
             onClick={onClose}
             disabled={isLoading}
-            className="px-4 py-2 text-xs font-semibold text-[#a7afc0] hover:text-white hover:bg-white/10 border border-white/10 rounded-xl transition-colors cursor-pointer min-h-[38px]"
+            className="px-4 py-2 text-xs font-semibold text-[#94a3b8] hover:text-white bg-[#080c14] hover:bg-[#1a2236] border border-white/8 rounded-xl transition-colors cursor-pointer min-h-[38px]"
           >
             {cancelLabel}
           </button>
@@ -113,14 +113,14 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
             ref={confirmBtnRef}
             onClick={onConfirm}
             disabled={isLoading}
-            className={`px-4 py-2 text-xs font-semibold text-white rounded-xl transition-colors cursor-pointer flex items-center gap-1.5 shadow-xs min-h-[38px] ${
+            className={`px-4 py-2 text-xs font-bold text-white rounded-xl shadow-md transition-all cursor-pointer min-h-[38px] flex items-center gap-1.5 ${
               actionType === 'APPROVE'
-                ? 'bg-[#2dd4bf]/30 hover:bg-[#2dd4bf]/40 text-[#2dd4bf] border border-[#2dd4bf]/50'
+                ? 'bg-[#2dd4bf] text-black hover:bg-[#14b8a6] shadow-[#2dd4bf]/20'
                 : actionType === 'REJECT' || actionType === 'DANGER'
-                ? 'bg-[#ff6577]/20 hover:bg-[#ff6577]/30 text-[#ff6577] border border-[#ff6577]/40'
+                ? 'bg-[#f87171] hover:bg-[#ef4444] shadow-[#f87171]/20'
                 : actionType === 'FLAG'
-                ? 'bg-[#f5b942]/20 hover:bg-[#f5b942]/30 text-[#f5b942] border border-[#f5b942]/40'
-                : 'bg-gradient-to-r from-[#7168ff] to-[#5687ff] hover:from-[#5d53ea] hover:to-[#4375ea]'
+                ? 'bg-[#fbbf24] text-black hover:bg-[#f59e0b] shadow-[#fbbf24]/20'
+                : 'bg-[#6366f1] hover:bg-[#4f46e5] shadow-[#6366f1]/20'
             }`}
           >
             {confirmLabel}
