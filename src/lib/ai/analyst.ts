@@ -255,22 +255,79 @@ export function generateDeterministicFallbackAnalysis(
 }
 
 /**
- * Analyzes exception using Google GenAI SDK (Gemini 2.5 Flash) with fallback.
+ * Circuit Breaker implementation for managing AI model call resilience.
  */
-export async function analyzeExceptionWithGemini(
-  record: ReconciliationRecord,
-  apiKey?: string
-): Promise<AiExceptionAnalysis> {
-  const activeKey = apiKey || process.env.GEMINI_API_KEY;
+export interface CircuitBreakerOptions {
+  maxConsecutiveFailures?: number;
+  cooldownMs?: number;
+}
 
-  if (!activeKey) {
-    return generateDeterministicFallbackAnalysis(record);
+export class AiModelCircuitBreaker {
+  private consecutiveFailures = 0;
+  private lastFailureTime = 0;
+  public readonly maxFailures: number;
+  public readonly cooldownMs: number;
+
+  constructor(options?: CircuitBreakerOptions) {
+    this.maxFailures = options?.maxConsecutiveFailures ?? 3;
+    this.cooldownMs = options?.cooldownMs ?? 30000;
   }
 
-  try {
-    const ai = new GoogleGenAI({ apiKey: activeKey });
+  public isOpen(): boolean {
+    if (this.consecutiveFailures >= this.maxFailures) {
+      const now = Date.now();
+      if (now - this.lastFailureTime > this.cooldownMs) {
+        return false;
+      }
+      return true;
+    }
+    return false;
+  }
 
-    const systemInstruction = `You are an expert AI Finance Controller for ShaRecon AI reconciling Razorpay payments, settlements, and bank credits.
+  public recordSuccess(): void {
+    this.consecutiveFailures = 0;
+  }
+
+  public recordFailure(): void {
+    this.consecutiveFailures++;
+    this.lastFailureTime = Date.now();
+  }
+
+  public reset(): void {
+    this.consecutiveFailures = 0;
+    this.lastFailureTime = 0;
+  }
+
+  public getStats() {
+    return {
+      isOpen: this.isOpen(),
+      consecutiveFailures: this.consecutiveFailures,
+      lastFailureTime: this.lastFailureTime,
+      maxFailures: this.maxFailures,
+    };
+  }
+}
+
+export const primaryModelCircuitBreaker = new AiModelCircuitBreaker();
+
+export interface ModelCallOptions {
+  apiKey?: string;
+  circuitBreaker?: AiModelCircuitBreaker;
+  customPrimaryCaller?: (record: ReconciliationRecord) => Promise<AiExceptionAnalysis>;
+  customSecondaryCaller?: (record: ReconciliationRecord) => Promise<AiExceptionAnalysis>;
+}
+
+/**
+ * Invokes a specific Gemini model variant with standard prompt framing and schema validation.
+ */
+async function callGeminiModel(
+  modelName: string,
+  record: ReconciliationRecord,
+  activeKey: string
+): Promise<AiExceptionAnalysis> {
+  const ai = new GoogleGenAI({ apiKey: activeKey });
+
+  const systemInstruction = `You are an expert AI Finance Controller for ShaRecon AI reconciling Razorpay payments, settlements, and bank credits.
 Your task is to analyze financial reconciliation anomalies based STRICTLY on the structured evidence provided.
 Rules:
 1. NEVER invent transactions, UTRs, or amounts not present in the input.
@@ -278,50 +335,50 @@ Rules:
 3. Classify risk honestly (LOW, MEDIUM, HIGH).
 4. Return pure JSON matching the specified schema.`;
 
-    const promptPayload = {
-      recordId: record.recordId,
-      payment: {
-        paymentId: record.payment.paymentId,
-        orderId: record.payment.orderId,
-        grossAmountPaise: record.payment.grossAmount,
-        grossAmountFormatted: formatINR(record.payment.grossAmount),
-        expectedNetAmountPaise: record.payment.expectedNetAmount,
-        expectedNetAmountFormatted: formatINR(record.payment.expectedNetAmount),
-        currency: record.payment.currency,
-        createdAt: record.payment.createdAt,
-      },
-      matchedSettlement: record.matchedSettlement
-        ? {
-            settlementId: record.matchedSettlement.settlementId,
-            paymentReference: record.matchedSettlement.paymentReference,
-            settledAmountPaise: record.matchedSettlement.settledAmount,
-            settledAmountFormatted: formatINR(record.matchedSettlement.settledAmount),
-            utr: record.matchedSettlement.utr,
-            settledAt: record.matchedSettlement.settledAt,
-          }
-        : null,
-      matchedBankTransaction: record.matchedBankTransaction
-        ? {
-            bankTransactionId: record.matchedBankTransaction.bankTransactionId,
-            utr: record.matchedBankTransaction.utr,
-            creditAmountPaise: record.matchedBankTransaction.creditAmount,
-            creditAmountFormatted: formatINR(record.matchedBankTransaction.creditAmount),
-            description: record.matchedBankTransaction.description,
-            creditedAt: record.matchedBankTransaction.creditedAt,
-          }
-        : null,
-      deterministicScore: record.confidence,
-      deterministicExceptionType: record.exceptionType,
-      evidenceBreakdown: record.evidence,
-      financialExposureFormatted: formatINR(record.financialExposurePaise),
-    };
+  const promptPayload = {
+    recordId: record.recordId,
+    payment: {
+      paymentId: record.payment.paymentId,
+      orderId: record.payment.orderId,
+      grossAmountPaise: record.payment.grossAmount,
+      grossAmountFormatted: formatINR(record.payment.grossAmount),
+      expectedNetAmountPaise: record.payment.expectedNetAmount,
+      expectedNetAmountFormatted: formatINR(record.payment.expectedNetAmount),
+      currency: record.payment.currency,
+      createdAt: record.payment.createdAt,
+    },
+    matchedSettlement: record.matchedSettlement
+      ? {
+          settlementId: record.matchedSettlement.settlementId,
+          paymentReference: record.matchedSettlement.paymentReference,
+          settledAmountPaise: record.matchedSettlement.settledAmount,
+          settledAmountFormatted: formatINR(record.matchedSettlement.settledAmount),
+          utr: record.matchedSettlement.utr,
+          settledAt: record.matchedSettlement.settledAt,
+        }
+      : null,
+    matchedBankTransaction: record.matchedBankTransaction
+      ? {
+          bankTransactionId: record.matchedBankTransaction.bankTransactionId,
+          utr: record.matchedBankTransaction.utr,
+          creditAmountPaise: record.matchedBankTransaction.creditAmount,
+          creditAmountFormatted: formatINR(record.matchedBankTransaction.creditAmount),
+          description: record.matchedBankTransaction.description,
+          creditedAt: record.matchedBankTransaction.creditedAt,
+        }
+      : null,
+    deterministicScore: record.confidence,
+    deterministicExceptionType: record.exceptionType,
+    evidenceBreakdown: record.evidence,
+    financialExposureFormatted: formatINR(record.financialExposurePaise),
+  };
 
-    // Use AbortController for a strict 6-second timeout
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 6000);
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 6000);
 
+  try {
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: modelName,
       contents: [
         {
           role: 'user',
@@ -341,8 +398,6 @@ Rules:
       },
     });
 
-    clearTimeout(timeoutId);
-
     const responseText = response.text || '';
     const rawJson = JSON.parse(responseText);
     const validated = ExceptionAnalysisResponseSchema.parse(rawJson);
@@ -354,13 +409,84 @@ Rules:
       missingInformation: validated.missingInformation,
       reviewerNote: validated.reviewerNote,
       riskAssessment: validated.riskAssessment,
-      modelUsed: 'gemini-2.5-flash',
+      modelUsed: modelName,
       isFallback: false,
       analyzedAt: new Date().toISOString(),
     };
-  } catch (err: unknown) {
-    // Graceful fallback on API error, timeout, rate limit, or invalid response
-    console.warn('Gemini Exception Analyst fallback activated:', err instanceof Error ? err.message : String(err));
-    return generateDeterministicFallbackAnalysis(record);
+  } finally {
+    clearTimeout(timeoutId);
   }
+}
+
+/**
+ * Multi-Model LLM Exception Analyst with 3-tier Fallback Chain & Circuit Breaker:
+ * Tier 1: Primary Model (gemini-2.5-flash)
+ * Tier 2: Secondary Model (gemini-2.5-flash-lite)
+ * Tier 3: Deterministic Rule-Based Fallback (Offline)
+ */
+export async function analyzeExceptionWithMultiModelRouting(
+  record: ReconciliationRecord,
+  options?: ModelCallOptions
+): Promise<AiExceptionAnalysis> {
+  const activeKey = options?.apiKey || process.env.GEMINI_API_KEY;
+  const breaker = options?.circuitBreaker || primaryModelCircuitBreaker;
+
+  // 1. Check if Primary Model is available and circuit breaker is CLOSED
+  if (activeKey || options?.customPrimaryCaller) {
+    if (!breaker.isOpen()) {
+      try {
+        let result: AiExceptionAnalysis;
+        if (options?.customPrimaryCaller) {
+          result = await options.customPrimaryCaller(record);
+        } else {
+          result = await callGeminiModel('gemini-2.5-flash', record, activeKey!);
+        }
+        breaker.recordSuccess();
+        return result;
+      } catch (primaryErr) {
+        breaker.recordFailure();
+        console.warn(
+          'Primary AI model failed or timed out; escalating to secondary model. Error:',
+          primaryErr instanceof Error ? primaryErr.message : String(primaryErr)
+        );
+      }
+    } else {
+      console.warn('Primary AI circuit breaker is OPEN (tripped); bypassing primary directly to secondary model.');
+    }
+  }
+
+  // 2. Tier 2: Secondary Model (gemini-2.5-flash-lite or customSecondaryCaller)
+  if (activeKey || options?.customSecondaryCaller) {
+    try {
+      let secondaryResult: AiExceptionAnalysis;
+      if (options?.customSecondaryCaller) {
+        secondaryResult = await options.customSecondaryCaller(record);
+      } else {
+        secondaryResult = await callGeminiModel('gemini-2.5-flash-lite', record, activeKey!);
+      }
+      return {
+        ...secondaryResult,
+        modelUsed: options?.customSecondaryCaller ? secondaryResult.modelUsed : 'gemini-2.5-flash-lite (Secondary Fallback)',
+        isFallback: true,
+      };
+    } catch (secondaryErr) {
+      console.warn(
+        'Secondary AI model failed; falling back to offline deterministic analyst. Error:',
+        secondaryErr instanceof Error ? secondaryErr.message : String(secondaryErr)
+      );
+    }
+  }
+
+  // 3. Tier 3: Deterministic Rule-Based Offline Fallback
+  return generateDeterministicFallbackAnalysis(record);
+}
+
+/**
+ * Standard entry point for analyzing exceptions.
+ */
+export async function analyzeExceptionWithGemini(
+  record: ReconciliationRecord,
+  apiKey?: string
+): Promise<AiExceptionAnalysis> {
+  return analyzeExceptionWithMultiModelRouting(record, { apiKey });
 }
