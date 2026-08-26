@@ -15,6 +15,7 @@ import { reconcileBatch, DEFAULT_ENGINE_CONFIG } from '@/lib/engine/matcher';
 import { evaluateReconciliation } from '@/lib/engine/evaluator';
 import { applyReviewerDecision } from '@/lib/engine/operations';
 import { exportReconciliationCsv, exportAuditEventsCsv } from '@/lib/dataset/csv';
+import { downloadCompliancePackage } from '@/lib/dataset/compliance_package';
 
 // Components
 import { NavigationRail, WorkspaceTab } from '@/components/NavigationRail';
@@ -311,6 +312,16 @@ function DashboardContent() {
     });
   };
 
+  const handleDownloadCompliancePackage = () => {
+    if (!batch) return;
+    downloadCompliancePackage(batch, config);
+    showToast({
+      type: 'success',
+      title: 'Compliance Package Exported',
+      description: 'Downloaded complete compliance & audit manifest bundle.',
+    });
+  };
+
   // Reset workspace
   const handleReset = () => {
     setBatch(null);
@@ -333,7 +344,7 @@ function DashboardContent() {
     : 0;
 
   return (
-    <div className="min-h-screen app-canvas text-slate-900 font-sans antialiased flex flex-col overflow-x-hidden max-w-full">
+    <div className="min-h-screen app-canvas text-[#f8fafc] font-sans antialiased flex flex-col overflow-x-hidden max-w-full">
       {/* Left Navigation Rail (Desktop & Mobile Drawer) */}
       <NavigationRail
         activeTab={activeTab}
@@ -404,6 +415,7 @@ function DashboardContent() {
               auditEvents={batch ? batch.auditEvents : []}
               onDownloadAuditJson={handleDownloadAuditJson}
               onDownloadAuditCsv={handleDownloadAuditCsv}
+              onDownloadCompliancePackage={handleDownloadCompliancePackage}
             />
           )}
 
@@ -429,12 +441,12 @@ function DashboardContent() {
         </main>
 
         {/* Footer */}
-        <footer className="bg-[#090d16]/80 border-t border-white/10 py-3.5 mt-12 text-center text-xs text-[#7d879b]">
+        <footer className="bg-[#080c14] border-t border-white/8 py-3.5 mt-12 text-center text-xs text-[#64748b]">
           <div className="max-w-7xl mx-auto px-4 flex flex-wrap items-center justify-between gap-2">
-            <span className="text-[#a7afc0]">
-              <strong className="text-[#f7f8fc]">ShaRecon AI</strong> — Built for Razorpay AI Buildathon (AI Finance Controller Track)
+            <span className="text-[#94a3b8]">
+              <strong className="text-[#f8fafc]">ShaRecon AI</strong> — Built for Razorpay AI Buildathon (AI Finance Controller Track)
             </span>
-            <span className="text-[11px] text-[#7d879b]">
+            <span className="text-[11px] text-[#64748b]">
               Evaluated using synthetic simulations. Zero live money movement.
             </span>
           </div>

@@ -50,4 +50,15 @@ test.describe('Reviewer Actions & Audit Trail Suite', () => {
     ]);
     expect(downloadCsv.suggestedFilename()).toContain('.csv');
   });
+
+  test('13. Compliance & Audit Package export triggers and downloads manifest JSON', async ({ page }) => {
+    await page.locator('aside button[title*="Audit Trail"]').first().click();
+
+    const [downloadPkg] = await Promise.all([
+      page.waitForEvent('download'),
+      page.locator('button:has-text("Compliance Package")').first().click(),
+    ]);
+    expect(downloadPkg.suggestedFilename()).toContain('compliance_audit_package');
+    expect(downloadPkg.suggestedFilename()).toContain('.json');
+  });
 });
