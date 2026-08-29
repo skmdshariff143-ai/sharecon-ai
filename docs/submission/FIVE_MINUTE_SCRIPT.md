@@ -1,4 +1,5 @@
 # ShaRecon AI — 5-Minute Technical Video Script (v3 — Track Rationale + Explicit Bar)
+**Pitch Video (YouTube)**: [https://youtu.be/tG-U4dJvXuQ](https://youtu.be/tG-U4dJvXuQ)  
 **Track**: Razorpay AI Buildathon — AI Finance Controller  
 **Target Audience**: Senior Razorpay Engineers, Fintech Leaders, and Technical Judges  
 **Spoken Word Count**: ~615 Words  

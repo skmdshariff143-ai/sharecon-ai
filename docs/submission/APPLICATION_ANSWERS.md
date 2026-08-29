@@ -1,6 +1,10 @@
 # Razorpay AI Buildathon — Track 4 Application Answers
 ## Project: ShaRecon AI (AI Finance Controller)
 
+- **Pitch Video (YouTube)**: [https://youtu.be/tG-U4dJvXuQ](https://youtu.be/tG-U4dJvXuQ)
+- **Live Deployment**: [https://sharecon-ai.vercel.app](https://sharecon-ai.vercel.app)
+- **GitHub Repository**: [https://github.com/skmdshariff143-ai/sharecon-ai](https://github.com/skmdshariff143-ai/sharecon-ai)
+
 ---
 
 ### 1. Problem Solved & Operational Impact
@@ -91,4 +95,5 @@ In addition, I pinned stable LTS dependencies matching our Node 20 runtime and r
 | **Verified Exception ID** | `pay_0110_razor` (₹50,000.00 gross, ₹48,820.00 exposure, Missing Bank Credit) | Exceptions Tab / `MISSING_BANK_CREDIT` | Preview UI & Dataset Generator |
 | **Held-Out Dataset Size** | 80 payments, 80 settlements, 76 bank transactions | `docs/evaluation/HELD_OUT_REPORT.md:L6` | `src/lib/dataset/held_out_dataset.ts` |
 | **Held-Out False Positives** | 7 records (₹28,100.00 Exposure) across 2 failure classes | `docs/evaluation/HELD_OUT_REPORT.md:L65-L74` | In-app Error Inspector table |
-| **Testing Coverage** | 48 automated unit, integrity and adversarial tests + 40 Playwright E2E browser tests | `.github/workflows/quality.yml` | Remote GitHub Actions CI run |
+| **Testing Coverage** | 71 automated unit, integrity and adversarial tests + 41 Playwright E2E browser tests (112 total) | `.github/workflows/quality.yml` | Remote GitHub Actions CI run |
+| **Pitch Video Walkthrough** | 5-minute technical demo (YouTube) | [https://youtu.be/tG-U4dJvXuQ](https://youtu.be/tG-U4dJvXuQ) | Video recording verification |

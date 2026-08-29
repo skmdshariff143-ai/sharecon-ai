@@ -6,8 +6,8 @@
 
 ### 🔗 Project Links
 
-- **Active Verification Target (Vercel Preview)**: [https://sharecon-3464ih2vi-shaik-mahammad-shariff-s-projects.vercel.app](https://sharecon-3464ih2vi-shaik-mahammad-shariff-s-projects.vercel.app)
-- **Production Baseline (`main` — Pending Approval)**: [https://sharecon-ai.vercel.app](https://sharecon-ai.vercel.app)
+- **Five-Minute Technical Pitch Video (YouTube)**: [https://youtu.be/tG-U4dJvXuQ](https://youtu.be/tG-U4dJvXuQ)
+- **Live Production URL**: [https://sharecon-ai.vercel.app](https://sharecon-ai.vercel.app)
 - **Five-Minute Walkthrough Video Script**: [`docs/submission/FIVE_MINUTE_SCRIPT.md`](docs/submission/FIVE_MINUTE_SCRIPT.md) *(In-app interactive tour available via **Guided Demo**)*
 - **GitHub Repository**: [https://github.com/skmdshariff143-ai/sharecon-ai](https://github.com/skmdshariff143-ai/sharecon-ai)
 - **Track**: Razorpay AI Buildathon — *AI Finance Controller*
