@@ -1,15 +1,7 @@
-/**
- * Tamper-Evident Cryptographic Audit Ledger for ShaRecon AI
- * Implements a lightweight hash-chained ledger (blockchain-style) for financial audit trails.
- * Each audit event is bound to the previous block hash via a deterministic SHA-256 digest,
- * guaranteeing that any retroactive tampering or deletion is instantly detectable.
- */
-
+/** Session hash chain. Authenticity requires an independently retained chain head. */
 import { AuditEvent } from '@/types/reconciliation';
-import { computeDeterministicDigest } from './compliance_package';
-
+import { canonicalJson, computeDeterministicDigest } from './digest';
 export const GENESIS_HASH = '0'.repeat(64);
-
 export interface LedgerVerificationResult {
   isValid: boolean;
   verifiedCount: number;
@@ -21,163 +13,59 @@ export interface LedgerVerificationResult {
   actualHash?: string;
   reason?: string;
 }
-
-/**
- * Computes the cryptographic payload string for an individual audit event.
- */
 export function getEventPayload(event: Omit<AuditEvent, 'eventHash'>, prevHash: string): string {
-  return JSON.stringify({
-    prevHash,
-    sequenceNumber: event.sequenceNumber ?? 1,
-    eventId: event.eventId,
-    timestamp: event.timestamp,
-    actor: event.actor,
-    action: event.action,
-    entityIds: event.entityIds,
-    previousState: event.previousState,
-    newState: event.newState,
-    confidence: event.confidence,
-    reason: event.reason,
-    modelUsed: event.modelUsed,
-    fallbackUsed: event.fallbackUsed,
-    evidence: event.evidence,
-  });
+  return canonicalJson({ ...event, eventHash: undefined, prevHash, sequenceNumber: event.sequenceNumber ?? 1 });
 }
-
-/**
- * Computes a 64-character deterministic block hash for an audit event chained to prevHash.
- */
-export function computeEventHash(
-  event: Omit<AuditEvent, 'eventHash'>,
-  prevHash: string
-): string {
-  const payload = getEventPayload(event, prevHash);
-  return computeDeterministicDigest(payload);
+export async function computeEventHash(event: Omit<AuditEvent, 'eventHash'>, prevHash: string): Promise<string> {
+  return computeDeterministicDigest(getEventPayload(event, prevHash));
 }
-
-/**
- * Chains a list of audit events into a tamper-evident sequence.
- * Expects events in chronological order (first event = Block #1).
- */
-export function chainAuditEvents(
-  events: readonly AuditEvent[],
-  genesisHash: string = GENESIS_HASH
-): AuditEvent[] {
+/** Create an initial chain in chronological order; validate already hashed entries, never repair them. */
+export async function chainAuditEvents(events: readonly AuditEvent[], genesisHash = GENESIS_HASH): Promise<AuditEvent[]> {
   let prevHash = genesisHash;
-  const chained: AuditEvent[] = [];
-
-  for (let i = 0; i < events.length; i++) {
-    const raw = events[i];
-    const sequenceNumber = i + 1;
-    const eventWithPrev: Omit<AuditEvent, 'eventHash'> = {
-      ...raw,
-      sequenceNumber,
-      prevHash,
-    };
-    const eventHash = computeEventHash(eventWithPrev, prevHash);
-
-    chained.push({
-      ...eventWithPrev,
-      eventHash,
-    });
-
+  const result: AuditEvent[] = [];
+  const ids = new Set<string>();
+  for (const [i, raw] of events.entries()) {
+    if (ids.has(raw.eventId)) throw new Error('Duplicate audit event ID.');
+    ids.add(raw.eventId);
+    const event = { ...structuredClone(raw), sequenceNumber: i + 1, prevHash };
+    const eventHash = await computeEventHash(event, prevHash);
+    if ((raw.eventHash !== undefined || raw.prevHash !== undefined || raw.sequenceNumber !== undefined) &&
+        (raw.eventHash !== eventHash || raw.prevHash !== prevHash || raw.sequenceNumber !== i + 1)) {
+      throw new Error('Refusing to rehash an invalid existing ledger entry.');
+    }
+    result.push({ ...event, eventHash });
     prevHash = eventHash;
   }
-
-  return chained;
+  return result;
 }
-
-/**
- * Verifies the complete cryptographic chain of an audit event ledger.
- * Detects modified payloads, broken sequence numbers, or invalid previous hash references.
- */
-export function verifyLedgerIntegrity(
-  events: readonly AuditEvent[],
-  genesisHash: string = GENESIS_HASH
-): LedgerVerificationResult {
-  if (!events || events.length === 0) {
-    return {
-      isValid: true,
-      verifiedCount: 0,
-      genesisHash,
-      latestBlockHash: genesisHash,
-    };
-  }
-
-  // Determine chronological order (ascending sequence numbers or timestamp)
-  const isReverseOrder =
-    events.length > 1 &&
-    events[0].sequenceNumber !== undefined &&
-    events[events.length - 1].sequenceNumber !== undefined &&
-    (events[0].sequenceNumber ?? 0) > (events[events.length - 1].sequenceNumber ?? 0);
-
-  const chronologicalEvents = isReverseOrder ? [...events].reverse() : [...events];
-
+export async function verifyLedgerIntegrity(
+  events: readonly AuditEvent[], genesisHash = GENESIS_HASH,
+  checkpoint?: { eventCount: number; latestBlockHash: string },
+): Promise<LedgerVerificationResult> {
+  const chronological = events.length > 1 && (events[0].sequenceNumber ?? 0) > (events.at(-1)?.sequenceNumber ?? 0)
+    ? [...events].reverse() : events;
   let prevHash = genesisHash;
-
-  for (let i = 0; i < chronologicalEvents.length; i++) {
-    const event = chronologicalEvents[i];
-    const expectedSeq = i + 1;
-
-    // 1. Verify sequence number
-    if (event.sequenceNumber !== undefined && event.sequenceNumber !== expectedSeq) {
-      return {
-        isValid: false,
-        verifiedCount: i,
-        genesisHash,
-        latestBlockHash: prevHash,
-        brokenAtIndex: i,
-        brokenEventId: event.eventId,
-        reason: `Sequence number mismatch at block #${expectedSeq}: expected ${expectedSeq}, got ${event.sequenceNumber}`,
-      };
-    }
-
-    // 2. Verify previous hash pointer
-    if (event.prevHash && event.prevHash !== prevHash) {
-      return {
-        isValid: false,
-        verifiedCount: i,
-        genesisHash,
-        latestBlockHash: prevHash,
-        brokenAtIndex: i,
-        brokenEventId: event.eventId,
-        expectedHash: prevHash,
-        actualHash: event.prevHash,
-        reason: `Broken chain link at block #${expectedSeq}: expected previous hash ${prevHash.slice(0, 12)}..., found ${event.prevHash.slice(0, 12)}...`,
-      };
-    }
-
-    // 3. Recompute event hash and verify cryptographic digest
-    const expectedHash = computeEventHash(
-      {
-        ...event,
-        sequenceNumber: expectedSeq,
-        prevHash,
-      },
-      prevHash
-    );
-
-    if (event.eventHash && event.eventHash !== expectedHash) {
-      return {
-        isValid: false,
-        verifiedCount: i,
-        genesisHash,
-        latestBlockHash: prevHash,
-        brokenAtIndex: i,
-        brokenEventId: event.eventId,
-        expectedHash,
-        actualHash: event.eventHash,
-        reason: `Tampered payload detected at block #${expectedSeq} (Event ID: ${event.eventId}). Computed digest does not match stored block hash.`,
-      };
-    }
-
-    prevHash = expectedHash;
+  const ids = new Set<string>();
+  for (const [i, event] of chronological.entries()) {
+    const invalid = (reason: string): LedgerVerificationResult => ({
+      isValid: false, verifiedCount: i, genesisHash, latestBlockHash: prevHash,
+      brokenAtIndex: i, brokenEventId: event.eventId, reason,
+    });
+    if (event.sequenceNumber !== i + 1) return invalid('Missing or invalid sequence number.');
+    if (event.prevHash !== prevHash) return invalid('Missing or broken previous hash link.');
+    if (!event.eventHash || !/^[a-f0-9]{64}$/.test(event.eventHash)) return invalid('Missing or invalid event hash.');
+    if (ids.has(event.eventId)) return invalid('Duplicate event ID.');
+    ids.add(event.eventId);
+    const expected = await computeEventHash(event, prevHash);
+    if (event.eventHash !== expected) return invalid('Tampered payload detected: computed digest does not match stored hash.');
+    prevHash = expected;
   }
-
-  return {
-    isValid: true,
-    verifiedCount: chronologicalEvents.length,
-    genesisHash,
-    latestBlockHash: prevHash,
-  };
+  if (checkpoint && (checkpoint.eventCount !== events.length || checkpoint.latestBlockHash !== prevHash)) {
+    return { isValid: false, verifiedCount: events.length, genesisHash, latestBlockHash: prevHash, reason: 'Ledger differs from independently retained checkpoint.' };
+  }
+  return { isValid: true, verifiedCount: events.length, genesisHash, latestBlockHash: prevHash };
+}
+/** Append raw events while preserving all earlier commitments. */
+export async function appendAuditEvents(existing: readonly AuditEvent[], added: readonly AuditEvent[]): Promise<AuditEvent[]> {
+  return chainAuditEvents([...existing, ...added]);
 }

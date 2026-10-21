@@ -19,21 +19,21 @@ describe('Compliance & Audit Package Builder (Step 3)', () => {
   const duration = performance.now() - start;
   batch.evaluation = evaluateReconciliation(batch.records, dataset.groundTruth, duration);
 
-  it('computes a stable, 64-character deterministic digest', () => {
+  it('computes a stable, 64-character deterministic digest', async () => {
     const data = JSON.stringify({ batchId: 'batch_test_1', records: 180 });
-    const digest1 = computeDeterministicDigest(data);
-    const digest2 = computeDeterministicDigest(data);
+    const digest1 = await computeDeterministicDigest(data);
+    const digest2 = await computeDeterministicDigest(data);
 
     expect(digest1).toHaveLength(64);
     expect(digest1).toBe(digest2);
     expect(typeof digest1).toBe('string');
   });
 
-  it('builds a comprehensive, compliant manifest adhering to fintech standards', () => {
-    const pkg = buildComplianceAuditPackage(batch, DEFAULT_ENGINE_CONFIG);
+  it('builds a comprehensive, compliant manifest adhering to fintech standards', async () => {
+    const pkg = await buildComplianceAuditPackage(batch, DEFAULT_ENGINE_CONFIG);
 
     // 1. Manifest structure
-    expect(pkg.packageVersion).toBe('1.0.0');
+    expect(pkg.packageVersion).toBe('2.0.0');
     expect(pkg.packageId).toContain('pkg_audit_');
     expect(pkg.generatedAt).toBeDefined();
 

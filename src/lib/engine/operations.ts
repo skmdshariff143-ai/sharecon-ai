@@ -19,6 +19,14 @@ export function applyReviewerDecision(
   timestamp = new Date().toISOString()
 ): OperationalDecisionResult {
   const targetRecord = records.find((r) => r.recordId === recordId);
+  if (!targetRecord) throw new Error('Reconciliation record no longer exists.');
+  if (!reviewer.trim()) throw new Error('Reviewer name is required.');
+  if (action === 'APPROVED' && records.some(r => r.recordId !== recordId &&
+      (r.status === 'AUTO_RECONCILED' || r.status === 'MANUALLY_APPROVED') &&
+      ((targetRecord.matchedSettlement && r.matchedSettlement?.settlementId === targetRecord.matchedSettlement.settlementId) ||
+       (targetRecord.matchedBankTransaction && r.matchedBankTransaction?.bankTransactionId === targetRecord.matchedBankTransaction.bankTransactionId)))) {
+    throw new Error('A resolved record already claims this settlement or bank credit.');
+  }
   const previousState = targetRecord?.status || 'PENDING_REVIEW';
 
   const newStatus =
@@ -47,7 +55,7 @@ export function applyReviewerDecision(
   const modifiedRecord = updatedRecords.find((r) => r.recordId === recordId);
 
   const newEvent: AuditEvent = {
-    eventId: `aud_rev_${Date.now()}_${recordId}`,
+    eventId: `aud_rev_${crypto.randomUUID()}`,
     timestamp,
     actor: 'FINANCE_REVIEWER',
     action:
@@ -74,7 +82,7 @@ export function applyReviewerDecision(
     fallbackUsed: false,
   };
 
-  const updatedAuditEvents = [newEvent, ...auditEvents];
+  const updatedAuditEvents = [...auditEvents, newEvent];
 
   return {
     updatedRecords,

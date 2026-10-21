@@ -1,44 +1,35 @@
-/**
- * CSV Import / Export Utilities with Schema Validation for ShaRecon AI
- */
-
+/** Atomic, bounded statement imports. Amount columns are decimal INR, outputs integer paise. */
 import Papa from 'papaparse';
 import { z } from 'zod';
 import { Payment, Settlement, BankTransaction } from '@/types/reconciliation';
 import { paiseToRupees, rupeesToPaise } from '@/lib/money';
+import { PaymentSchema, SettlementSchema, BankTransactionSchema, MAX_IMPORT_BYTES, MAX_IMPORT_ROWS } from '@/lib/validation';
+import { normalizeReference } from '@/lib/engine/normalizer';
 
-// Validation Schemas for CSV Rows
+const MoneyInput = z.union([z.string(), z.number()]).transform((value, ctx) => {
+  try { return rupeesToPaise(value); }
+  catch (error) {
+    ctx.addIssue({ code: 'custom', message: error instanceof Error ? error.message : 'Invalid amount' });
+    return z.NEVER;
+  }
+});
+const OptionalMoney = z.preprocess(value => value === '' ? undefined : value, MoneyInput.optional());
+
 export const PaymentCsvRowSchema = z.object({
-  paymentId: z.string().min(1, 'paymentId is required'),
-  orderId: z.string().min(1, 'orderId is required'),
-  grossAmount: z.union([z.string(), z.number()]).transform((val) => rupeesToPaise(val)),
-  fee: z.union([z.string(), z.number()]).optional().transform((val) => (val ? rupeesToPaise(val) : 0)),
-  tax: z.union([z.string(), z.number()]).optional().transform((val) => (val ? rupeesToPaise(val) : 0)),
-  expectedNetAmount: z
-    .union([z.string(), z.number()])
-    .optional()
-    .transform((val) => (val ? rupeesToPaise(val) : 0)),
+  paymentId: z.string(), orderId: z.string(), grossAmount: MoneyInput,
+  fee: OptionalMoney, tax: OptionalMoney, expectedNetAmount: OptionalMoney,
   currency: z.string().default('INR'),
-  status: z.enum(['captured', 'failed', 'refunded', 'pending']).default('captured'),
-  createdAt: z.string().min(1, 'createdAt is required'),
-});
+  status: z.string().default('captured'), createdAt: z.string(),
+}).transform(row => ({ ...row, fee: row.fee ?? 0, tax: row.tax ?? 0,
+  expectedNetAmount: row.expectedNetAmount ?? row.grossAmount - (row.fee ?? 0) - (row.tax ?? 0),
+})).pipe(PaymentSchema);
 
-export const SettlementCsvRowSchema = z.object({
-  settlementId: z.string().min(1, 'settlementId is required'),
-  paymentReference: z.string().min(1, 'paymentReference is required'),
-  settledAmount: z.union([z.string(), z.number()]).transform((val) => rupeesToPaise(val)),
-  utr: z.string().min(1, 'utr is required'),
-  settledAt: z.string().min(1, 'settledAt is required'),
-  status: z.enum(['processed', 'reversed', 'failed']).default('processed'),
-});
-
-export const BankTransactionCsvRowSchema = z.object({
-  bankTransactionId: z.string().min(1, 'bankTransactionId is required'),
-  utr: z.string().min(1, 'utr is required'),
-  creditAmount: z.union([z.string(), z.number()]).transform((val) => rupeesToPaise(val)),
-  description: z.string().default(''),
-  creditedAt: z.string().min(1, 'creditedAt is required'),
-});
+export const SettlementCsvRowSchema = SettlementSchema.extend({
+  settledAmount: MoneyInput, status: SettlementSchema.shape.status.default('processed'),
+}).pipe(SettlementSchema);
+export const BankTransactionCsvRowSchema = BankTransactionSchema.extend({
+  creditAmount: MoneyInput, description: z.string().default(''),
+}).pipe(BankTransactionSchema);
 
 export interface CsvParseResult<T> {
   data: T[];
@@ -46,129 +37,42 @@ export interface CsvParseResult<T> {
   totalRows: number;
 }
 
-export function parsePaymentsCsv(csvText: string): CsvParseResult<Payment> {
-  const parsed = Papa.parse<Record<string, string>>(csvText, {
-    header: true,
-    skipEmptyLines: true,
+function parseStatement<T>(text: string, schema: z.ZodType<T>, id: keyof T): CsvParseResult<T> {
+  const errors: CsvParseResult<T>['errors'] = [];
+  const fail = (message: string): CsvParseResult<T> => ({ data: [], errors: [{ row: 1, message }], totalRows: 0 });
+  if (new TextEncoder().encode(text).byteLength > MAX_IMPORT_BYTES) return fail('Statement exceeds 5 MiB.');
+  const parsed = Papa.parse<Record<string, string>>(text, {
+    header: true, skipEmptyLines: 'greedy', preview: MAX_IMPORT_ROWS + 1,
+    transformHeader: header => header.trim(),
   });
-
-  const validData: Payment[] = [];
-  const errors: { row: number; field?: string; message: string }[] = [];
-
+  if (parsed.data.length > MAX_IMPORT_ROWS || parsed.meta.truncated) return fail('Statement exceeds 10,000 rows.');
+  if (!parsed.data.length) return fail('Statement has no data rows.');
+  if (parsed.meta.renamedHeaders && Object.keys(parsed.meta.renamedHeaders).length) return fail('Duplicate column headers are not allowed.');
+  parsed.errors.forEach(error => errors.push({ row: (error.row ?? 0) + 2, message: error.message }));
+  const data: T[] = [];
+  const ids = new Set<string>();
+  let totalPaise = 0;
   parsed.data.forEach((row, index) => {
-    const rowNum = index + 2; // +1 for 0-index, +1 for header
-    try {
-      const validated = PaymentCsvRowSchema.parse(row);
-      // Auto-compute net if not provided
-      const expectedNet =
-        validated.expectedNetAmount ||
-        validated.grossAmount - (validated.fee || 0) - (validated.tax || 0);
-
-      validData.push({
-        paymentId: validated.paymentId,
-        orderId: validated.orderId,
-        grossAmount: validated.grossAmount,
-        fee: validated.fee || 0,
-        tax: validated.tax || 0,
-        expectedNetAmount: expectedNet,
-        currency: validated.currency,
-        status: validated.status as Payment['status'],
-        createdAt: validated.createdAt,
-      });
-    } catch (err: unknown) {
-      if (err instanceof z.ZodError) {
-        err.issues.forEach((issue) => {
-          errors.push({
-            row: rowNum,
-            field: issue.path.join('.'),
-            message: issue.message,
-          });
-        });
-      } else {
-        errors.push({ row: rowNum, message: 'Invalid payment record structure' });
-      }
+    const result = schema.safeParse(row);
+    if (!result.success) {
+      result.error.issues.forEach(issue => errors.push({ row: index + 2, field: issue.path.join('.'), message: issue.message }));
+      return;
     }
+    const key = normalizeReference(String(result.data[id]));
+    if (ids.has(key)) errors.push({ row: index + 2, field: String(id), message: 'Duplicate normalized identifier.' });
+    ids.add(key);
+    const amounts = result.data as Record<string, unknown>;
+    totalPaise += Number(amounts.grossAmount ?? amounts.settledAmount ?? amounts.creditAmount);
+    if (!Number.isSafeInteger(totalPaise)) errors.push({ row: index + 2, message: 'Statement total exceeds safe integer paise.' });
+    data.push(result.data);
   });
-
-  return { data: validData, errors, totalRows: parsed.data.length };
+  // A financial statement is one atomic input. Never silently reconcile a valid subset.
+  return { data: errors.length ? [] : data, errors, totalRows: parsed.data.length };
 }
 
-export function parseSettlementsCsv(csvText: string): CsvParseResult<Settlement> {
-  const parsed = Papa.parse<Record<string, string>>(csvText, {
-    header: true,
-    skipEmptyLines: true,
-  });
-
-  const validData: Settlement[] = [];
-  const errors: { row: number; field?: string; message: string }[] = [];
-
-  parsed.data.forEach((row, index) => {
-    const rowNum = index + 2;
-    try {
-      const validated = SettlementCsvRowSchema.parse(row);
-      validData.push({
-        settlementId: validated.settlementId,
-        paymentReference: validated.paymentReference,
-        settledAmount: validated.settledAmount,
-        utr: validated.utr,
-        settledAt: validated.settledAt,
-        status: validated.status as Settlement['status'],
-      });
-    } catch (err: unknown) {
-      if (err instanceof z.ZodError) {
-        err.issues.forEach((issue) => {
-          errors.push({
-            row: rowNum,
-            field: issue.path.join('.'),
-            message: issue.message,
-          });
-        });
-      } else {
-        errors.push({ row: rowNum, message: 'Invalid settlement record structure' });
-      }
-    }
-  });
-
-  return { data: validData, errors, totalRows: parsed.data.length };
-}
-
-export function parseBankTransactionsCsv(csvText: string): CsvParseResult<BankTransaction> {
-  const parsed = Papa.parse<Record<string, string>>(csvText, {
-    header: true,
-    skipEmptyLines: true,
-  });
-
-  const validData: BankTransaction[] = [];
-  const errors: { row: number; field?: string; message: string }[] = [];
-
-  parsed.data.forEach((row, index) => {
-    const rowNum = index + 2;
-    try {
-      const validated = BankTransactionCsvRowSchema.parse(row);
-      validData.push({
-        bankTransactionId: validated.bankTransactionId,
-        utr: validated.utr,
-        creditAmount: validated.creditAmount,
-        description: validated.description,
-        creditedAt: validated.creditedAt,
-      });
-    } catch (err: unknown) {
-      if (err instanceof z.ZodError) {
-        err.issues.forEach((issue) => {
-          errors.push({
-            row: rowNum,
-            field: issue.path.join('.'),
-            message: issue.message,
-          });
-        });
-      } else {
-        errors.push({ row: rowNum, message: 'Invalid bank transaction structure' });
-      }
-    }
-  });
-
-  return { data: validData, errors, totalRows: parsed.data.length };
-}
+export const parsePaymentsCsv = (text: string): CsvParseResult<Payment> => parseStatement(text, PaymentCsvRowSchema, 'paymentId');
+export const parseSettlementsCsv = (text: string): CsvParseResult<Settlement> => parseStatement(text, SettlementCsvRowSchema, 'settlementId');
+export const parseBankTransactionsCsv = (text: string): CsvParseResult<BankTransaction> => parseStatement(text, BankTransactionCsvRowSchema, 'bankTransactionId');
 
 export function exportPaymentsCsv(payments: Payment[]): string {
   const unparsed = payments.map((p) => ({
@@ -182,7 +86,7 @@ export function exportPaymentsCsv(payments: Payment[]): string {
     status: p.status,
     createdAt: p.createdAt,
   }));
-  return Papa.unparse(unparsed);
+  return Papa.unparse(unparsed, { escapeFormulae: /^[\s]*[=+@\-\t\r]/ });
 }
 
 export function exportSettlementsCsv(settlements: Settlement[]): string {
@@ -194,7 +98,7 @@ export function exportSettlementsCsv(settlements: Settlement[]): string {
     settledAt: s.settledAt,
     status: s.status,
   }));
-  return Papa.unparse(unparsed);
+  return Papa.unparse(unparsed, { escapeFormulae: /^[\s]*[=+@\-\t\r]/ });
 }
 
 export function exportBankTransactionsCsv(bankTransactions: BankTransaction[]): string {
@@ -205,7 +109,7 @@ export function exportBankTransactionsCsv(bankTransactions: BankTransaction[]): 
     description: b.description,
     creditedAt: b.creditedAt,
   }));
-  return Papa.unparse(unparsed);
+  return Papa.unparse(unparsed, { escapeFormulae: /^[\s]*[=+@\-\t\r]/ });
 }
 
 export function exportReconciliationCsv(records: import('@/types/reconciliation').ReconciliationRecord[]): string {
@@ -228,7 +132,7 @@ export function exportReconciliationCsv(records: import('@/types/reconciliation'
     'Financial Exposure (INR)': paiseToRupees(r.financialExposurePaise).toFixed(2),
     'Audit Explanation': r.explanation,
   }));
-  return Papa.unparse(unparsed);
+  return Papa.unparse(unparsed, { escapeFormulae: /^[\s]*[=+@\-\t\r]/ });
 }
 
 export function exportExceptionsCsv(records: import('@/types/reconciliation').ReconciliationRecord[]): string {
@@ -252,6 +156,6 @@ export function exportAuditEventsCsv(events: import('@/types/reconciliation').Au
     'Model Used': e.modelUsed || '',
     'Fallback Used': e.fallbackUsed ? 'YES' : 'NO',
   }));
-  return Papa.unparse(unparsed);
+  return Papa.unparse(unparsed, { escapeFormulae: /^[\s]*[=+@\-\t\r]/ });
 }
 

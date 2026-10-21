@@ -10,9 +10,11 @@ import {
   ReconciliationRecord,
   AuditEvent,
 } from '@/types/reconciliation';
+import { canonicalJson, computeDeterministicDigest } from './digest';
+export { computeDeterministicDigest } from './digest';
 
 export interface CompliancePackageManifest {
-  packageVersion: '1.0.0';
+  packageVersion: '2.0.0';
   packageId: string;
   generatedAt: string;
   system: {
@@ -31,6 +33,8 @@ export interface CompliancePackageManifest {
   };
   integrityAttestation: {
     sha256Digest: string;
+    digestAlgorithm: 'SHA-256';
+    digestEncoding: 'canonical-json-v1';
     scoringModel: {
       referenceMatchPoints: number;
       amountCompatibilityPoints: number;
@@ -66,45 +70,16 @@ export interface CompliancePackageManifest {
 }
 
 /**
- * Computes a deterministic pseudo SHA-256 hex string for the package contents
- * in a browser/node agnostic manner.
- */
-export function computeDeterministicDigest(data: string): string {
-  let hash = 0x811c9dc5;
-  for (let i = 0; i < data.length; i++) {
-    hash ^= data.charCodeAt(i);
-    hash +=
-      (hash << 1) + (hash << 4) + (hash << 7) + (hash << 8) + (hash << 24);
-  }
-  const hex = (hash >>> 0).toString(16).padStart(8, '0');
-  // Expand to standard 64-char hex format
-  return (hex + hex + hex + hex + hex + hex + hex + hex).slice(0, 64);
-}
-
-/**
  * Builds a complete compliance & audit manifest from an active batch result and configuration.
  */
-export function buildComplianceAuditPackage(
+export async function buildComplianceAuditPackage(
   batch: BatchReconciliationResult,
   config: EngineConfig
-): CompliancePackageManifest {
+): Promise<CompliancePackageManifest> {
+  batch = structuredClone(batch);
+  config = structuredClone(config);
   const timestamp = new Date().toISOString();
   const packageId = `pkg_audit_${batch.batchId}_${Date.now()}`;
-
-  // Content string to hash for integrity verification
-  const contentToHash = JSON.stringify({
-    batchId: batch.batchId,
-    records: batch.records.map((r) => ({
-      id: r.recordId,
-      status: r.status,
-      confidence: r.confidence,
-      exposure: r.financialExposurePaise,
-    })),
-    auditEventCount: batch.auditEvents.length,
-    config,
-  });
-
-  const sha256Digest = computeDeterministicDigest(contentToHash);
 
   const evalSummary = batch.evaluation
     ? {
@@ -119,14 +94,14 @@ export function buildComplianceAuditPackage(
       }
     : undefined;
 
-  return {
-    packageVersion: '1.0.0',
+  const manifest: CompliancePackageManifest = {
+    packageVersion: '2.0.0',
     packageId,
     generatedAt: timestamp,
     system: {
       name: 'ShaRecon AI',
       track: 'Razorpay AI Buildathon — AI Finance Controller',
-      version: '0.1.0-production',
+      version: '0.1.0',
       environment: 'Client-Side Evaluation & Audit Controller',
     },
     batchSummary: {
@@ -138,7 +113,9 @@ export function buildComplianceAuditPackage(
       currencyUnit: 'Integer Paise (1 INR = 100 paise)',
     },
     integrityAttestation: {
-      sha256Digest,
+      sha256Digest: '',
+      digestAlgorithm: 'SHA-256',
+      digestEncoding: 'canonical-json-v1',
       scoringModel: {
         referenceMatchPoints: 40,
         amountCompatibilityPoints: 35,
@@ -166,16 +143,18 @@ export function buildComplianceAuditPackage(
         'All confidence scores and resolution decisions are mathematically derived from 4-factor evidence with zero AI hallucinations overriding thresholds.',
     },
   };
+  manifest.integrityAttestation.sha256Digest = await computeDeterministicDigest(packagePayload(manifest));
+  return manifest;
 }
 
 /**
  * Triggers a browser download of the compliance package as a formatted JSON file.
  */
-export function downloadCompliancePackage(
+export async function downloadCompliancePackage(
   batch: BatchReconciliationResult,
   config: EngineConfig
-): void {
-  const pkg = buildComplianceAuditPackage(batch, config);
+): Promise<void> {
+  const pkg = await buildComplianceAuditPackage(batch, config);
   const jsonStr = JSON.stringify(pkg, null, 2);
   const blob = new Blob([jsonStr], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
@@ -184,4 +163,16 @@ export function downloadCompliancePackage(
   a.download = `sharecon_compliance_audit_package_${batch.batchId}.json`;
   a.click();
   URL.revokeObjectURL(url);
+}
+
+/** The digest covers every exported field except the digest itself. */
+function packagePayload(manifest: CompliancePackageManifest): string {
+  const integrityAttestation = { ...manifest.integrityAttestation, sha256Digest: undefined };
+  return canonicalJson({ ...manifest, integrityAttestation });
+}
+export async function verifyComplianceAuditPackage(manifest: CompliancePackageManifest): Promise<boolean> {
+  if (manifest.packageVersion !== '2.0.0' || manifest.integrityAttestation.digestAlgorithm !== 'SHA-256' ||
+      manifest.integrityAttestation.digestEncoding !== 'canonical-json-v1') return false;
+  return /^[a-f0-9]{64}$/.test(manifest.integrityAttestation.sha256Digest) &&
+    manifest.integrityAttestation.sha256Digest === await computeDeterministicDigest(packagePayload(manifest));
 }

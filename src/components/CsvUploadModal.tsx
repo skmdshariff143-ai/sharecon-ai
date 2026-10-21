@@ -19,6 +19,7 @@ import {
 } from '@/lib/dataset/csv';
 import { generateSyntheticDataset } from '@/lib/dataset/generator';
 import { Payment, Settlement, BankTransaction } from '@/types/reconciliation';
+import { MAX_IMPORT_BYTES } from '@/lib/validation';
 
 interface CsvUploadModalProps {
   isOpen: boolean;
@@ -39,7 +40,9 @@ export const CsvUploadModal: React.FC<CsvUploadModalProps> = ({
   const [parsedSettlements, setParsedSettlements] = useState<Settlement[] | null>(null);
   const [parsedBank, setParsedBank] = useState<BankTransaction[] | null>(null);
 
-  const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const [fileErrors, setFileErrors] = useState<Record<string, string[]>>({});
+  const validationErrors = Object.values(fileErrors).flat();
+  const uploadVersions = React.useRef<Record<string, number>>({});
 
   React.useEffect(() => {
     if (!isOpen) return;
@@ -58,32 +61,36 @@ export const CsvUploadModal: React.FC<CsvUploadModalProps> = ({
   ) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
+    const version = (uploadVersions.current[type] ?? 0) + 1;
+    uploadVersions.current[type] = version;
+    const setErrors = (errors: string[]) => setFileErrors(prev => ({ ...prev, [type]: errors }));
+    if (type === 'PAYMENTS') setParsedPayments(null);
+    if (type === 'SETTLEMENTS') setParsedSettlements(null);
+    if (type === 'BANK') setParsedBank(null);
     try {
+      if (file.size > MAX_IMPORT_BYTES) throw new Error('Statement exceeds 5 MiB.');
       const text = await file.text();
+      if (uploadVersions.current[type] !== version) return;
       if (type === 'PAYMENTS') {
         const res = parsePaymentsCsv(text);
-        if (res.errors.length > 0) {
-          setValidationErrors((prev) => [...prev, ...res.errors.map((e) => `Row ${e.row}: ${e.message}`)]);
-        }
-        setParsedPayments(res.data);
+        setErrors(res.errors.map(e => `Payments row ${e.row}: ${e.field ?? ''} ${e.message}`));
+        setParsedPayments(res.errors.length ? null : res.data);
       } else if (type === 'SETTLEMENTS') {
         const res = parseSettlementsCsv(text);
-        if (res.errors.length > 0) {
-          setValidationErrors((prev) => [...prev, ...res.errors.map((e) => `Row ${e.row}: ${e.message}`)]);
-        }
-        setParsedSettlements(res.data);
+        setErrors(res.errors.map(e => `Settlements row ${e.row}: ${e.field ?? ''} ${e.message}`));
+        setParsedSettlements(res.errors.length ? null : res.data);
       } else if (type === 'BANK') {
-        const res = parseBankTransactionsCsv(text);
-        if (res.errors.length > 0) {
-          setValidationErrors((prev) => [...prev, ...res.errors.map((e) => `Row ${e.row}: ${e.message}`)]);
-        }
-        setParsedBank(res.data);
+        const res = file.name.toLowerCase().endsWith('.xml')
+          ? { data: (await import('@/lib/dataset/camt053')).parseCamt053Xml(text).bankTransactions, errors: [] }
+          : parseBankTransactionsCsv(text);
+        if (uploadVersions.current[type] !== version) return;
+        setErrors(res.errors.map(e => `Bank row ${e.row}: ${e.field ?? ''} ${e.message}`));
+        setParsedBank(res.errors.length ? null : res.data);
       }
-      setValidationErrors([]);
     } catch (err: unknown) {
+      if (uploadVersions.current[type] !== version) return;
       const msg = err instanceof Error ? err.message : String(err);
-      setValidationErrors((prev) => [...prev, `Failed to parse ${type} CSV: ${msg}`]);
+      setErrors([`Failed to parse ${type} CSV: ${msg}`]);
     }
   };
 
@@ -119,7 +126,7 @@ export const CsvUploadModal: React.FC<CsvUploadModalProps> = ({
     if (!parsedBank || parsedBank.length === 0) errors.push('Bank statement CSV is required.');
 
     if (errors.length > 0) {
-      setValidationErrors(errors);
+      setFileErrors(prev => ({ ...prev, required: errors }));
       return;
     }
 
@@ -145,7 +152,7 @@ export const CsvUploadModal: React.FC<CsvUploadModalProps> = ({
                 Upload 3-Way Statement Files
               </h2>
               <p className="text-xs text-[#94a3b8] font-sans">
-                Import CSV files for Payments, Settlements, and Bank Account statement records.
+                Import Payments and Settlements CSVs, plus Bank CSV or CAMT.053 XML. Maximum 5 MiB and 10,000 rows per file.
               </p>
             </div>
           </div>
@@ -161,12 +168,12 @@ export const CsvUploadModal: React.FC<CsvUploadModalProps> = ({
 
         {/* Validation Errors */}
         {validationErrors.length > 0 && (
-          <div className="p-3 bg-[#f87171]/10 border border-[#f87171]/25 rounded-xl space-y-1 text-xs text-[#f87171]">
+          <div role="alert" className="p-3 bg-[#f87171]/10 border border-[#f87171]/25 rounded-xl space-y-1 text-xs text-[#f87171]">
             <div className="font-bold flex items-center gap-1.5">
               <AlertTriangle className="w-4 h-4" /> Validation Issues
             </div>
             <ul className="list-disc list-inside space-y-0.5 text-[11px]">
-              {validationErrors.map((err, idx) => (
+              {validationErrors.slice(0, 20).map((err, idx) => (
                 <li key={idx}>{err}</li>
               ))}
             </ul>
@@ -243,7 +250,7 @@ export const CsvUploadModal: React.FC<CsvUploadModalProps> = ({
           <div className="p-4 bg-[#080c14] border border-white/8 rounded-xl flex flex-col justify-between space-y-3">
             <div>
               <div className="flex items-center justify-between font-bold text-[#2dd4bf] font-mono mb-1">
-                <span>3. Bank CSV</span>
+                <span>3. Bank CSV / XML</span>
                 {parsedBank && <CheckCircle2 className="w-4 h-4 text-[#2dd4bf]" />}
               </div>
               <p className="text-[11px] text-[#64748b]">
@@ -256,7 +263,7 @@ export const CsvUploadModal: React.FC<CsvUploadModalProps> = ({
                 <span>{parsedBank ? `${parsedBank.length} records loaded` : 'Select File'}</span>
                 <input
                   type="file"
-                  accept=".csv"
+                  accept=".csv,.xml"
                   className="hidden"
                   onChange={(e) => handleFileUpload(e, 'BANK')}
                 />

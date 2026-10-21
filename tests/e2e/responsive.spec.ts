@@ -2,11 +2,15 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Responsive Layout & Command Bar Quality Suite', () => {
   const targetViewports = [
+    { name: 'Desktop Wide (1920x1080)', width: 1920, height: 1080 },
     { name: 'Desktop (1440x900)', width: 1440, height: 900 },
     { name: 'Laptop WXGA (1366x768)', width: 1366, height: 768 },
     { name: 'Compact Desktop (1280x720)', width: 1280, height: 720 },
     { name: 'Tablet Landscape (1024x768)', width: 1024, height: 768 },
+    { name: 'Tablet Portrait (768x1024)', width: 768, height: 1024 },
     { name: 'Mobile (390x844)', width: 390, height: 844 },
+    { name: 'Mobile Standard (360x800)', width: 360, height: 800 },
+    { name: 'Mobile Ultra-Compact (320x568)', width: 320, height: 568 },
   ];
 
   for (const vp of targetViewports) {

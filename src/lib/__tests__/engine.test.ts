@@ -193,9 +193,9 @@ describe('Reconciliation Engine & Ground Truth Evaluation', () => {
 
     // 6. Confirm appropriate audit events were created
     expect(flagResult.updatedAuditEvents.length).toBe(result.auditEvents.length + 3);
-    expect(flagResult.updatedAuditEvents[0].action).toBe('INVESTIGATION_FLAG');
-    expect(flagResult.updatedAuditEvents[1].action).toBe('MANUAL_REJECT');
-    expect(flagResult.updatedAuditEvents[2].action).toBe('MANUAL_APPROVE');
+    expect(flagResult.updatedAuditEvents.at(-1)?.action).toBe('INVESTIGATION_FLAG');
+    expect(flagResult.updatedAuditEvents.at(-2)?.action).toBe('MANUAL_REJECT');
+    expect(flagResult.updatedAuditEvents.at(-3)?.action).toBe('MANUAL_APPROVE');
 
     // 7. Confirm the stored baseline evaluation remains deeply equal to its original snapshot
     expect(baselineEval).toEqual(originalSnapshot);

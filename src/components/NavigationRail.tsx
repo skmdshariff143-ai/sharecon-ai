@@ -212,15 +212,24 @@ export const NavigationRail: React.FC<NavigationRailProps> = ({
         {/* Footer / Track Info & Collapse Toggle */}
         <div className="p-3 border-t border-white/8 shrink-0 bg-[#080c14]">
           {!isCollapsed && (
-            <div className="bg-[#0e131f] rounded-xl p-2.5 mb-2 border border-white/8 shadow-inner">
-              <div className="flex items-center gap-1.5 text-[11px] font-semibold text-[#f8fafc] mb-0.5">
-                <Zap className="w-3.5 h-3.5 text-[#fbbf24]" />
-                <span className="font-mono">Razorpay Buildathon</span>
+            <>
+              <div className="bg-[#0e131f] rounded-xl p-2.5 mb-2 border border-white/8 shadow-inner">
+                <div className="flex items-center gap-1.5 text-[11px] font-semibold text-[#f8fafc] mb-0.5">
+                  <Zap className="w-3.5 h-3.5 text-[#fbbf24]" />
+                  <span className="font-mono">Razorpay Buildathon</span>
+                </div>
+                <p className="text-[10px] text-[#64748b] leading-tight">
+                  AI Finance Controller Track Prototype
+                </p>
               </div>
-              <p className="text-[10px] text-[#64748b] leading-tight">
-                AI Finance Controller Track Prototype
-              </p>
-            </div>
+              <div className="flex items-center justify-between text-[10px] text-[#64748b] px-1 mb-2">
+                <a href="/privacy" className="hover:text-[#94a3b8] underline-offset-2 hover:underline">Privacy</a>
+                <span>•</span>
+                <a href="/terms" className="hover:text-[#94a3b8] underline-offset-2 hover:underline">Terms</a>
+                <span>•</span>
+                <span className="font-mono">v0.1.0</span>
+              </div>
+            </>
           )}
 
           <button

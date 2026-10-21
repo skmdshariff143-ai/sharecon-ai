@@ -1,10 +1,8 @@
-/**
- * ISO 20022 CAMT.053 XML Bank Statement Adapter for ShaRecon AI
- * Parses Bank-to-Customer Statement (camt.053.001.02 / camt.053.001.08) XML files
- * and normalizes bank entries into standard BankTransaction data models.
- */
-
+/** CAMT.053 booked INR credits; rejects ambiguous aggregates and unsupported statements. */
+import { XMLParser, XMLValidator } from 'fast-xml-parser';
 import { BankTransaction } from '@/types/reconciliation';
+import { BankTransactionSchema, DateSchema, IdentifierSchema, MAX_IMPORT_BYTES, MAX_IMPORT_ROWS } from '../validation';
+import { rupeesToPaise } from '../money';
 
 export interface Camt053ParseResult {
   statementId: string;
@@ -15,144 +13,77 @@ export interface Camt053ParseResult {
   totalCreditsCount: number;
   totalCreditPaise: number;
 }
-
-/**
- * Extracts inner text of an XML tag, ignoring namespaces.
- */
-function extractTagContent(xml: string, tagName: string): string | null {
-  const regex = new RegExp(`<(?:[\\w]+:)?${tagName}(?:\\s+[^>]*)?>([\\s\\S]*?)<\\/(?:[\\w]+:)?${tagName}>`, 'i');
-  const match = xml.match(regex);
-  return match ? match[1].trim() : null;
+export const parseAmountToPaise = rupeesToPaise;
+type XmlObject = Record<string, unknown>;
+function object(value: unknown): XmlObject {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error('Expected one XML element.');
+  return value as XmlObject;
 }
-
-/**
- * Extracts all matching block occurrences of a given tag.
- */
-function extractTagBlocks(xml: string, tagName: string): string[] {
-  const regex = new RegExp(`<(?:[\\w]+:)?${tagName}(?:\\s+[^>]*)?>([\\s\\S]*?)<\\/(?:[\\w]+:)?${tagName}>`, 'gi');
-  const matches: string[] = [];
-  let match: RegExpExecArray | null;
-  while ((match = regex.exec(xml)) !== null) {
-    matches.push(match[1]);
-  }
-  return matches;
+function text(value: unknown): string {
+  if (typeof value !== 'string') throw new Error('Required XML text is missing or repeated.');
+  return value.trim();
 }
+const list = (value: unknown): unknown[] => value === undefined ? [] : Array.isArray(value) ? value : [value];
+function optionalObject(value: unknown): XmlObject { return value === undefined ? {} : object(value); }
 
-/**
- * Normalizes decimal amount string (e.g. "1171.68" or "1500") into integer paise (e.g. 117168 or 150000).
- */
-export function parseAmountToPaise(amtStr: string): number {
-  const cleaned = amtStr.replace(/,/g, '').trim();
-  const num = parseFloat(cleaned);
-  if (isNaN(num)) return 0;
-  return Math.round(num * 100);
-}
-
-/**
- * Extracts UTR or reference from remittance info or transaction details.
- */
-function extractUtr(ntryXml: string, fallbackId: string): string {
-  // 1. Look for EndToEndId
-  const endToEnd = extractTagContent(ntryXml, 'EndToEndId');
-  if (endToEnd && endToEnd !== 'NOTPROVIDED' && endToEnd !== '/NOTPROVIDED/') {
-    return endToEnd;
-  }
-
-  // 2. Look for AcctSvcrRef
-  const acctRef = extractTagContent(ntryXml, 'AcctSvcrRef');
-  if (acctRef && acctRef !== 'NOTPROVIDED') {
-    return acctRef;
-  }
-
-  // 3. Look for TxId
-  const txId = extractTagContent(ntryXml, 'TxId');
-  if (txId && txId !== 'NOTPROVIDED') {
-    return txId;
-  }
-
-  // 4. Regex scan within unstructured remittance info (Ustrd) for UTR or CMS patterns
-  const ustrd = extractTagContent(ntryXml, 'Ustrd') || extractTagContent(ntryXml, 'AddtlNtryInf') || '';
-  const utrPattern = /(?:UTR|CMS|REF|NEFT|RTGS|IMPS)[:\s-]*([A-Za-z0-9_]{6,30})/i;
-  const utrMatch = ustrd.match(utrPattern);
-  if (utrMatch) {
-    return utrMatch[1];
-  }
-
-  return `UTR_${fallbackId}`;
-}
-
-/**
- * Parses raw ISO 20022 CAMT.053 XML string into normalized BankTransaction records.
- */
-export function parseCamt053Xml(xmlString: string): Camt053ParseResult {
-  if (!xmlString || !xmlString.includes('<')) {
-    throw new Error('Invalid CAMT.053 XML: empty or non-XML input provided.');
-  }
-
-  const statementId = extractTagContent(xmlString, 'Id') || `STMT_${Date.now()}`;
-  const accountIbanOrNumber =
-    extractTagContent(xmlString, 'IBAN') ||
-    extractTagContent(xmlString, 'Othr') ||
-    'PRIMARY_CORP_ACCOUNT';
-  const statementDate = extractTagContent(xmlString, 'CreDtTm') || new Date().toISOString();
-
-  // Extract all <Ntry> (Entry) blocks
-  const ntryBlocks = extractTagBlocks(xmlString, 'Ntry');
-  const bankTransactions: BankTransaction[] = [];
-  let totalCreditPaise = 0;
-  let defaultCurrency = 'INR';
-
-  ntryBlocks.forEach((ntry, index) => {
-    // Check credit vs debit indicator: CRDT vs DBIT
-    const cdtDbtInd = extractTagContent(ntry, 'CdtDbtInd') || 'CRDT';
-    
-    // Extract raw amount tag with optional Currency attribute
-    const amtRegex = /<(?:[\w]+:)?Amt(?:\s+Ccy="([^"]+)")?>([\s\S]*?)<\/(?:[\w]+:)?Amt>/i;
-    const amtMatch = ntry.match(amtRegex);
-    const currency = amtMatch && amtMatch[1] ? amtMatch[1] : defaultCurrency;
-    defaultCurrency = currency;
-    const rawAmt = amtMatch ? amtMatch[2].trim() : '0';
-    const amountPaise = parseAmountToPaise(rawAmt);
-
-    // Filter to credit transactions (inbound deposits/settlements)
-    if (cdtDbtInd.toUpperCase() === 'CRDT' && amountPaise > 0) {
-      // Determine booking or value date
-      let creditedAt =
-        extractTagContent(ntry, 'DtTm') ||
-        extractTagContent(ntry, 'Dt') ||
-        new Date().toISOString();
-
-      if (creditedAt.length === 10 && creditedAt.includes('-')) {
-        creditedAt = `${creditedAt}T12:00:00.000Z`;
-      }
-
-      const entryRef = extractTagContent(ntry, 'NtryRef') || `btx_${index + 1}`;
-      const bankTransactionId = `CAMT_${entryRef}`;
-      const utr = extractUtr(ntry, `${index + 1}`);
-      const description =
-        extractTagContent(ntry, 'Ustrd') ||
-        extractTagContent(ntry, 'AddtlNtryInf') ||
-        `CAMT.053 Bank Credit - ${utr}`;
-
-      bankTransactions.push({
-        bankTransactionId,
-        utr,
-        creditAmount: amountPaise,
-        description,
-        creditedAt,
-      });
-
-      totalCreditPaise += amountPaise;
+export function parseCamt053Xml(xml: string): Camt053ParseResult {
+  try {
+    if (!xml || new TextEncoder().encode(xml).byteLength > MAX_IMPORT_BYTES) throw new Error('Input is empty or exceeds 5 MiB.');
+    if (/<!DOCTYPE|<!ENTITY/i.test(xml)) throw new Error('DTD and entity declarations are not supported.');
+    if (XMLValidator.validate(xml) !== true) throw new Error('Malformed XML document.');
+    const parser = new XMLParser({ ignoreAttributes: false, removeNSPrefix: true, parseTagValue: false,
+      parseAttributeValue: false, trimValues: true, maxNestedTags: 32 });
+    const parsed: unknown = parser.parse(xml);
+    const message = object(object(object(parsed).Document).BkToCstmrStmt);
+    const statement = object(message.Stmt); // Multiple accounts/statements must be imported separately.
+    const statementId = IdentifierSchema.parse(statement.Id);
+    const statementDate = DateSchema.parse(statement.CreDtTm);
+    const account = object(statement.Acct);
+    const accountId = object(account.Id);
+    const accountIbanOrNumber = IdentifierSchema.parse(accountId.IBAN ?? object(accountId.Othr).Id);
+    const currency = text(account.Ccy);
+    if (currency !== 'INR') throw new Error('Only INR statements are supported.');
+    const entries = list(statement.Ntry);
+    if (entries.length > MAX_IMPORT_ROWS) throw new Error('Statement exceeds 10,000 entries.');
+    const bankTransactions: BankTransaction[] = [];
+    const ids = new Set<string>();
+    let totalCreditPaise = 0;
+    for (const [index, raw] of entries.entries()) {
+      const entry = object(raw);
+      const direction = text(entry.CdtDbtInd);
+      if (direction !== 'CRDT' && direction !== 'DBIT') throw new Error('Missing or unsupported credit/debit direction.');
+      if (direction === 'DBIT') continue;
+      if (entry.RvslInd !== undefined && !['true', 'false', '0', '1'].includes(text(entry.RvslInd))) throw new Error('Invalid reversal flag.');
+      if (entry.RvslInd === 'true' || entry.RvslInd === '1') continue;
+      const status = typeof entry.Sts === 'string' ? entry.Sts : object(entry.Sts).Cd;
+      if (status !== 'BOOK') throw new Error('Only booked credits can be reconciled.');
+      const amount = object(entry.Amt);
+      if (amount['@_Ccy'] !== 'INR') throw new Error('Credit currency must be explicitly INR.');
+      const creditAmount = rupeesToPaise(text(amount['#text']));
+      const booking = object(entry.BookgDt);
+      const creditedAt = DateSchema.parse(booking.DtTm ?? booking.Dt);
+      const details = optionalObject(entry.NtryDtls);
+      if (Array.isArray(details.TxDtls)) throw new Error('Aggregated entries with multiple transactions require a dedicated batch adapter.');
+      const transaction = optionalObject(details.TxDtls);
+      const refs = optionalObject(transaction.Refs);
+      const utr = [refs.EndToEndId, entry.AcctSvcrRef, refs.TxId].find(value =>
+        typeof value === 'string' && value.trim() && !['NOTPROVIDED', '/NOTPROVIDED/'].includes(value.toUpperCase()));
+      if (!utr) throw new Error('Credit has no traceable UTR/reference.');
+      const entryRef = entry.NtryRef ?? statementId + '_' + (index + 1);
+      const bankTransactionId = 'CAMT_' + IdentifierSchema.parse(entryRef);
+      if (ids.has(bankTransactionId)) throw new Error('Duplicate bank entry identifier.');
+      ids.add(bankTransactionId);
+      const remittance = optionalObject(transaction.RmtInf);
+      const description = list(remittance.Ustrd).map(text).join(' ') ||
+        (entry.AddtlNtryInf ? text(entry.AddtlNtryInf) : 'CAMT.053 Bank Credit');
+      bankTransactions.push(BankTransactionSchema.parse({ bankTransactionId, utr, creditAmount, description, creditedAt }));
+      totalCreditPaise += creditAmount;
+      if (!Number.isSafeInteger(totalCreditPaise)) throw new Error('Statement total exceeds safe integer paise.');
     }
-  });
-
-  return {
-    statementId,
-    accountIbanOrNumber,
-    currency: defaultCurrency,
-    statementDate,
-    bankTransactions,
-    totalCreditsCount: bankTransactions.length,
-    totalCreditPaise,
-  };
+    if (!bankTransactions.length) throw new Error('Statement contains no booked non-reversal credits.');
+    return { statementId, accountIbanOrNumber, currency, statementDate, bankTransactions,
+      totalCreditsCount: bankTransactions.length, totalCreditPaise };
+  } catch (error) {
+    throw new Error('Invalid CAMT.053 XML: ' + (error instanceof Error ? error.message : 'Unsupported statement.'));
+  }
 }
