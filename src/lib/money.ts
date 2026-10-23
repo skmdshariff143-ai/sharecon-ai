@@ -9,14 +9,16 @@
  * Avoids binary floating-point representation errors.
  */
 export function rupeesToPaise(amount: number | string): number {
-  if (typeof amount === 'string') {
-    const cleaned = amount.replace(/[^\d.-]/g, '').trim();
-    const parsed = parseFloat(cleaned);
-    if (isNaN(parsed)) return 0;
-    return Math.round(parsed * 100);
+  const text = String(amount).trim().replace(/^₹\s*/, '');
+  // Accept ungrouped, Indian or international grouping; never strip arbitrary text.
+  if (!/^-?(?:\d+|\d{1,3}(?:,\d{3})+|\d{1,2}(?:,\d{2})*,\d{3})(?:\.\d{1,2})?$/.test(text)) {
+    throw new Error('Amount must be a decimal with at most two fractional digits.');
   }
-  if (isNaN(amount)) return 0;
-  return Math.round(amount * 100);
+  const negative = text.startsWith('-');
+  const [whole, fraction = ''] = text.replace(/[-,]/g, '').split('.');
+  const paise = Number(whole) * 100 + Number(fraction.padEnd(2, '0'));
+  if (!Number.isSafeInteger(paise)) throw new Error('Amount exceeds the safe integer paise limit.');
+  return negative ? -paise : paise;
 }
 
 /**

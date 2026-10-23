@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   BatchReconciliationResult,
   ReconciliationRecord,
@@ -16,7 +16,8 @@ import { evaluateReconciliation } from '@/lib/engine/evaluator';
 import { applyReviewerDecision } from '@/lib/engine/operations';
 import { exportReconciliationCsv, exportAuditEventsCsv } from '@/lib/dataset/csv';
 import { downloadCompliancePackage } from '@/lib/dataset/compliance_package';
-import { chainAuditEvents } from '@/lib/dataset/audit_ledger';
+import { useAuditLedger } from '@/hooks/useAuditLedger';
+const EMPTY_AUDIT_EVENTS: import('@/types/reconciliation').AuditEvent[] = [];
 
 // Components
 import { NavigationRail, WorkspaceTab } from '@/components/NavigationRail';
@@ -76,7 +77,12 @@ function DashboardContent() {
   const [isNavCollapsed, setIsNavCollapsed] = useState(false);
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
 
-  const [selectedRecord, setSelectedRecord] = useState<ReconciliationRecord | null>(null);
+  const [selectedRecordId, setSelectedRecordId] = useState<string | null>(null);
+  const selectedRecord = batch?.records.find(r => r.recordId === selectedRecordId) ?? null;
+  const setSelectedRecord = (record: ReconciliationRecord | null) => setSelectedRecordId(record?.recordId ?? null);
+  const ledger = useAuditLedger(batch?.auditEvents ?? EMPTY_AUDIT_EVENTS);
+  const analysisController = useRef<AbortController | null>(null);
+  useEffect(() => () => { analysisController.current?.abort(); }, [batch?.batchId]);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
@@ -107,7 +113,6 @@ function DashboardContent() {
     const duration = performance.now() - start;
     const evaluation = evaluateReconciliation(result.records, dataset.groundTruth, duration);
     result.evaluation = evaluation;
-    result.auditEvents = chainAuditEvents(result.auditEvents);
 
     setBatch(result);
     setIsReconciling(false);
@@ -136,7 +141,6 @@ function DashboardContent() {
     if (groundTruth.length > 0) {
       result.evaluation = evaluateReconciliation(result.records, groundTruth, duration);
     }
-    result.auditEvents = chainAuditEvents(result.auditEvents);
 
     setBatch(result);
     showToast({
@@ -154,6 +158,7 @@ function DashboardContent() {
   ) => {
     if (!batch) return;
 
+    try {
     const decisionResult = applyReviewerDecision(
       batch.records,
       batch.auditEvents,
@@ -167,7 +172,7 @@ function DashboardContent() {
     setBatch({
       ...batch,
       records: decisionResult.updatedRecords,
-      auditEvents: chainAuditEvents(decisionResult.updatedAuditEvents.slice().reverse()).reverse(),
+      auditEvents: decisionResult.updatedAuditEvents,
     });
 
     // Update selected record in drawer if open
@@ -180,8 +185,11 @@ function DashboardContent() {
     showToast({
       type: action === 'APPROVED' ? 'success' : action === 'REJECTED' ? 'error' : 'warning',
       title: `Record ${action.toLowerCase()}`,
-      description: `${recordId} state updated. Recorded in immutable audit log.`,
+      description: `${recordId} state updated. Recorded in session audit log.`,
     });
+    } catch (error) {
+      showToast({ type: 'error', title: 'Decision blocked', description: error instanceof Error ? error.message : 'Unable to apply decision.' });
+    }
   };
 
   // Quick action helpers
@@ -195,24 +203,27 @@ function DashboardContent() {
 
   // AI Exception Analysis
   const handleAnalyzeException = async (record: ReconciliationRecord) => {
+    if (!batch) return;
+    analysisController.current?.abort();
+    const controller = new AbortController();
+    analysisController.current = controller;
+    const batchId = batch.batchId;
     setIsAnalyzingAi(true);
     try {
       const res = await fetch('/api/analyze-exception', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ record }),
+        signal: AbortSignal.any([controller.signal, AbortSignal.timeout(15000)]),
       });
 
       const data = await res.json();
-      if (data.success && data.analysis && batch) {
-        const updatedRecords = batch.records.map((r) =>
-          r.recordId === record.recordId ? { ...r, aiAnalysis: data.analysis } : r
-        );
-
-        setBatch({ ...batch, records: updatedRecords });
-        if (selectedRecord && selectedRecord.recordId === record.recordId) {
-          setSelectedRecord({ ...selectedRecord, aiAnalysis: data.analysis });
-        }
+      if (controller.signal.aborted) return;
+      if (res.ok && data.success && data.analysis) {
+        setBatch(current => current?.batchId === batchId ? {
+          ...current,
+          records: current.records.map(r => r.recordId === record.recordId ? { ...r, aiAnalysis: data.analysis } : r),
+        } : current);
 
         showToast({
           type: 'info',
@@ -227,13 +238,14 @@ function DashboardContent() {
         });
       }
     } catch {
+      if (controller.signal.aborted) return;
       showToast({
         type: 'error',
         title: 'Network Error',
         description: 'Failed to contact exception analysis server.',
       });
     } finally {
-      setIsAnalyzingAi(false);
+      if (analysisController.current === controller) setIsAnalyzingAi(false);
     }
   };
 
@@ -249,7 +261,7 @@ function DashboardContent() {
     const start = performance.now();
     const result = reconcileBatch(payments, settlements, bankTx, config);
     const duration = performance.now() - start;
-    result.evaluation = evaluateReconciliation(result.records, [], duration);
+    void duration; // Accuracy is unavailable for unlabelled statements.
 
     setBatch(result);
     setIsReconciling(false);
@@ -281,7 +293,8 @@ function DashboardContent() {
 
   const handleDownloadAuditJson = () => {
     if (!batch) return;
-    const jsonStr = JSON.stringify(batch.auditEvents, null, 2);
+    if (!ledger || ledger.error) return;
+    const jsonStr = JSON.stringify(ledger.events, null, 2);
     const blob = new Blob([jsonStr], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -299,7 +312,8 @@ function DashboardContent() {
 
   const handleDownloadAuditCsv = () => {
     if (!batch) return;
-    const csv = exportAuditEventsCsv(batch.auditEvents);
+    if (!ledger || ledger.error) return;
+    const csv = exportAuditEventsCsv(ledger.events);
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -315,9 +329,15 @@ function DashboardContent() {
     });
   };
 
-  const handleDownloadCompliancePackage = () => {
+  const handleDownloadCompliancePackage = async () => {
     if (!batch) return;
-    downloadCompliancePackage(batch, config);
+    if (!ledger || ledger.error) return;
+    try {
+      await downloadCompliancePackage({ ...batch, auditEvents: ledger.events }, config);
+    } catch {
+      showToast({ type: 'error', title: 'Export failed', description: 'Unable to compute audit integrity.' });
+      return;
+    }
     showToast({
       type: 'success',
       title: 'Compliance Package Exported',
@@ -415,7 +435,8 @@ function DashboardContent() {
 
           {activeTab === 'audit' && (
             <AuditTab
-              auditEvents={batch ? batch.auditEvents : []}
+              auditEvents={ledger?.events ?? EMPTY_AUDIT_EVENTS}
+              integrityStatus={ledger?.error ?? (!ledger ? 'Preparing audit integrity…' : undefined)}
               onDownloadAuditJson={handleDownloadAuditJson}
               onDownloadAuditCsv={handleDownloadAuditCsv}
               onDownloadCompliancePackage={handleDownloadCompliancePackage}
@@ -458,6 +479,7 @@ function DashboardContent() {
 
       {/* Slide-Out 3-Way Evidence Drawer */}
       <MatchDetailDrawer
+        key={selectedRecordId}
         record={selectedRecord}
         onClose={() => setSelectedRecord(null)}
         onReviewDecision={handleReviewDecision}
@@ -487,19 +509,19 @@ function DashboardContent() {
       />
 
       {/* Threshold Configuration Modal */}
-      <SettingsModal
+      {isSettingsOpen && <SettingsModal
         config={config}
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
         onSave={handleUpdateConfig}
-      />
+      />}
 
       {/* 3-Way CSV Upload Modal */}
-      <CsvUploadModal
+      {isUploadOpen && <CsvUploadModal
         isOpen={isUploadOpen}
         onClose={() => setIsUploadOpen(false)}
         onUploadSuccess={handleUploadSuccess}
-      />
+      />}
 
       {/* Live Reconciliation Runner Modal */}
       <LiveRunnerModal

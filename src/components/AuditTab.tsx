@@ -23,6 +23,7 @@ interface AuditTabProps {
   onDownloadAuditJson: () => void;
   onDownloadAuditCsv: () => void;
   onDownloadCompliancePackage?: () => void;
+  integrityStatus?: string;
 }
 
 export const AuditTab: React.FC<AuditTabProps> = ({
@@ -30,19 +31,25 @@ export const AuditTab: React.FC<AuditTabProps> = ({
   onDownloadAuditJson,
   onDownloadAuditCsv,
   onDownloadCompliancePackage,
+  integrityStatus,
 }) => {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [actorFilter, setActorFilter] = useState<string>('ALL');
   const [actionFilter, setActionFilter] = useState<string>('ALL');
-  const [verificationResult, setVerificationResult] = useState<LedgerVerificationResult | null>(null);
+  const [verification, setVerification] = useState<{ source: AuditEvent[]; result: LedgerVerificationResult } | null>(null);
+  const verificationResult = verification?.source === auditEvents ? verification.result : null;
 
-  const handleVerifyLedger = () => {
-    const result = verifyLedgerIntegrity(auditEvents);
-    setVerificationResult(result);
+  const handleVerifyLedger = async () => {
+    try {
+      const result = await verifyLedgerIntegrity(auditEvents);
+      setVerification({ source: auditEvents, result });
+    } catch {
+      setVerification({ source: auditEvents, result: { isValid: false, verifiedCount: 0, genesisHash: '', latestBlockHash: '', reason: 'Cryptographic verification unavailable.' } });
+    }
   };
 
   const filteredEvents = useMemo(() => {
-    return auditEvents.filter((ev) => {
+    return [...auditEvents].reverse().filter((ev) => {
       if (actorFilter !== 'ALL' && ev.actor !== actorFilter) return false;
       if (actionFilter !== 'ALL' && ev.action !== actionFilter) return false;
       if (!searchQuery) return true;
@@ -108,6 +115,7 @@ export const AuditTab: React.FC<AuditTabProps> = ({
 
   return (
     <div className="elevated-card overflow-hidden flex flex-col bg-[#0e131f] border-white/8 shadow-xl">
+      {integrityStatus && <p role="status" className="p-4 text-sm">{integrityStatus}</p>}
       {/* Header & Export Controls */}
       <div className="p-4 sm:p-5 border-b border-white/8 flex flex-wrap items-center justify-between gap-3 bg-[#080c14]">
         <div>
@@ -123,6 +131,7 @@ export const AuditTab: React.FC<AuditTabProps> = ({
         <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={handleVerifyLedger}
+            disabled={Boolean(integrityStatus)}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#2dd4bf]/15 hover:bg-[#2dd4bf]/25 text-[#2dd4bf] rounded-xl text-xs font-bold border border-[#2dd4bf]/30 transition-all cursor-pointer shadow-xs"
             title="Recompute and verify SHA-256 hash chain across all audit blocks"
           >
@@ -132,6 +141,7 @@ export const AuditTab: React.FC<AuditTabProps> = ({
           {onDownloadCompliancePackage && (
             <button
               onClick={onDownloadCompliancePackage}
+              disabled={Boolean(integrityStatus)}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-[#6366f1] to-[#3b82f6] hover:from-[#4f46e5] hover:to-[#2563eb] text-white rounded-xl text-xs font-bold shadow-[0_0_12px_rgba(99,102,241,0.3)] transition-all cursor-pointer"
             >
               <Download className="w-3.5 h-3.5 text-white" />
@@ -140,6 +150,7 @@ export const AuditTab: React.FC<AuditTabProps> = ({
           )}
           <button
             onClick={onDownloadAuditCsv}
+            disabled={Boolean(integrityStatus)}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#080c14] hover:bg-[#141b2b] text-[#94a3b8] hover:text-white rounded-xl text-xs font-semibold border border-white/8 transition-colors cursor-pointer"
           >
             <Download className="w-3.5 h-3.5 text-[#64748b]" />
@@ -147,6 +158,7 @@ export const AuditTab: React.FC<AuditTabProps> = ({
           </button>
           <button
             onClick={onDownloadAuditJson}
+            disabled={Boolean(integrityStatus)}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#6366f1]/15 hover:bg-[#6366f1]/25 text-[#a5b4fc] rounded-xl text-xs font-semibold border border-[#6366f1]/30 transition-colors cursor-pointer"
           >
             <FileCode className="w-3.5 h-3.5 text-[#818cf8]" />

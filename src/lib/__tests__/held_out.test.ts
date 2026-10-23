@@ -4,7 +4,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { HELD_OUT_DATASET } from '../dataset/held_out_dataset';
-import { evaluateHeldOutBenchmark } from '../engine/evaluator';
+import { evaluateHeldOutBenchmark, evaluateReconciliation } from '../engine/evaluator';
 import { reconcileBatch, DEFAULT_ENGINE_CONFIG } from '../engine/matcher';
 
 describe('Held-Out Adversarial Dataset & Evaluation Suite', () => {
@@ -54,13 +54,19 @@ describe('Held-Out Adversarial Dataset & Evaluation Suite', () => {
     expect(benchmark.evaluation.proposedPairPrecision).toBeGreaterThanOrEqual(0.85);
     expect(benchmark.evaluation.proposedPairRecall).toBeGreaterThanOrEqual(0.85);
     expect(benchmark.evaluation.autoResolutionRecall).toBe(1.0);
+    expect(benchmark.evaluation.falsePositiveCount).toBe(0);
+    expect(benchmark.evaluation.falsePositiveExposurePaise).toBe(0);
     expect(benchmark.evaluation.exceptionDetectionAccuracy).toBeGreaterThanOrEqual(0.85);
     expect(benchmark.processingDurationMs).toBeGreaterThan(0);
   });
 
   it('populates error inspector with failure diagnostics for all discrepancy cases', () => {
     const benchmark = evaluateHeldOutBenchmark();
-    const errors = benchmark.evaluation.errors;
+    // Deliberately inject an unsafe decision to exercise diagnostics even when all
+    // original held-out unsafe matches have been fixed. Never alter fixture labels.
+    const unsafeRecords = benchmark.records.map(record => record.exceptionType === 'MISSING_BANK_CREDIT'
+      ? { ...record, status: 'AUTO_RECONCILED' as const } : record);
+    const errors = evaluateReconciliation(unsafeRecords, benchmark.groundTruth).errors;
 
     expect(errors.length).toBeGreaterThan(0);
 

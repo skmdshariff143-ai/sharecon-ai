@@ -82,6 +82,13 @@ const FAQ_DATABASE: FAQItem[] = [
       'Gemini operates strictly as an advisory copilot. It generates natural language summaries, suggests actionable remediation steps, and flags missing checklist items. Gemini AI CANNOT alter confidence scores, override deterministic safety gates, or execute fund transfers.',
     targetTab: 'exceptions',
   },
+  {
+    id: 'privacy-data-retention',
+    category: 'Safety',
+    question: 'How does ShaRecon AI handle financial data privacy and retention?',
+    answer:
+      'ShaRecon AI operates on a strict zero-server-persistence principle: all CSV statements, ledger records, and audit events reside exclusively in volatile client browser memory (React state). Refreshing or closing the tab immediately and permanently purges all session data. Server exception analysis is stateless with redacted logs and zero model training retention.',
+  },
 ];
 
 export const HelpTab: React.FC<HelpTabProps> = ({ onNavigateTab, onStartTour }) => {
@@ -326,6 +333,28 @@ export const HelpTab: React.FC<HelpTabProps> = ({ onNavigateTab, onStartTour }) 
               );
             })
           )}
+        </div>
+        {/* Legal & Governance Footer Card */}
+        <div className="p-4 bg-[#080c14] border border-white/8 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+          <div>
+            <div className="font-semibold text-white">Privacy & Legal Governance</div>
+            <div className="text-[#94a3b8] text-[11px]">Zero-persistence client architecture, open licensing, and financial controller disclaimers.</div>
+          </div>
+          <div className="flex items-center gap-3 shrink-0">
+            <a
+              href="/privacy"
+              className="text-[#818cf8] hover:text-[#a5b4fc] underline-offset-2 hover:underline font-mono text-[11px]"
+            >
+              Privacy Policy →
+            </a>
+            <span className="text-[#64748b]">•</span>
+            <a
+              href="/terms"
+              className="text-[#818cf8] hover:text-[#a5b4fc] underline-offset-2 hover:underline font-mono text-[11px]"
+            >
+              Terms of Use →
+            </a>
+          </div>
         </div>
       </div>
     </div>

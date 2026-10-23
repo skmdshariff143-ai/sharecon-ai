@@ -26,13 +26,13 @@ To prevent circular evaluation (where a synthetic generator and reconciliation e
 | :--- | :--- | :---: | :---: | :--- |
 | **Entity Matching** | **Proposed-Pair Precision** | **97.1%** | $\ge 85.0\%$ | Correctness of proposed settlement and bank transaction pairs. |
 | **Entity Matching** | **Proposed-Pair Recall** | **97.1%** | $\ge 85.0\%$ | Coverage of true underlying financial linkages identified. |
-| **Workflow Safety** | **Auto-Resolution Precision** | **83.3%** | **$100.0\%$** | Safety of zero-touch automated reconciliations ($0$ false positives). |
+| **Workflow Safety** | **Auto-Resolution Precision** | **100.0%** | **$100.0\%$** | Safety of zero-touch automated reconciliations ($0$ false positives). |
 | **Workflow Safety** | **Auto-Resolution Recall** | **100.0%** | $\ge 70.0\%$ | Fraction of safe, clean records safely auto-resolved. |
-| **Human Governance**| **Review-Routing Accuracy** | **75.9%** | $\ge 80.0\%$ | Correctness of routing ambiguous or anomalous items to human triage. |
-| **Anomaly Detection**| **Exception Accuracy** | **95.0%** | $\ge 85.0\%$ | Exact classification rate of financial exception types. |
-| **Financial Exposure**| **False-Positive Count** | **7** | **$0$** | Number of non-matching or unsafe records falsely auto-reconciled. |
-| **Financial Exposure**| **False-Positive Exposure** | **₹28,100.00** | **₹0.00** | Rupee value exposed to improper auto-clearance. |
-| **Operational Yield**| **Automation Rate** | **52.5%** | $40\% - 60\%$ | 42 of 80 records safely processed hands-free. |
+| **Human Governance**| **Review-Routing Accuracy** | **100.0%** | $\ge 80.0\%$ | Correctness of routing ambiguous or anomalous items to human triage. |
+| **Anomaly Detection**| **Exception Accuracy** | **100.0%** | $\ge 85.0\%$ | Exact classification rate of financial exception types. |
+| **Financial Exposure**| **False-Positive Count** | **0** | **$0$** | Number of non-matching or unsafe records falsely auto-reconciled. |
+| **Financial Exposure**| **False-Positive Exposure** | **₹0.00** | **₹0.00** | Rupee value exposed to improper auto-clearance. |
+| **Operational Yield**| **Automation Rate** | **43.8%** | $40\% - 60\%$ | 35 of 80 records safely processed hands-free. |
 
 ---
 
@@ -64,57 +64,10 @@ The table below documents every deviation between predicted engine outputs and e
 
 | # | Payment ID | Gross Amount | Expected Outcome | Predicted Outcome | Expected Exception | Predicted Exception | Error Class | Exposure | Explanation |
 | :-: | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| 1 | `ho_pay_trunc_031` | ₹1,500.00 | `manual_review` | `AUTO_RECONCILED` | `PARTIALLY_MISSING_REF` | `PARTIALLY_MISSING_REF` | `FALSE_POSITIVE` | ₹1,500.00 | Unsafe auto-reconciliation: Expected manual_review (Order ID reference instead of Payment ID) but engine automatically reconciled. |
-| 2 | `ho_pay_trunc_033` | ₹3,900.00 | `manual_review` | `AUTO_RECONCILED` | `PARTIALLY_MISSING_REF` | `PARTIALLY_MISSING_REF` | `FALSE_POSITIVE` | ₹3,900.00 | Unsafe auto-reconciliation: Expected manual_review (Order ID reference instead of Payment ID) but engine automatically reconciled. |
-| 3 | `ho_pay_trunc_035` | ₹6,200.00 | `manual_review` | `AUTO_RECONCILED` | `PARTIALLY_MISSING_REF` | `PARTIALLY_MISSING_REF` | `FALSE_POSITIVE` | ₹6,200.00 | Unsafe auto-reconciliation: Expected manual_review (Order ID reference instead of Payment ID) but engine automatically reconciled. |
-| 4 | `ho_pay_wrongnar_045` | ₹1,650.00 | `manual_review` | `AUTO_RECONCILED` | `INCONSISTENT_DESCRIPTION` | `CLEAN_MATCH` | `FALSE_POSITIVE` | ₹1,650.00 | Unsafe auto-reconciliation: Expected manual_review (Bank narration references wrong payment ID) but engine automatically reconciled. |
-| 5 | `ho_pay_wrongnar_046` | ₹2,950.00 | `manual_review` | `AUTO_RECONCILED` | `INCONSISTENT_DESCRIPTION` | `CLEAN_MATCH` | `FALSE_POSITIVE` | ₹2,950.00 | Unsafe auto-reconciliation: Expected manual_review (Bank narration references wrong payment ID) but engine automatically reconciled. |
-| 6 | `ho_pay_wrongnar_047` | ₹4,800.00 | `manual_review` | `AUTO_RECONCILED` | `INCONSISTENT_DESCRIPTION` | `CLEAN_MATCH` | `FALSE_POSITIVE` | ₹4,800.00 | Unsafe auto-reconciliation: Expected manual_review (Bank narration references wrong payment ID) but engine automatically reconciled. |
-| 7 | `ho_pay_wrongnar_048` | ₹7,100.00 | `manual_review` | `AUTO_RECONCILED` | `INCONSISTENT_DESCRIPTION` | `CLEAN_MATCH` | `FALSE_POSITIVE` | ₹7,100.00 | Unsafe auto-reconciliation: Expected manual_review (Bank narration references wrong payment ID) but engine automatically reconciled. |
+| - | None | - | - | - | - | - | - | ₹0.00 | All records matched ground truth perfectly. |
 
 ### Detailed Failure Mode Diagnostics:
-#### 1. `ho_pay_trunc_031` (FALSE_POSITIVE)
-- **Expected**: `manual_review` with exception `PARTIALLY_MISSING_REF`
-- **Predicted**: `AUTO_RECONCILED` with exception `PARTIALLY_MISSING_REF`
-- **Root Cause & Engine Rationale**: Unsafe auto-reconciliation: Expected manual_review (Order ID reference instead of Payment ID) but engine automatically reconciled.
-- **Monetary Exposure**: ₹1,500.00
-
-#### 2. `ho_pay_trunc_033` (FALSE_POSITIVE)
-- **Expected**: `manual_review` with exception `PARTIALLY_MISSING_REF`
-- **Predicted**: `AUTO_RECONCILED` with exception `PARTIALLY_MISSING_REF`
-- **Root Cause & Engine Rationale**: Unsafe auto-reconciliation: Expected manual_review (Order ID reference instead of Payment ID) but engine automatically reconciled.
-- **Monetary Exposure**: ₹3,900.00
-
-#### 3. `ho_pay_trunc_035` (FALSE_POSITIVE)
-- **Expected**: `manual_review` with exception `PARTIALLY_MISSING_REF`
-- **Predicted**: `AUTO_RECONCILED` with exception `PARTIALLY_MISSING_REF`
-- **Root Cause & Engine Rationale**: Unsafe auto-reconciliation: Expected manual_review (Order ID reference instead of Payment ID) but engine automatically reconciled.
-- **Monetary Exposure**: ₹6,200.00
-
-#### 4. `ho_pay_wrongnar_045` (FALSE_POSITIVE)
-- **Expected**: `manual_review` with exception `INCONSISTENT_DESCRIPTION`
-- **Predicted**: `AUTO_RECONCILED` with exception `CLEAN_MATCH`
-- **Root Cause & Engine Rationale**: Unsafe auto-reconciliation: Expected manual_review (Bank narration references wrong payment ID) but engine automatically reconciled.
-- **Monetary Exposure**: ₹1,650.00
-
-#### 5. `ho_pay_wrongnar_046` (FALSE_POSITIVE)
-- **Expected**: `manual_review` with exception `INCONSISTENT_DESCRIPTION`
-- **Predicted**: `AUTO_RECONCILED` with exception `CLEAN_MATCH`
-- **Root Cause & Engine Rationale**: Unsafe auto-reconciliation: Expected manual_review (Bank narration references wrong payment ID) but engine automatically reconciled.
-- **Monetary Exposure**: ₹2,950.00
-
-#### 6. `ho_pay_wrongnar_047` (FALSE_POSITIVE)
-- **Expected**: `manual_review` with exception `INCONSISTENT_DESCRIPTION`
-- **Predicted**: `AUTO_RECONCILED` with exception `CLEAN_MATCH`
-- **Root Cause & Engine Rationale**: Unsafe auto-reconciliation: Expected manual_review (Bank narration references wrong payment ID) but engine automatically reconciled.
-- **Monetary Exposure**: ₹4,800.00
-
-#### 7. `ho_pay_wrongnar_048` (FALSE_POSITIVE)
-- **Expected**: `manual_review` with exception `INCONSISTENT_DESCRIPTION`
-- **Predicted**: `AUTO_RECONCILED` with exception `CLEAN_MATCH`
-- **Root Cause & Engine Rationale**: Unsafe auto-reconciliation: Expected manual_review (Bank narration references wrong payment ID) but engine automatically reconciled.
-- **Monetary Exposure**: ₹7,100.00
-
+- **Zero False Positives**: The engine achieved 100% precision on auto-resolution with ₹0.00 false-positive exposure.
 
 ---
 

@@ -53,8 +53,8 @@ describe('Tamper-Evident Cryptographic Audit Ledger', () => {
     },
   ];
 
-  it('creates a valid cryptographic hash chain from Genesis', () => {
-    const chained = chainAuditEvents(sampleEvents);
+  it('creates a valid cryptographic hash chain from Genesis', async () => {
+    const chained = await chainAuditEvents(sampleEvents);
 
     expect(chained).toHaveLength(3);
 
@@ -74,14 +74,14 @@ describe('Tamper-Evident Cryptographic Audit Ledger', () => {
     expect(chained[2].eventHash).toHaveLength(64);
 
     // Verification passes
-    const verification = verifyLedgerIntegrity(chained);
+    const verification = await verifyLedgerIntegrity(chained);
     expect(verification.isValid).toBe(true);
     expect(verification.verifiedCount).toBe(3);
     expect(verification.latestBlockHash).toBe(chained[2].eventHash);
   });
 
-  it('detects retroactive modification of an event payload', () => {
-    const chained = chainAuditEvents(sampleEvents);
+  it('detects retroactive modification of an event payload', async () => {
+    const chained = await chainAuditEvents(sampleEvents);
 
     // Tamper with Block 2 (e.g. maliciously modify reviewer reason / confidence)
     const tampered = [
@@ -93,27 +93,27 @@ describe('Tamper-Evident Cryptographic Audit Ledger', () => {
       chained[2],
     ];
 
-    const verification = verifyLedgerIntegrity(tampered);
+    const verification = await verifyLedgerIntegrity(tampered);
     expect(verification.isValid).toBe(false);
     expect(verification.brokenAtIndex).toBe(1);
     expect(verification.brokenEventId).toBe('aud_002');
     expect(verification.reason).toContain('Tampered payload detected');
   });
 
-  it('detects broken previous hash linkage when blocks are spliced or deleted', () => {
-    const chained = chainAuditEvents(sampleEvents);
+  it('detects broken previous hash linkage when blocks are spliced or deleted', async () => {
+    const chained = await chainAuditEvents(sampleEvents);
 
     // Maliciously delete Block 2 and link Block 3 directly to Block 1 without re-signing
     const spliced = [chained[0], chained[2]];
 
-    const verification = verifyLedgerIntegrity(spliced);
+    const verification = await verifyLedgerIntegrity(spliced);
     expect(verification.isValid).toBe(false);
     expect(verification.reason).toBeDefined();
   });
 
-  it('computes deterministic hashes consistently across calls', () => {
-    const hash1 = computeEventHash(sampleEvents[0], GENESIS_HASH);
-    const hash2 = computeEventHash(sampleEvents[0], GENESIS_HASH);
+  it('computes deterministic hashes consistently across calls', async () => {
+    const hash1 = await computeEventHash(sampleEvents[0], GENESIS_HASH);
+    const hash2 = await computeEventHash(sampleEvents[0], GENESIS_HASH);
     expect(hash1).toBe(hash2);
     expect(hash1).toHaveLength(64);
   });
